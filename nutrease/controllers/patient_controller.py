@@ -16,6 +16,7 @@ from nutrease.models.enums import Nutrient
 from nutrease.models.record import Record
 from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
+from nutrease.utils.database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +31,12 @@ class PatientController:  # noqa: D101 – documented above
         self,
         patient: Patient,
         *,
+        db: Database | None = None,
         notification_service: NotificationService | None = None,
         link_store: List[LinkRequest] | None = None,
     ) -> None:
         self.patient = patient
+        self._db = db if db is not None else Database.default()
         self._notif = notification_service
         self._link_store = link_store if link_store is not None else _LINK_REQUESTS
 
@@ -46,6 +49,10 @@ class PatientController:  # noqa: D101 – documented above
 
     def add_record(self, record: Record) -> None:  # noqa: D401 – imperative
         self.patient.register_record(record.created_at.date(), record)
+        try:
+            self._db.save(record)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Persistenza record non riuscita", exc_info=True)
         logger.info("Record %s aggiunto al diario di %s", record.record_type, self.patient.email)
 
     def get_diary(self, day: date) -> DailyDiary | None:  # noqa: D401 – imperative
@@ -88,5 +95,9 @@ class PatientController:  # noqa: D101 – documented above
             comment=comment,
         )
         self._link_store.append(req)
+        try:
+            self._db.save(req)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
         logger.info("LinkRequest creata da %s a %s", self.patient.email, specialist.email)
         return req

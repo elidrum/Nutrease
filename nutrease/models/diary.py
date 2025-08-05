@@ -135,3 +135,10 @@ class DailyDiary:
             if isinstance(rec, MealRecord):
                 total += rec.get_nutrient_total(nutrient)
         return total
+
+
+# Resolve forward references for dataclasses defined across modules ---------
+from pydantic.dataclasses import rebuild_dataclass
+from .user import Patient
+
+rebuild_dataclass(Patient)
