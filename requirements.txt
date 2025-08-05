@@ -1,1 +1,20 @@
-streamlit
+# Nutrease – dependencies (runtime + dev)
+# Pin or bound versions for reproducibility.
+
+# ---------------- runtime ----------------
+streamlit==1.47.0        # UI framework
+pandas==2.3.1            # DataFrames & analysis
+pydantic==2.11.7         # Data validation (EmailStr, ecc.)
+email-validator>=2.1.0   # Necessario per pydantic.EmailStr
+python-dateutil>=2.9.0,<3
+watchdog>=4.0.0          # Hot-reload file watcher
+tinydb>=4.8.0,<4.9       # JSON DB backend
+SQLAlchemy>=2.0.30       # Optional relational backend
+
+# ---------------- development ----------------
+pytest==8.2.0
+pre-commit==3.6.2
+black==24.1.1
+isort==5.13.2
+flake8==7.0.0
+flake8-bugbear==24.2.6
