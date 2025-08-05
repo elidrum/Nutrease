@@ -20,6 +20,7 @@ from typing import ClassVar, List, TYPE_CHECKING
 from pydantic.dataclasses import dataclass
 from dataclasses import field
 
+
 from .enums import Nutrient, RecordType, Severity, Unit
 
 if TYPE_CHECKING:  # pragma: no cover – forward‑refs only
@@ -44,7 +45,7 @@ def _dataset() -> "AlimentazioneDataset":  # noqa: D401 – imperative
 # Core domain objects
 # ---------------------------------------------------------------------------
 
-@dataclass(config={"validate_assignment": True, "repr": True})
+@dataclass(config={"validate_assignment": True, "repr": True}, kw_only=True)
 class Record(ABC):
     """Abstract base for any diary entry (meal, symptom, …)."""
 
@@ -61,7 +62,7 @@ class Record(ABC):
 # Concrete – MealRecord
 # .........................................................................
 
-@dataclass
+@dataclass(kw_only=True)
 class FoodPortion:
     """A quantity of a given *food* expressed in a *unit*."""
 
@@ -82,7 +83,7 @@ class FoodPortion:
         return grams * self.quantity
 
 
-@dataclass
+@dataclass(kw_only=True)
 class MealRecord(Record):
     """A patient meal composed of multiple food portions."""
 
@@ -106,7 +107,7 @@ class MealRecord(Record):
 # Concrete – SymptomRecord
 # .........................................................................
 
-@dataclass
+@dataclass(kw_only=True)
 class SymptomRecord(Record):
     """Patient‑reported symptom with a severity level."""
 
