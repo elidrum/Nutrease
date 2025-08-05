@@ -56,18 +56,18 @@ if role is None:
     # Only login available
     choice = st.sidebar.radio("Menu", ["Login"])
     if choice == "Login":
-        _render_page("nutrease.ui.pages.1_login")
+        _render_page("nutrease.ui.pages.login")
 else:
     if role == "patient":
         items = {
-            "Diario": "nutrease.ui.pages.2_patient_diary",
-            "Chat": "nutrease.ui.pages.4_messaging",
+            "Diario": "nutrease.ui.pages.patient_diary",
+            "Chat": "nutrease.ui.pages.messaging",
             "Logout": None,
         }
     else:  # specialist
         items = {
-            "Dashboard": "nutrease.ui.pages.3_specialist_dashboard",
-            "Chat": "nutrease.ui.pages.4_messaging",
+            "Dashboard": "nutrease.ui.pages.specialist_dashboard",
+            "Chat": "nutrease.ui.pages.messaging",
             "Logout": None,
         }
 
