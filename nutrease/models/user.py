@@ -12,7 +12,7 @@ from dataclasses import field
 from datetime import date
 from typing import List, TYPE_CHECKING
 
-from pydantic import EmailStr
+from pydantic import EmailStr, TypeAdapter
 from pydantic.dataclasses import dataclass
 
 from .enums import SpecialistCategory
@@ -44,14 +44,20 @@ def _validate_password(pwd: str) -> None:
 class User(ABC):
     """Attributi comuni ai vari ruoli utente."""
 
-    email: EmailStr
+    email: str
     name: str
     surname: str
     password: str = field(repr=False)
 
+    # Riutilizza un ``TypeAdapter`` per convalidare l'e-mail senza istanziare
+    # direttamente ``EmailStr`` (in Pydantic v2 non è più chiamabile).
+    _email_adapter = TypeAdapter(EmailStr)
+
     # ---------------------------------------------------------------------
     def __post_init__(self) -> None:  # noqa: D401
         _validate_password(self.password)
+        # Valida e normalizza l'e-mail
+        self.email = self._email_adapter.validate_python(self.email)
 
 
 # ---------------------------------------------------------------------------
@@ -89,3 +95,4 @@ class Specialist(User):
 
     def get_category(self) -> SpecialistCategory:  # noqa: D401
         return self.category
+    
