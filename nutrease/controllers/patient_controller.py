@@ -128,7 +128,11 @@ class PatientController:  # noqa: D101 – documented above
         except Exception:  # pragma: no cover
             logger.debug("Delete record non riuscita", exc_info=True)
         logger.info("Record %s eliminato da %s", record_id, self.patient.email)
-
+        
+        try:
+            self._db.save(self.patient)
+        except Exception:  # pragma: no cover
+            logger.debug("Persistenza paziente non riuscita", exc_info=True)
     # ---------- NUTRIENT TOTAL -------------------------------------------
     def nutrient_total(  # noqa: D401 – imperative
         self, day: date, nutrient: Nutrient
@@ -143,11 +147,82 @@ class PatientController:  # noqa: D101 – documented above
                 tot += meal.get_nutrient_total(nutrient)
         return tot
 
+    # ---------- MODIFY RECORD -------------------------------------------
+    def modify_meal(
+        self,
+        day: date,
+        record_id: int,
+        food_names: List[str],
+        quantities: List[float],
+        units: List[Unit],
+        note: str | None = None,
+    ) -> None:
+        diary = self.get_diary(day)
+        if diary is None:
+            raise KeyError("Diario non trovato")
+        old = next(
+            (r for r in diary.records if r.id == record_id and r.record_type == RecordType.MEAL),
+            None,
+        )
+        if old is None:
+            raise KeyError("Record non trovato")
+        meal: MealRecord = old  # type: ignore[assignment]
+        portions = [
+            FoodPortion(food_name=fn, quantity=q, unit=u)
+            for fn, q, u in zip(food_names, quantities, units)
+        ]
+        new = MealRecord(
+            id=record_id,
+            created_at=meal.created_at,
+            portions=portions,
+            note=note,
+        )
+        diary.modify_record(meal, new)
+        try:
+            self._db.save(new)
+            self._db.save(self.patient)
+        except Exception:  # pragma: no cover
+            logger.debug("Persistenza update meal non riuscita", exc_info=True)
+
+    def modify_symptom(
+        self,
+        day: date,
+        record_id: int,
+        description: str,
+        severity: Severity,
+        when: time,
+        note: str | None = None,
+    ) -> None:
+        diary = self.get_diary(day)
+        if diary is None:
+            raise KeyError("Diario non trovato")
+        old = next(
+            (r for r in diary.records if r.id == record_id and r.record_type == RecordType.SYMPTOM),
+            None,
+        )
+        if old is None:
+            raise KeyError("Record non trovato")
+        sym: SymptomRecord = old  # type: ignore[assignment]
+        new = SymptomRecord(
+            id=record_id,
+            created_at=datetime.combine(day, when),
+            symptom=description,
+            severity=severity,
+            note=note,
+        )
+        diary.modify_record(sym, new)
+        try:
+            self._db.save(new)
+            self._db.save(self.patient)
+        except Exception:  # pragma: no cover
+            logger.debug("Persistenza update symptom non riuscita", exc_info=True)
+
     # ---------- Metodo legacy add_record (resta invariato) ---------------
     def add_record(self, record: Record) -> None:  # noqa: D401 – imperative
         self.patient.register_record(record.created_at.date(), record)
         try:
             self._db.save(record)
+            self._db.save(self.patient)
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza record non riuscita", exc_info=True)
         logger.info(
@@ -162,19 +237,50 @@ class PatientController:  # noqa: D101 – documented above
     # ---------------------------------------------------------------------
     # Alarm helpers
     # ---------------------------------------------------------------------
-    def configure_alarm(  # noqa: D401 – imperative
-        self, hour: int, minute: int, enabled: bool = True
-    ) -> None:
+    def add_alarm(
+        self, hour: int, minute: int, days: List[int], enabled: bool = True
+    ) -> None:  # noqa: D401 – imperative
         from nutrease.models.diary import AlarmConfig  # local import
 
-        self.patient.alarm = AlarmConfig(hour=hour, minute=minute, enabled=enabled)
+        self.patient.alarms.append(
+            AlarmConfig(hour=hour, minute=minute, days=days, enabled=enabled)
+        )
+        try:
+            self._db.save(self.patient)
+        except Exception:  # pragma: no cover
+            logger.debug("Persistenza paziente non riuscita", exc_info=True)
         logger.info(
-            "Alarm impostato a %02d:%02d (%s) per %s",
+            "Alarm aggiunto %02d:%02d per %s",
             hour,
             minute,
-            "on" if enabled else "off",
             self.patient.email,
         )
+
+    def update_alarm(
+        self, idx: int, hour: int, minute: int, days: List[int], enabled: bool
+    ) -> None:  # noqa: D401 – imperative
+        from nutrease.models.diary import AlarmConfig  # local import
+
+        if 0 <= idx < len(self.patient.alarms):
+            self.patient.alarms[idx] = AlarmConfig(
+                hour=hour, minute=minute, days=days, enabled=enabled
+            )
+            try:
+                self._db.save(self.patient)
+            except Exception:  # pragma: no cover
+                logger.debug("Persistenza paziente non riuscita", exc_info=True)
+        else:
+            logger.warning("Indice alarm %s non valido", idx)
+
+    def remove_alarm(self, idx: int) -> None:  # noqa: D401 – imperative
+        if 0 <= idx < len(self.patient.alarms):
+            self.patient.alarms.pop(idx)
+            try:
+                self._db.save(self.patient)
+            except Exception:  # pragma: no cover
+                logger.debug("Persistenza paziente non riuscita", exc_info=True)
+        else:
+            logger.warning("Indice alarm %s non valido", idx)
 
     # ---------------------------------------------------------------------
     # Link-request helpers (Patient → Specialist)
@@ -210,3 +316,11 @@ class PatientController:  # noqa: D101 – documented above
             "LinkRequest creata da %s a %s", self.patient.email, specialist.email
         )
         return req
+    
+    def send_link_request_by_email(self, email: str, comment: str = "") -> LinkRequest:
+        rows = self._db.search(Specialist, email=email.lower())
+        if not rows:
+            raise ValueError("Specialista non trovato")
+        data = rows[0]
+        specialist = Specialist(**{k: v for k, v in data.items() if not k.startswith("__")})
+        return self.send_link_request(specialist, comment)    

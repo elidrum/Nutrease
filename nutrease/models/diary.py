@@ -9,6 +9,7 @@ from __future__ import annotations
 
 from datetime import date, datetime, time, timedelta
 from typing import List, TYPE_CHECKING
+from dataclasses import field
 
 from pydantic.dataclasses import dataclass
 
@@ -41,15 +42,15 @@ class Day:
 
 @dataclass
 class AlarmConfig:
-    """Daily alarm time & enable switch.
+    """Configurazione di un promemoria ricorrente.
 
-    *For now* the alarm recurs **every day** at the configured local hour/minute.
-    In future we might enrich this with custom RRULEs.
+    ``days`` usa la convenzione :pyfunc:`datetime.date.weekday` (0=Lunedì).
     """
 
     hour: int = 8
     minute: int = 0
     enabled: bool = True
+    days: List[int] = field(default_factory=lambda: list(range(7)))
 
     # .....................................................................
     # Public helpers
@@ -69,16 +70,18 @@ class AlarmConfig:
             ``None`` if the alarm is disabled; otherwise the next occurrence
             **strictly after** *now*.
         """
-        if not self.enabled:
+        if not self.enabled or not self.days:
             return None
 
         now = now or datetime.now()
-        today_target = datetime.combine(now.date(), time(self.hour, self.minute))
-        if today_target > now:
-            return today_target
-        # Otherwise schedule for tomorrow
-        tomorrow = today_target + timedelta(days=1)
-        return tomorrow
+        for offset in range(8):  # massimo una settimana di lookahead
+            candidate_date = now.date() + timedelta(days=offset)
+            if candidate_date.weekday() not in self.days:
+                continue
+            candidate_dt = datetime.combine(candidate_date, time(self.hour, self.minute))
+            if candidate_dt > now:
+                return candidate_dt
+        return None
 
 
 # ---------------------------------------------------------------------------
