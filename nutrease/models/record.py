@@ -1,39 +1,39 @@
 from __future__ import annotations
 
-"""Meal/Symptom records and food portions (UML §§ UC8‑12).
+"""Meal & Symptom record models (UML UC 8-12).
 
-The module defines:
-* :class:`Record` – abstract base with shared metadata.
-* :class:`MealRecord` – collection of :class:`FoodPortion` consumed.
-* :class:`SymptomRecord` – patient‑reported symptom & severity.
-* :class:`FoodPortion` – food name, quantity & unit, with :py:meth:`to_grams`.
+Definisce:
 
-`to_grams()` relies on :class:`nutrease.services.dataset_service.AlimentazioneDataset`.
-The service will be injected at runtime via a *class‑level* singleton accessor to
-avoid tight coupling (dataset lazily loaded on first use).
+* ``Record``            – base astratta con metadata comuni.
+* ``MealRecord``        – insieme di ``FoodPortion`` consumate.
+* ``SymptomRecord``     – sintomo riportato dal paziente.
+* ``FoodPortion``       – alimento + quantità + unità con conversione in grammi.
+
+`FoodPortion.to_grams()` sfrutta il servizio
+``nutrease.services.dataset_service.AlimentazioneDataset`` ottenuto lazily
+tramite ``_dataset()``.
 """
 
 from abc import ABC
+from dataclasses import field
 from datetime import datetime
-from typing import ClassVar, List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from pydantic.dataclasses import dataclass
-from dataclasses import field
-
 
 from .enums import Nutrient, RecordType, Severity, Unit
 
-if TYPE_CHECKING:  # pragma: no cover – forward‑refs only
+if TYPE_CHECKING:  # pragma: no cover – forward refs only
     from nutrease.services.dataset_service import AlimentazioneDataset
 
 
 # ---------------------------------------------------------------------------
-# Shared helpers / lazy dataset accessor
+# Helper – singleton dataset accessor
 # ---------------------------------------------------------------------------
 
-def _dataset() -> "AlimentazioneDataset":  # noqa: D401 – imperative
-    """Return (and cache) the singleton dataset service instance."""
-    # Local import avoids circular dependency until services package is ready.
+
+def _dataset() -> "AlimentazioneDataset":  # noqa: D401
+    """Ritorna (e cache) il dataset alimenti."""
     from nutrease.services.dataset_service import AlimentazioneDataset  # local import
 
     if not hasattr(_dataset, "_instance"):
@@ -42,77 +42,82 @@ def _dataset() -> "AlimentazioneDataset":  # noqa: D401 – imperative
 
 
 # ---------------------------------------------------------------------------
-# Core domain objects
+# Record base
 # ---------------------------------------------------------------------------
+
 
 @dataclass(config={"validate_assignment": True, "repr": True}, kw_only=True)
 class Record(ABC):
-    """Abstract base for any diary entry (meal, symptom, …)."""
+    """Base astratta per ogni voce del diario."""
 
-    record_type: RecordType
-    created_at: datetime = datetime.now()
+    id: int = 0
+    created_at: datetime = field(default_factory=datetime.now)
     note: str | None = None
 
-    def as_dict(self) -> dict:  # noqa: D401 – imperative
-        """Serialise to plain dict (useful for JSON/DB)."""
+    # impostato nei sottotipi con object.__setattr__ in __post_init__
+    record_type: RecordType | None = field(init=False, default=None)
+
+    # ---------------------------------------------------------------------
+    def as_dict(self) -> dict:  # noqa: D401
+        """Serializza in dict semplice (per JSON / DB)."""
         return self.__dict__.copy()
 
 
-# .........................................................................
-# Concrete – MealRecord
-# .........................................................................
+# ---------------------------------------------------------------------------
+# FoodPortion
+# ---------------------------------------------------------------------------
+
 
 @dataclass(kw_only=True)
 class FoodPortion:
-    """A quantity of a given *food* expressed in a *unit*."""
+    """Quantità di un alimento espressa in una certa unità."""
 
     food_name: str
     quantity: float
     unit: Unit
 
-    # ⇢  to_grams  -----------------------------------------------------------
-    def to_grams(self) -> float:  # noqa: D401 – imperative
-        """Convert this portion to grams using the nutrient dataset.
-
-        Raises
-        ------
-        ValueError
-            If the dataset lacks a conversion for the given (*food_name*, *unit*).
-        """
+    def to_grams(self) -> float:  # noqa: D401
+        """Converte la porzione in grammi usando il dataset."""
         grams = _dataset().get_grams_per_unit(self.food_name, self.unit)
         return grams * self.quantity
 
 
+# ---------------------------------------------------------------------------
+# MealRecord
+# ---------------------------------------------------------------------------
+
+
 @dataclass(kw_only=True)
 class MealRecord(Record):
-    """A patient meal composed of multiple food portions."""
+    """Pasto composto da una o più porzioni."""
 
-    portions: List[FoodPortion]
+    portions: List[FoodPortion] = field(default_factory=list)
 
-    def __post_init__(self):  # noqa: D401 – imperative
-        self.record_type = RecordType.MEAL  # always enforced
+    def __post_init__(self) -> None:  # noqa: D401
+        # Evita validate_assignment di Pydantic
+        object.__setattr__(self, "record_type", RecordType.MEAL)
 
-    # Convenience nutrient total -------------------------------------------
+    # ---------------------------------------------------------------------
     def get_nutrient_total(self, nutrient: Nutrient) -> float:
-        """Return the total amount of *nutrient* in the meal (grams)."""
-        dataset = _dataset()
+        """Totale grammi di *nutrient* in questo pasto."""
         total = 0.0
         for p in self.portions:
-            food_info = dataset.lookup(p.food_name)
+            food_info = _dataset().lookup(p.food_name)
             total += food_info.get(nutrient.name.lower(), 0.0) * p.quantity
         return total
 
 
-# .........................................................................
-# Concrete – SymptomRecord
-# .........................................................................
+# ---------------------------------------------------------------------------
+# SymptomRecord
+# ---------------------------------------------------------------------------
+
 
 @dataclass(kw_only=True)
 class SymptomRecord(Record):
-    """Patient‑reported symptom with a severity level."""
+    """Sintomo riportato dal paziente con severità."""
 
-    symptom: str
-    severity: Severity
+    symptom: str = ""
+    severity: Severity = Severity.NONE
 
-    def __post_init__(self):  # noqa: D401 – imperative
-        self.record_type = RecordType.SYMPTOM
+    def __post_init__(self) -> None:  # noqa: D401
+        object.__setattr__(self, "record_type", RecordType.SYMPTOM)

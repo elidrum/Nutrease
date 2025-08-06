@@ -59,7 +59,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     if rej_col.button("❌ Rifiuta", key=f"rej_{id(lr)}"):
                         sc.reject_request(lr)
                         st.warning("Richiesta rifiutata")
-                        st.experimental_rerun()
+                        st.rerun()
 
     # ------------------- colonna destra – pazienti ----------------------
     with col_pat:

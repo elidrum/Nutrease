@@ -75,7 +75,7 @@ else:
 
     if choice == "Logout":
         st.session_state.clear()
-        st.experimental_rerun()
+        st.rerun()
 
     else:
         _render_page(items[choice])

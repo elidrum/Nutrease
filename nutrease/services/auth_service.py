@@ -1,53 +1,87 @@
 from __future__ import annotations
 
-"""Simple in‑memory authentication service.
+"""Authentication service con persistenza TinyDB.
 
-This is a *placeholder* implementation that satisfies basic requirements until
-a real DB‑backed repository is wired.
-
-Functions / methods implemented
--------------------------------
-* :meth:`AuthService.signup` – create user account (Patient/Specialist) ensuring
-  e‑mail uniqueness via :class:`nutrease.models.user.EmailRegistry`.
-* :meth:`AuthService.login` – return user instance after credential check.
-* :meth:`AuthService.password_reset` – mock reset that prints a reset token to
-  console (later to be replaced with an e‑mail workflow via AWS SES or similar).
+Caratteristiche
+---------------
+* **Signup**: crea Patient o Specialist, assicura unicità e-mail,
+  salva su TinyDB (fallback in-memory per i test).
+* **Login**: carica credenziali dal DB (o repo in-memory) e verifica hash.
+* **Password reset (mock)**: stampa un token in console.
 """
 
 from datetime import datetime
+from hashlib import sha256
 from secrets import token_urlsafe
-from typing import Dict, Literal, Protocol
+from typing import Dict, Literal, Protocol, Type
 
 from pydantic import EmailStr
 
 from nutrease.models.enums import SpecialistCategory
-from nutrease.models.user import EmailRegistry, Patient, Specialist, User
+from nutrease.models.user import Patient, Specialist, User
+from nutrease.utils.database import Database
 
-# Typing --------------------------------------------------------------------
+# ---------------------------------------------------------------------------
+# Typing & helper
+# ---------------------------------------------------------------------------
+
 Role = Literal["PATIENT", "SPECIALIST"]
 
 
-class UserRepository(Protocol):  # pragma: no cover – minimal protocol
-    """Dependency inversion boundary for persistence (DB vs in‑memory)."""
+def _hash(raw_pw: str) -> str:
+    """Hash elementare SHA-256; da sostituire con bcrypt in prod."""
+    return sha256(raw_pw.encode()).hexdigest()
 
-    def add(self, user: User) -> None: ...  # noqa: D401 – ellipsis stub
+
+# ---------------------------------------------------------------------------
+# Repository Protocol
+# ---------------------------------------------------------------------------
+
+
+class UserRepository(Protocol):  # pragma: no cover – interfaccia minima
+    def add(self, user: User) -> None: ...  # noqa: D401 – stub
 
     def get(self, email: str) -> User | None: ...  # noqa: D401 – stub
 
 
 # ---------------------------------------------------------------------------
-# In‑memory fallback repository (until DB layer is ready)
+# Repo TinyDB
 # ---------------------------------------------------------------------------
 
-class _InMemoryUserRepo:  # noqa: D101 – internal helper
+
+class _DBUserRepo:  # noqa: D101 – interno
+    def __init__(self, db: Database):
+        self._db = db
+
+    # ------------- helpers ----------------------------------------------
+    def _key(self, email: str) -> str:
+        return email.lower()
+
+    def add(self, user: User) -> None:  # noqa: D401
+        self._db.save(user)
+
+    def get(self, email: str) -> User | None:  # noqa: D401
+        rows = self._db.search(User, email=self._key(email))
+        if not rows:
+            return None
+        data = rows[0]
+        cls: Type[User] = Patient if data["__type__"] == "Patient" else Specialist
+        return cls(**{k: v for k, v in data.items() if not k.startswith("__")})
+
+
+# ---------------------------------------------------------------------------
+# Repo in-memory (fallback)
+# ---------------------------------------------------------------------------
+
+
+class _InMemoryUserRepo:  # noqa: D101
     def __init__(self):
         self._store: Dict[str, User] = {}
 
-    # Protocol compliance ---------------------------------------------------
-    def add(self, user: User) -> None:  # noqa: D401 – imperative
+    def add(self, user: User) -> None:  # noqa: D401
         self._store[user.email.lower()] = user
 
-    def get(self, email: str) -> User | None:  # noqa: D401 – imperative
+    def get(self, email: str) -> User | None:  # noqa: D401
         return self._store.get(email.lower())
 
 
@@ -55,14 +89,17 @@ class _InMemoryUserRepo:  # noqa: D101 – internal helper
 # AuthService
 # ---------------------------------------------------------------------------
 
-class AuthService:  # noqa: D101 – documented in module docstring
-    def __init__(self, *, repo: UserRepository | None = None):
-        self._repo: UserRepository = repo or _InMemoryUserRepo()
 
-    # .....................................................................
-    # API – signup/login/password‑reset
-    # .....................................................................
+class AuthService:
+    """Gestisce signup / login; default persistente su TinyDB."""
 
+    def __init__(self, *, db: Database | None = None, repo: UserRepository | None = None):
+        if repo:  # test injection esplicita
+            self._repo = repo
+        else:
+            self._repo = _DBUserRepo(db or Database.default())
+
+    # ---------------------- signup --------------------------------------
     def signup(
         self,
         email: EmailStr,
@@ -73,54 +110,48 @@ class AuthService:  # noqa: D101 – documented in module docstring
         surname: str = "",
         category: SpecialistCategory | None = None,
     ) -> User:
-        """Register a new user and return the created instance.
-
-        Parameters
-        ----------
-        role
-            ``"PATIENT"`` (default) or ``"SPECIALIST"``.
-        category
-            Required when *role* is ``SPECIALIST``.
-        """
-        if self._repo.get(str(email)) is not None:
-            raise ValueError("E‑mail già registrata.")
+        """Registra un nuovo utente e lo restituisce."""
+        if self._repo.get(str(email)):
+            raise ValueError("E-mail già registrata.")
 
         if role.upper() == "PATIENT":
-            user = Patient(email=email, password=password, name=name, surname=surname)  # type: ignore[arg-type]
+            user = Patient(
+                email=email,
+                password=_hash(password),
+                name=name,
+                surname=surname,
+            )  # type: ignore[arg-type]
         elif role.upper() == "SPECIALIST":
             if category is None:
                 raise ValueError("category richiesto per SPECIALIST.")
             user = Specialist(
                 email=email,
-                password=password,
+                password=_hash(password),
                 name=name,
                 surname=surname,
                 category=category,
             )  # type: ignore[arg-type]
         else:
-            raise ValueError("Ruolo non valido: scegliere PATIENT o SPECIALIST.")
+            raise ValueError("Ruolo non valido.")
 
-        # EmailRegistry.register is implicitly called inside model.__post_init__
         self._repo.add(user)
         return user
 
-    # .....................................................................
-
-    def login(self, email: EmailStr, password: str) -> User:  # noqa: D401 – imperative
+    # ---------------------- login ---------------------------------------
+    def login(self, email: EmailStr, password: str) -> User:  # noqa: D401
         user = self._repo.get(str(email))
-        if user is None or user.password != password:
+        if user is None or user.password != _hash(password):
             raise PermissionError("Credenziali non valide.")
         return user
 
-    # .....................................................................
-
-    def password_reset(self, email: EmailStr) -> str:  # noqa: D401 – imperative
+    # ---------------------- password reset (mock) -----------------------
+    def password_reset(self, email: EmailStr) -> str:  # noqa: D401
         user = self._repo.get(str(email))
         if user is None:
             raise KeyError("Utente non trovato.")
         token = token_urlsafe(16)
         print(
-            f"[MOCK‑EMAIL] {datetime.now():%Y‑%m‑%d %H:%M:%S} → {email}: "
+            f"[MOCK-EMAIL] {datetime.now():%Y-%m-%d %H:%M:%S} → {email}: "
             f"Per reimpostare la password usa il token: {token}"
         )
         return token
