@@ -97,7 +97,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
             if text:
                 mc.send(sender=user, receiver=peer, text=text)
                 st.session_state.msg_text = ""  # clear
-                st.experimental_rerun()
+                st.rerun()
     else:
         st.info("Solo lo specialista può inviare messaggi. Attendi una risposta.")
 

@@ -1,19 +1,25 @@
 from __future__ import annotations
 
-"""Patient‑side application controller (UML UC8‑12).
+"""Patient-side application controller (UML UC 8-12).
 
 Orchestra le operazioni di diario, allarmi e richieste di collegamento verso
 uno specialista, delegando la logica di dominio ai *model* e ai *service*.
+
+Novità 2025-08:
+* Wrapper di alto livello **add_meal**, **add_symptom**, **remove_record**,
+  **nutrient_total** con firma coerente alla nuova UI Streamlit.
+* Campo autoincrementale ``_next_rec_id`` per assegnare ``Record.id``.
+* ``configure_alarm()`` ora accetta anche lo stato *enabled*.
 """
 
 import logging
-from datetime import date
+from datetime import date, datetime, time
 from typing import List
 
 from nutrease.models.communication import LinkRequest, LinkRequestState
 from nutrease.models.diary import DailyDiary
-from nutrease.models.enums import Nutrient
-from nutrease.models.record import Record
+from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
+from nutrease.models.record import FoodPortion, MealRecord, Record, SymptomRecord
 from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
@@ -22,11 +28,16 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["PatientController"]
 
-# In‑memory shared storage ---------------------------------------------------
+# In-memory shared storage ---------------------------------------------------
 _LINK_REQUESTS: List[LinkRequest] = []  # naive placeholder until DB layer
 
 
 class PatientController:  # noqa: D101 – documented above
+    _next_rec_id: int = 1  # id autoincrement “globale” all’istanza
+
+    # ---------------------------------------------------------------------
+    # Init
+    # ---------------------------------------------------------------------
     def __init__(
         self,
         patient: Patient,
@@ -43,45 +54,141 @@ class PatientController:  # noqa: D101 – documented above
         if self._notif:
             self._notif.register_patient(patient)
 
-    # .....................................................................
-    # Diary API (CRUD wrapper)
-    # .....................................................................
+    # ---------------------------------------------------------------------
+    # Diary – API “high-level” usate dalla UI
+    # ---------------------------------------------------------------------
+    def _iter_link_requests(self):  # noqa: D401 – internal helper
+        """Ritorna un generatore di LinkRequest relative a questo paziente."""
+        yield from (
+            lr for lr in self._link_store if lr.patient == self.patient
+        )
+        
+    # ---------- ADD MEAL --------------------------------------------------
+    def add_meal(  # noqa: D401 – imperative
+        self,
+        day: date,
+        when: time,
+        food_names: List[str],
+        quantities: List[float],
+        units: List[Unit],
+        note: str | None = None,
+    ) -> None:
+        """Crea un `MealRecord` e lo salva."""
+        
+        portions = [
+            FoodPortion(food_name=fn, quantity=q, unit=u)
+            for fn, q, u in zip(food_names, quantities, units)
+        ]
+        record = MealRecord(
+            id=self._next_rec_id,
+            created_at=datetime.combine(day, when),
+            portions=portions,
+            note=note,
+        )
+        record.record_type = RecordType.MEAL
+        self._next_rec_id += 1
+        self.add_record(record)
 
+    # ---------- ADD SYMPTOM ----------------------------------------------
+    def add_symptom(  # noqa: D401 – imperative
+        self,
+        day: date,
+        description: str,
+        severity: Severity,
+        when: time,
+        note: str | None = None,
+    ) -> None:
+        """Crea un `SymptomRecord` e lo salva."""
+        record = SymptomRecord(
+            id=self._next_rec_id,
+            created_at=datetime.combine(day, when),
+            symptom=description,
+            severity=severity,
+            note=note,
+        )
+        record.record_type = RecordType.SYMPTOM
+        self._next_rec_id += 1
+        self.add_record(record)
+
+    # ---------- REMOVE RECORD --------------------------------------------
+    def remove_record(self, day: date, record_id: int) -> None:  # noqa: D401
+        """Elimina un record dal diario e dal DB (best effort)."""
+        diary = self.get_diary(day)
+        if diary is None:
+            logger.warning("Diario %s non trovato per rimozione record", day)
+            return
+        target = next((r for r in diary.records if r.id == record_id), None)
+        if not target:
+            logger.warning("Record id=%s non trovato nel diario %s", record_id, day)
+            return
+
+        diary.remove_record(target)
+        try:
+            self._db.delete(target)  # type: ignore[attr-defined]
+        except Exception:  # pragma: no cover
+            logger.debug("Delete record non riuscita", exc_info=True)
+        logger.info("Record %s eliminato da %s", record_id, self.patient.email)
+
+    # ---------- NUTRIENT TOTAL -------------------------------------------
+    def nutrient_total(  # noqa: D401 – imperative
+        self, day: date, nutrient: Nutrient
+    ) -> float:
+        diary = self.get_diary(day)
+        if diary is None:
+            return 0.0
+        tot = 0.0
+        for rec in diary.records:
+            if rec.record_type == RecordType.MEAL:
+                meal: MealRecord = rec  # type: ignore[assignment]
+                tot += meal.get_nutrient_total(nutrient)
+        return tot
+
+    # ---------- Metodo legacy add_record (resta invariato) ---------------
     def add_record(self, record: Record) -> None:  # noqa: D401 – imperative
         self.patient.register_record(record.created_at.date(), record)
         try:
             self._db.save(record)
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza record non riuscita", exc_info=True)
-        logger.info("Record %s aggiunto al diario di %s", record.record_type, self.patient.email)
+        logger.info(
+            "Record %s aggiunto al diario di %s",
+            record.record_type,
+            self.patient.email,
+        )
 
-    def get_diary(self, day: date) -> DailyDiary | None:  # noqa: D401 – imperative
+    def get_diary(self, day: date) -> DailyDiary | None:  # noqa: D401
         return next((d for d in self.patient.diaries if d.day.date == day), None)
 
-    def nutrient_total(self, day: date, nutrient: Nutrient) -> float:  # noqa: D401 – imperative
-        diary = self.get_diary(day)
-        return diary.get_totals(nutrient) if diary else 0.0
-
-    # .....................................................................
+    # ---------------------------------------------------------------------
     # Alarm helpers
-    # .....................................................................
+    # ---------------------------------------------------------------------
+    def configure_alarm(  # noqa: D401 – imperative
+        self, hour: int, minute: int, enabled: bool = True
+    ) -> None:
+        from nutrease.models.diary import AlarmConfig  # local import
 
-    def configure_alarm(self, hour: int, minute: int) -> None:  # noqa: D401 – imperative
-        from nutrease.models.diary import AlarmConfig  # local to avoid import cycle
+        self.patient.alarm = AlarmConfig(hour=hour, minute=minute, enabled=enabled)
+        logger.info(
+            "Alarm impostato a %02d:%02d (%s) per %s",
+            hour,
+            minute,
+            "on" if enabled else "off",
+            self.patient.email,
+        )
 
-        self.patient.alarm = AlarmConfig(hour=hour, minute=minute, enabled=True)
-        logger.info("Alarm impostato a %02d:%02d per %s", hour, minute, self.patient.email)
-
-    # .....................................................................
-    # Link‑request helpers (Patient → Specialist)
-    # .....................................................................
-
-    def send_link_request(self, specialist: Specialist, comment: str = "") -> LinkRequest:  # noqa: D401 – imperative
+    # ---------------------------------------------------------------------
+    # Link-request helpers (Patient → Specialist)
+    # ---------------------------------------------------------------------
+    def send_link_request(  # noqa: D401 – imperative
+        self, specialist: Specialist, comment: str = ""
+    ) -> LinkRequest:
         existing = next(
             (
                 lr
                 for lr in self._link_store
-                if lr.patient == self.patient and lr.specialist == specialist and lr.state == LinkRequestState.PENDING
+                if lr.patient == self.patient
+                and lr.specialist == specialist
+                and lr.state == LinkRequestState.PENDING
             ),
             None,
         )
@@ -99,5 +206,7 @@ class PatientController:  # noqa: D101 – documented above
             self._db.save(req)
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
-        logger.info("LinkRequest creata da %s a %s", self.patient.email, specialist.email)
+        logger.info(
+            "LinkRequest creata da %s a %s", self.patient.email, specialist.email
+        )
         return req

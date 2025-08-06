@@ -1,35 +1,60 @@
 from __future__ import annotations
 
-"""Messaging controller: simple patient‑specialist chat storage."""
-
-import logging
 from datetime import datetime
-from typing import List
+from typing import List, Sequence
 
 from nutrease.models.communication import Message
 from nutrease.models.user import User
-
-logger = logging.getLogger(__name__)
-
-__all__ = ["MessagingController"]
+from nutrease.utils.database import Database
 
 
-class MessagingController:  # noqa: D101 – documented above
-    def __init__(self, *, store: List[Message] | None = None):
-        self._store = store if store is not None else []
+class MessagingController:
+    """Gestisce la chat tra paziente e specialista.
 
-    # .....................................................................
-    # Public API
-    # .....................................................................
+    Se viene passato un `Database`, i messaggi sono salvati su TinyDB;
+    altrimenti restano in memoria (comodo per i test).
+    """
 
-    def send(self, sender: User, receiver: User, text: str) -> Message:  # noqa: D401 – imperative
-        msg = Message(sender=sender, receiver=receiver, text=text, sent_at=datetime.now())
-        self._store.append(msg)
-        logger.debug("Messaggio #%d inviato da %s a %s", id(msg), sender.email, receiver.email)
+    def __init__(self, *, db: Database | None = None) -> None:
+        self._db: Database | None = db
+        # fallback in-memory quando db è None
+        self._store: list[Message] = []
+
+    # ------------------------------------------------------------------ #
+    # Core API                                                           #
+    # ------------------------------------------------------------------ #
+
+    def send(self, *, sender: User, receiver: User, text: str) -> Message:
+        """Crea e salva un nuovo messaggio."""
+        msg = Message(
+            sender=sender,
+            receiver=receiver,
+            text=text,
+            sent_at=datetime.now(),
+        )
+        if self._db:
+            self._db.save(msg)                    # persiste
+        else:
+            self._store.append(msg)               # fallback
         return msg
 
-    def conversation(self, u1: User, u2: User) -> List[Message]:  # noqa: D401 – imperative
-        """Return chronologically ordered conversation between *u1* and *u2*."""
-        conv = [m for m in self._store if {m.sender, m.receiver} == {u1, u2}]
-        conv.sort(key=lambda m: m.sent_at)
-        return conv
+    def conversation(self, u1: User, u2: User) -> List[Message]:
+        """Ritorna tutti i messaggi (ordinati) scambiati tra *u1* e *u2*."""
+        if self._db:
+            raw = self._db.search(
+                Message,
+                sender=u1.email,
+                receiver=u2.email,
+            ) + self._db.search(
+                Message,
+                sender=u2.email,
+                receiver=u1.email,
+            )
+            conv: Sequence[Message] = [Message(**d) for d in raw]
+        else:
+            conv = [
+                m
+                for m in self._store
+                if {m.sender, m.receiver} == {u1, u2}
+            ]
+        return sorted(conv, key=lambda m: m.sent_at)

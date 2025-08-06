@@ -1,16 +1,16 @@
 from __future__ import annotations
 
-"""User domain models (abstract & concrete) and an in‑memory e‑mail registry.
+"""User domain models (abstract & concrete).
 
-This module fulfils RNF4 (password validation ≥ 8 caratteri alfanumerici) and
-RNF6 (unicità e‑mail) by means of a temporary :class:`EmailRegistry` that will
-later be replaced by a proper DB constraint.
+* Gestisce la **validazione password** (RNF4).
+* L’unicità dell’e-mail (RNF6) è ora demandata a :class:`nutrease.services.auth_service.AuthService`,
+  che effettua il check sul database; non serve più un registry in-memory.
 """
 
 from abc import ABC
 from dataclasses import field
 from datetime import date
-from typing import ClassVar, List, Set, TYPE_CHECKING
+from typing import List, TYPE_CHECKING
 
 from pydantic import EmailStr
 from pydantic.dataclasses import dataclass
@@ -23,90 +23,59 @@ if TYPE_CHECKING:  # pragma: no cover – forward refs
 
 
 # ---------------------------------------------------------------------------
-# Helper – in‑memory uniqueness check for e‑mail addresses
+# Helper – password validation
 # ---------------------------------------------------------------------------
 
-class EmailRegistry:
-    """Very small helper to enforce e‑mail uniqueness in memory.
 
-    *Nota*: verrà sostituito da una unique‑constraint a livello di DB.
-    """
-
-    _emails: ClassVar[Set[str]] = set()
-
-    @classmethod
-    def register(cls, email: str) -> None:
-        key = email.lower()
-        if key in cls._emails:
-            raise ValueError(f"E‑mail '{email}' già in uso (RNF6).")
-        cls._emails.add(key)
-
-    @classmethod
-    def unregister(cls, email: str) -> None:  # pragma: no cover
-        cls._emails.discard(email.lower())
-
-    @classmethod
-    def clear(cls) -> None:  # pragma: no cover – handy for tests
-        cls._emails.clear()
+def _validate_password(pwd: str) -> None:
+    """RNF4: almeno 8 **caratteri alfanumerici**."""
+    if len(pwd) < 8 or not pwd.isalnum():
+        raise ValueError(
+            "La password deve contenere almeno 8 caratteri alfanumerici (RNF4)."
+        )
 
 
 # ---------------------------------------------------------------------------
-# Shared validation helpers
+# Abstract base class – User
 # ---------------------------------------------------------------------------
 
-def _validate_password(password: str) -> None:
-    """Enforce RNF4: ≥ 8 *alphanumeric* characters."""
-    if len(password) < 8 or not password.isalnum():
-        raise ValueError("La password deve contenere almeno 8 caratteri alfanumerici (RNF4).")
-
-
-# ---------------------------------------------------------------------------
-# Abstract base class – *User*
-# ---------------------------------------------------------------------------
 
 @dataclass(config={"validate_assignment": True, "repr": True})
 class User(ABC):
-    """Common attributes and validation shared by all user roles."""
+    """Attributi comuni ai vari ruoli utente."""
 
     email: EmailStr
     name: str
     surname: str
     password: str = field(repr=False)
 
-    # --- runtime hooks ------------------------------------------------------
-
-    def __post_init__(self) -> None:  # noqa: D401 – imperative
-        """Validate & register e‑mail uniqueness right after instantiation."""
+    # ---------------------------------------------------------------------
+    def __post_init__(self) -> None:  # noqa: D401
         _validate_password(self.password)
-        EmailRegistry.register(self.email)
-
-    def __del__(self):  # pragma: no cover – defensive cleanup
-        try:
-            EmailRegistry.unregister(self.email)
-        except Exception:  # noqa: BLE001 – best‑effort on interpreter shutdown
-            pass
 
 
 # ---------------------------------------------------------------------------
-# Concrete subclasses – *Patient* & *Specialist*
+# Concrete subclasses
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class Patient(User):
-    """A system user who records meals/symptoms and is linked to specialists."""
+    """Utente che registra pasti / sintomi e si collega agli specialisti."""
 
     alarm: "AlarmConfig | None" = None
     diaries: List["DailyDiary"] = field(default_factory=list, repr=False)
 
-    # API façade -------------------------------------------------------------
+    # API façade -----------------------------------------------------------
     def register_record(self, work_date: date, record: "Record") -> None:
-        """Append *record* to the diary for *work_date*, creating it if absent."""
+        """Aggiunge *record* al diario di *work_date* (creandolo se assente)."""
         for diary in self.diaries:
             if diary.day.date == work_date:  # type: ignore[attr-defined]
                 diary.add_record(record)  # type: ignore[attr-defined]
                 return
-        # Deferred import avoids circular dependencies during module load.
-        from .diary import Day, DailyDiary  # local import
+
+        # Deferred import per evitare cicli
+        from .diary import Day, DailyDiary  # local
 
         new_diary = DailyDiary(day=Day(date=work_date), patient=self, records=[record])
         self.diaries.append(new_diary)
@@ -114,10 +83,9 @@ class Patient(User):
 
 @dataclass
 class Specialist(User):
-    """Professional user who analyses and communicates with patients."""
+    """Professionista che analizza i dati del paziente."""
 
     category: SpecialistCategory
 
-    # Convenience getter (follows UML signature) -----------------------------
-    def get_category(self) -> SpecialistCategory:  # noqa: D401 – imperative
+    def get_category(self) -> SpecialistCategory:  # noqa: D401
         return self.category

@@ -30,6 +30,11 @@ class SpecialistController:  # noqa: D101 – documented above
     # .....................................................................
     # Link‑request workflow
     # .....................................................................
+    def _iter_link_requests(self):
+        """Generator su tutte le LinkRequest verso questo specialista."""
+        yield from (
+            lr for lr in self._link_store if lr.specialist == self.current
+        )
 
     def pending_requests(self) -> List[LinkRequest]:  # noqa: D401 – imperative
         return [lr for lr in self._link_store if lr.specialist == self.specialist and lr.state == LinkRequestState.PENDING]
