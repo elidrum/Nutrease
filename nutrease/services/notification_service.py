@@ -67,12 +67,16 @@ class NotificationService:  # noqa: D101 – documented in module docstring
         while not self._stop_evt.is_set():
             now = datetime.now()
             for patient in self._patients:
-                alarm: AlarmConfig | None = getattr(patient, "alarm", None)
-                if not alarm or not alarm.enabled:
-                    continue
-                next_time = alarm.next_activation(now=now)
-                if next_time and 0 <= (next_time - now).total_seconds() < self.POLL_SECONDS:
-                    self._notify(patient, next_time)
+                alarms = getattr(patient, "alarms", [])
+                for alarm in alarms:
+                    if not alarm.enabled:
+                        continue
+                    next_time = alarm.next_activation(now=now)
+                    if (
+                        next_time
+                        and 0 <= (next_time - now).total_seconds() < self.POLL_SECONDS
+                    ):
+                        self._notify(patient, next_time)
             time.sleep(self.POLL_SECONDS)
         logger.info("Alarm scheduler terminato.")
 

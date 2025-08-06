@@ -15,7 +15,7 @@ from hashlib import sha256
 from secrets import token_urlsafe
 from typing import Dict, Literal, Protocol, Type
 
-from pydantic import EmailStr
+from pydantic import EmailStr, TypeAdapter
 
 from nutrease.models.enums import SpecialistCategory
 from nutrease.models.user import Patient, Specialist, User
@@ -27,11 +27,14 @@ from nutrease.utils.database import Database
 
 Role = Literal["PATIENT", "SPECIALIST"]
 
+# Riutilizza un `TypeAdapter` per validare le e-mail senza dover istanziare
+# direttamente ``EmailStr`` (in Pydantic v2 non è più chiamabile come funzione).
+_email_adapter = TypeAdapter(EmailStr)
+
 
 def _hash(raw_pw: str) -> str:
     """Hash elementare SHA-256; da sostituire con bcrypt in prod."""
     return sha256(raw_pw.encode()).hexdigest()
-
 
 # ---------------------------------------------------------------------------
 # Repository Protocol
@@ -57,7 +60,8 @@ class _DBUserRepo:  # noqa: D101 – interno
     def _key(self, email: str) -> str:
         return email.lower()
 
-    def add(self, user: User) -> None:  # noqa: D401
+    def add(self, user: User) -> None:
+        user.email = EmailStr(self._key(str(user.email)))  # noqa: D401
         self._db.save(user)
 
     def get(self, email: str) -> User | None:  # noqa: D401
@@ -102,7 +106,7 @@ class AuthService:
     # ---------------------- signup --------------------------------------
     def signup(
         self,
-        email: EmailStr,
+        email: str,
         password: str,
         *,
         role: Role = "PATIENT",
@@ -111,7 +115,8 @@ class AuthService:
         category: SpecialistCategory | None = None,
     ) -> User:
         """Registra un nuovo utente e lo restituisce."""
-        if self._repo.get(str(email)):
+        email = _email_adapter.validate_python(email)
+        if self._repo.get(email):
             raise ValueError("E-mail già registrata.")
 
         if role.upper() == "PATIENT":
@@ -138,15 +143,17 @@ class AuthService:
         return user
 
     # ---------------------- login ---------------------------------------
-    def login(self, email: EmailStr, password: str) -> User:  # noqa: D401
-        user = self._repo.get(str(email))
+    def login(self, email: str, password: str) -> User:  # noqa: D401
+        email = _email_adapter.validate_python(email)
+        user = self._repo.get(email)
         if user is None or user.password != _hash(password):
             raise PermissionError("Credenziali non valide.")
         return user
 
     # ---------------------- password reset (mock) -----------------------
-    def password_reset(self, email: EmailStr) -> str:  # noqa: D401
-        user = self._repo.get(str(email))
+    def password_reset(self, email: str) -> str:  # noqa: D401
+        email = _email_adapter.validate_python(email)
+        user = self._repo.get(email)
         if user is None:
             raise KeyError("Utente non trovato.")
         token = token_urlsafe(16)

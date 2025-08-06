@@ -10,6 +10,7 @@ from nutrease.models.communication import LinkRequest, LinkRequestState
 from nutrease.models.diary import DailyDiary
 from nutrease.models.enums import Nutrient
 from nutrease.models.user import Patient, Specialist
+from nutrease.utils.database import Database
 
 logger = logging.getLogger(__name__)
 
@@ -23,8 +24,16 @@ except ModuleNotFoundError:
 
 
 class SpecialistController:  # noqa: D101 – documented above
-    def __init__(self, specialist: Specialist, *, link_store: List[LinkRequest] | None = None):
+    def __init__(
+        self,
+        specialist: Specialist,
+        *,
+        db: Database | None = None,
+        link_store: List[LinkRequest] | None = None,
+    ) -> None:
         self.specialist = specialist
+        self._db = db if db is not None else Database.default()    
+
         self._link_store = link_store if link_store is not None else _GLOBAL_LR
 
     # .....................................................................

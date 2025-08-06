@@ -102,7 +102,11 @@ class MealRecord(Record):
         """Totale grammi di *nutrient* in questo pasto."""
         total = 0.0
         for p in self.portions:
-            food_info = _dataset().lookup(p.food_name)
+            try:
+                food_info = _dataset().lookup(p.food_name)
+            except KeyError:
+                # Alimento non presente nel dataset → assume 0 g di nutrienti
+                continue
             total += food_info.get(nutrient.name.lower(), 0.0) * p.quantity
         return total
 

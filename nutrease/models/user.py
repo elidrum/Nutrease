@@ -63,7 +63,7 @@ class User(ABC):
 class Patient(User):
     """Utente che registra pasti / sintomi e si collega agli specialisti."""
 
-    alarm: "AlarmConfig | None" = None
+    alarms: List["AlarmConfig"] = field(default_factory=list, repr=False)
     diaries: List["DailyDiary"] = field(default_factory=list, repr=False)
 
     # API façade -----------------------------------------------------------
