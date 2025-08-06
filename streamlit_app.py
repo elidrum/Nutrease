@@ -50,7 +50,7 @@ if user:
 # Sidebar – navigation menu
 # ----------------------------------------------------------------------------
 
-st.sidebar.image("https://drive.google.com/file/d/1DlCcpudILmGJ5uoNu6IoIJfKteiJqoe3/view?usp=sharing", width=120)
+st.sidebar.image("assets/logo.png", width=200)
 
 if role is None:
     # Only login available
