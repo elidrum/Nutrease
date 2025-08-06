@@ -61,7 +61,11 @@ class _DBUserRepo:  # noqa: D101 – interno
         return email.lower()
 
     def add(self, user: User) -> None:
-        user.email = EmailStr(self._key(str(user.email)))  # noqa: D401
+        # ``EmailStr`` in Pydantic v2 non è più invocabile direttamente.
+        # Usiamo il TypeAdapter condiviso per normalizzare e
+        # validare l'indirizzo e-mail, forzando anche il lowercase
+        # per garantire unicità.
+        user.email = _email_adapter.validate_python(self._key(str(user.email)))
         self._db.save(user)
 
     def get(self, email: str) -> User | None:  # noqa: D401
@@ -69,9 +73,10 @@ class _DBUserRepo:  # noqa: D101 – interno
         if not rows:
             return None
         data = rows[0]
-        cls: Type[User] = Patient if data["__type__"] == "Patient" else Specialist
-        return cls(**{k: v for k, v in data.items() if not k.startswith("__")})
-
+        filtered = {k: v for k, v in data.items() if not k.startswith("__")}
+        is_patient = data["__type__"] == "Patient"
+        cls: Type[User] = Patient if is_patient else Specialist
+        return cls(**filtered)
 
 # ---------------------------------------------------------------------------
 # Repo in-memory (fallback)
