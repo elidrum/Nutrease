@@ -103,6 +103,9 @@ def main() -> None:  # noqa: D401
                         st.markdown(
                             f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
                         )
+                    cols = st.columns(len(Nutrient))
+                    for col, n in zip(cols, Nutrient):
+                        col.metric(n.value.title(), f"{meal.get_nutrient_total(n):.1f}")
                     if st.button("Modifica", key=f"edit_{rec.id}"):
                         st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()
@@ -209,14 +212,6 @@ def main() -> None:  # noqa: D401
                 st.rerun()
             else:
                 st.warning("Inserisci il nome del sintomo.")
-
-    # ---------------- Riepilogo nutrienti --------------------------------
-    st.subheader("Totali nutrienti (g)")
-    cols = st.columns(len(Nutrient))
-    for col, nutr in zip(cols, Nutrient):
-        total = pc.nutrient_total(sel_day, nutr)
-        col.metric(nutr.value.title(), f"{total:.1f}")
-
 
 # ---------------------------------------------------------------------------
 # Debug standalone

@@ -3,6 +3,7 @@ from __future__ import annotations
 """Very lightweight persistence layer over TinyDB (JSON)."""
 
 from dataclasses import asdict, is_dataclass
+from datetime import datetime
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Type, TypeVar, overload
@@ -18,7 +19,9 @@ class Database:
     # ------------------------- init / singleton -------------------------
     def __init__(self, path: str | Path = "nutrease_db.json") -> None:
         self.path = Path(path).expanduser()
-        self._db = TinyDB(self.path)
+        # Pretty-print JSON with indentation
+        # so data isn't stored on a single line
+        self._db = TinyDB(self.path, indent=2)
         self._lock = Lock()
 
     @classmethod
@@ -29,16 +32,34 @@ class Database:
 
     # ------------------------- internals --------------------------------
     def _table(self, model_or_name: str | Type[Any]):
-        name = (
-            model_or_name
-            if isinstance(model_or_name, str)
-            else model_or_name.__name__
-        )
+        if isinstance(model_or_name, str):
+            name = model_or_name
+        else:
+            name = model_or_name.__name__
         return self._db.table(name)
 
     # ------------------------- CRUD -------------------------------------
     def _obj_to_dict(self, obj: Any) -> Dict[str, Any]:
-        data = asdict(obj) if is_dataclass(obj) else obj.__dict__.copy()
+        """Serialize dataclass *obj* into a JSON-friendly ``dict``.
+
+        ``dataclasses.asdict`` already converts nested dataclasses to dictionaries,
+        but values like :class:`datetime.datetime` still need to be transformed in
+        order to be serialised by :func:`json.dumps`.  This helper walks the data
+        structure and converts any ``datetime`` instances to ISO formatted strings
+        so that TinyDB's JSON storage can persist them without errors.
+        """
+
+        def _sanitise(value: Any) -> Any:
+            if isinstance(value, datetime):
+                return value.isoformat()
+            if isinstance(value, dict):
+                return {k: _sanitise(v) for k, v in value.items()}
+            if isinstance(value, list):
+                return [_sanitise(v) for v in value]
+            return value
+
+        raw = asdict(obj) if is_dataclass(obj) else obj.__dict__.copy()
+        data = {k: _sanitise(v) for k, v in raw.items()}
         data["__type__"] = obj.__class__.__name__
         return data
 
@@ -84,7 +105,7 @@ class Database:
             obj = args[0]
             model = type(obj)
             if hasattr(obj, "id"):
-                kwargs = {"id": getattr(obj, "id")}
+                kwargs = {"id": obj.id}
             else:  # fallback: rimuovi per doc_id se presente
                 return self._table(model).remove(doc_ids=[obj.doc_id])
         else:
