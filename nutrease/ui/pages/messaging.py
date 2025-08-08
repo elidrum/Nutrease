@@ -46,7 +46,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                 return None
             accepted = [
                 lr.patient
-                for lr in sc._iter_link_requests()  # type: ignore[attr-defined]
+                for lr in sc.link_requests()
                 if lr.state.value == "ACCEPTED"
             ]
             if not accepted:

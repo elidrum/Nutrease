@@ -40,10 +40,12 @@ class SpecialistController:  # noqa: D101 – documented above
     # Link‑request workflow
     # .....................................................................
     def _iter_link_requests(self):
-        """Generator su tutte le LinkRequest verso questo specialista."""
-        yield from (
-            lr for lr in self._link_store if lr.specialist == self.current
-        )
+        """Generator su tutte le ``LinkRequest`` verso questo specialista."""
+        yield from self.link_requests()
+
+    def link_requests(self) -> List[LinkRequest]:  # noqa: D401 – imperative
+        """Restituisce tutte le ``LinkRequest`` per questo specialista."""
+        return [lr for lr in self._link_store if lr.specialist == self.specialist]
 
     def pending_requests(self) -> List[LinkRequest]:  # noqa: D401 – imperative
         return [lr for lr in self._link_store if lr.specialist == self.specialist and lr.state == LinkRequestState.PENDING]
@@ -52,12 +54,20 @@ class SpecialistController:  # noqa: D101 – documented above
         if lr not in self._link_store or lr.specialist != self.specialist:
             raise ValueError("Richiesta non gestita da questo specialista.")
         lr.accept()
+        try:
+            self._db.save(lr)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
         logger.info("LinkRequest %s accettata da %s", id(lr), self.specialist.email)
 
     def reject_request(self, lr: LinkRequest) -> None:  # noqa: D401 – imperative
         if lr not in self._link_store or lr.specialist != self.specialist:
             raise ValueError("Richiesta non gestita da questo specialista.")
         lr.reject()
+        try:
+            self._db.save(lr)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
         logger.info("LinkRequest %s rifiutata da %s", id(lr), self.specialist.email)
 
     # .....................................................................
@@ -82,3 +92,24 @@ class SpecialistController:  # noqa: D101 – documented above
             lr.patient == patient and lr.specialist == self.specialist and lr.state == LinkRequestState.ACCEPTED
             for lr in self._link_store
         )
+
+    # ------------------------------------------------------------------
+    def remove_link(self, patient: Patient) -> None:  # noqa: D401 – imperative
+        """Remove an accepted link with *patient* (both memory and DB)."""
+        lr = next(
+            (
+                lr
+                for lr in self._link_store
+                if lr.specialist == self.specialist
+                and lr.patient == patient
+                and lr.state == LinkRequestState.ACCEPTED
+            ),
+            None,
+        )
+        if not lr:
+            raise ValueError("Paziente non collegato")
+        self._link_store.remove(lr)
+        try:
+            self._db.delete(lr)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Rimozione LinkRequest non riuscita", exc_info=True)

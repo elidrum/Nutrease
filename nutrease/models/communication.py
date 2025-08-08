@@ -83,6 +83,7 @@ class LinkRequest:
 
     patient: Patient
     specialist: Specialist
+    id: int = 0
     state: LinkRequestState = LinkRequestState.PENDING
     comment: str = ""
     requested_at: datetime = datetime.now()

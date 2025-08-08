@@ -31,6 +31,39 @@ __all__ = ["PatientController"]
 # In-memory shared storage ---------------------------------------------------
 _LINK_REQUESTS: List[LinkRequest] = []  # naive placeholder until DB layer
 
+def _load_link_requests_from_db() -> None:
+    """Populate in-memory link requests from the JSON DB (best effort)."""
+    db = Database.default()
+    try:
+        rows = db.all(LinkRequest)
+    except Exception:  # pragma: no cover - defensive
+        logger.debug("Caricamento LinkRequest non riuscito", exc_info=True)
+        return
+    for row in rows:
+        try:
+            p_data = row["patient"]
+            s_data = row["specialist"]
+            patient = Patient(
+                **{k: v for k, v in p_data.items() if not k.startswith("__")}
+            )
+            specialist = Specialist(
+                **{k: v for k, v in s_data.items() if not k.startswith("__")}
+            )
+            state = LinkRequestState(row.get("state", LinkRequestState.PENDING))
+            lr = LinkRequest(
+                patient=patient,
+                specialist=specialist,
+                state=state,
+                comment=row.get("comment", ""),
+            )
+            lr.id = row.get("id", 0)
+            _LINK_REQUESTS.append(lr)
+        except Exception:  # pragma: no cover - skip malformed rows
+            logger.debug("LinkRequest non valida nel DB", exc_info=True)
+
+
+_load_link_requests_from_db()
+
 
 class PatientController:  # noqa: D101 – documented above
     _next_rec_id: int = 1  # id autoincrement “globale” all’istanza
@@ -309,7 +342,7 @@ class PatientController:  # noqa: D101 – documented above
         )
         self._link_store.append(req)
         try:
-            self._db.save(req)
+            req.id = self._db.save(req)
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
         logger.info(
@@ -323,4 +356,26 @@ class PatientController:  # noqa: D101 – documented above
             raise ValueError("Specialista non trovato")
         data = rows[0]
         specialist = Specialist(**{k: v for k, v in data.items() if not k.startswith("__")})
-        return self.send_link_request(specialist, comment)    
+        return self.send_link_request(specialist, comment)
+
+    # ------------------------------------------------------------------
+    def remove_link(self, specialist: Specialist) -> None:  # noqa: D401 – imperative
+        """Remove an accepted link with *specialist* (both memory and DB)."""
+        lr = next(
+            (
+                lr
+                for lr in self._link_store
+                if lr.patient == self.patient
+                and lr.specialist == specialist
+                and lr.state == LinkRequestState.ACCEPTED
+            ),
+            None,
+        )
+        if not lr:
+            raise ValueError("Specialista non collegato")
+        self._link_store.remove(lr)
+        try:
+            self._db.delete(lr)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Rimozione LinkRequest non riuscita", exc_info=True)
+  

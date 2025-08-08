@@ -9,7 +9,7 @@ Funzioni principali (UC ManageRequests + ReadPatientDiary):
                     lista record e riepilogo nutrienti
 """
 
-from datetime import date
+from datetime import date, timedelta
 from typing import List
 
 import streamlit as st
@@ -55,7 +55,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     if acc_col.button("✅ Accetta", key=f"acc_{id(lr)}"):
                         sc.accept_request(lr)
                         st.success("Richiesta accettata")
-                        st.experimental_rerun()
+                        st.rerun()
                     if rej_col.button("❌ Rifiuta", key=f"rej_{id(lr)}"):
                         sc.reject_request(lr)
                         st.warning("Richiesta rifiutata")
@@ -65,9 +65,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
     with col_pat:
         st.subheader("Pazienti collegati")
         accepted = [
-            lr
-            for lr in sc._iter_link_requests()  # type: ignore[attr-defined]
-            if lr.state == LinkRequestState.ACCEPTED
+            lr for lr in sc.link_requests() if lr.state == LinkRequestState.ACCEPTED
         ]
 
         if not accepted:
@@ -81,46 +79,58 @@ def main() -> None:  # noqa: D401 – imperative name by design
         sel_label = st.selectbox("Seleziona paziente", list(patient_options.keys()))
         selected_patient: Patient = patient_options[sel_label]
 
-        # ---------------- data + filtro nutriente ----------------------
+              # ---------------- intervallo date ------------------------------
         st.divider()
         st.subheader("Diario paziente")
-        day: date = st.date_input("Giorno", value=date.today(), key="view_date")
+        col_from, col_to = st.columns(2)
+        with col_from:
+            start_day: date = st.date_input("Da", value=date.today(), key="start_day")
+        with col_to:
+            end_day: date = st.date_input("A", value=date.today(), key="end_day")
+
         nutrient_filter = st.selectbox(
-            "Filtra nutriente (Totale)",
+            "Filtra nutriente (per pasto)",
             ["Tutti"] + [n.value for n in Nutrient],
+            key="nut_filter",
         )
 
-        diary = sc.get_patient_diary(selected_patient, day)
-        if diary is None or not diary.records:
-            st.info("Nessun record per questo giorno.")
-        else:
-            for rec in diary.records:
-                if rec.record_type == RecordType.MEAL:
-                    meal: MealRecord = rec  # type: ignore[assignment]
-                    with st.expander(f"🍽️ Pasto – {rec.created_at:%H:%M}"):
-                        for p in meal.portions:
-                            st.markdown(
-                                f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
-                            )
-                else:
-                    sym: SymptomRecord = rec  # type: ignore[assignment]
-                    with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
-                        st.write(sym.symptom)
-                        st.write(f"Intensità: {sym.severity.value}")
+        if start_day > end_day:
+            st.error("La data iniziale deve precedere la data finale.")
+            st.stop()
 
-        # ---------------- riepilogo nutrienti --------------------------
-        st.subheader("Totali nutrienti (g)")
-        if nutrient_filter == "Tutti":
-            cols = st.columns(len(Nutrient))
-            for col, n in zip(cols, Nutrient):
-                col.metric(
-                    n.value.title(),
-                    f"{sc.nutrient_total(selected_patient, day, n):.1f}",
-                )
-        else:
-            n_sel = Nutrient.from_str(nutrient_filter)
-            tot = sc.nutrient_total(selected_patient, day, n_sel)
-            st.metric(n_sel.value.title(), f"{tot:.1f} g")
+        for offset in range((end_day - start_day).days + 1):
+            day = start_day + timedelta(days=offset)
+            st.markdown(f"### {day:%Y-%m-%d}")
+            diary = sc.get_patient_diary(selected_patient, day)
+            if diary is None or not diary.records:
+                st.info("Nessun record per questo giorno.")
+            else:
+                for rec in diary.records:
+                    if rec.record_type == RecordType.MEAL:
+                        meal: MealRecord = rec  # type: ignore[assignment]
+                        with st.expander(f"🍽️ Pasto – {rec.created_at:%H:%M}"):
+                            for p in meal.portions:
+                                st.markdown(
+                                    f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
+                                )
+                            if nutrient_filter == "Tutti":
+                                cols = st.columns(len(Nutrient))
+                                for col, n in zip(cols, Nutrient):
+                                    col.metric(
+                                        n.value.title(),
+                                        f"{meal.get_nutrient_total(n):.1f}",
+                                    )
+                            else:
+                                n_sel = Nutrient.from_str(nutrient_filter)
+                                st.metric(
+                                    n_sel.value.title(),
+                                    f"{meal.get_nutrient_total(n_sel):.1f}",
+                                )
+                    else:
+                        sym: SymptomRecord = rec  # type: ignore[assignment]
+                        with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
+                            st.write(sym.symptom)
+                            st.write(f"Intensità: {sym.severity.value}")
 
 
 # ---------------------------------------------------------------------------

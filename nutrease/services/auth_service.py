@@ -69,14 +69,17 @@ class _DBUserRepo:  # noqa: D101 – interno
         self._db.save(user)
 
     def get(self, email: str) -> User | None:  # noqa: D401
-        rows = self._db.search(User, email=self._key(email))
-        if not rows:
-            return None
-        data = rows[0]
-        filtered = {k: v for k, v in data.items() if not k.startswith("__")}
-        is_patient = data["__type__"] == "Patient"
-        cls: Type[User] = Patient if is_patient else Specialist
-        return cls(**filtered)
+        key = self._key(email)
+        for cls in (Patient, Specialist):
+            rows = self._db.search(cls, email=key)
+            if rows:
+                data = rows[0]
+                filtered = dict(
+                    (k, v) for k, v in data.items() if not k.startswith("__")
+                )
+                return cls(**filtered)
+        return None
+
 
 # ---------------------------------------------------------------------------
 # Repo in-memory (fallback)
