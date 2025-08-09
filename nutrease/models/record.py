@@ -120,13 +120,15 @@ class MealRecord(Record):
         total = 0.0
         for p in self.portions:
             try:
-                food_info = _dataset().lookup(p.food_name)
+                nutrient_per_gram = (
+                    _dataset().lookup(p.food_name).get(nutrient.name.lower(), 0.0)
+                )
+                total += nutrient_per_gram * p.to_grams()
             except KeyError:
                 # Alimento non presente nel dataset → assume 0 g di nutrienti
                 continue
-            total += food_info.get(nutrient.name.lower(), 0.0) * p.quantity
         return total
-    
+
     def as_dict(self) -> dict:  # noqa: D401
         data = super().as_dict()
         data["portions"] = [p.as_dict() for p in self.portions]
