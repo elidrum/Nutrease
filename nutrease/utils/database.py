@@ -3,7 +3,8 @@ from __future__ import annotations
 """Very lightweight persistence layer over TinyDB (JSON)."""
 
 from dataclasses import asdict, is_dataclass
-from datetime import datetime
+from datetime import date, datetime
+from enum import Enum
 from pathlib import Path
 from threading import Lock
 from typing import Any, Dict, List, Type, TypeVar, overload
@@ -40,26 +41,31 @@ class Database:
 
     # ------------------------- CRUD -------------------------------------
     def _obj_to_dict(self, obj: Any) -> Dict[str, Any]:
-        """Serialize dataclass *obj* into a JSON-friendly ``dict``.
+        """Serialise dataclass *obj* into a JSON-friendly ``dict``.
 
         ``dataclasses.asdict`` already converts nested dataclasses to dictionaries,
-        but values like :class:`datetime.datetime` still need to be transformed in
-        order to be serialised by :func:`json.dumps`.  This helper walks the data
-        structure and converts any ``datetime`` instances to ISO formatted strings
-        so that TinyDB's JSON storage can persist them without errors.
+        but values like :class:`datetime.datetime`, :class:`datetime.date` or
+        :class:`enum.Enum` still need to be transformed in order to be serialised
+        by :func:`json.dumps`.  This helper walks the data structure recursively
+        and sanitises any unsupported types so that TinyDB's JSON storage can
+        persist them without errors.
         """
 
         def _sanitise(value: Any) -> Any:
-            if isinstance(value, datetime):
+            if isinstance(value, (datetime, date)):
                 return value.isoformat()
+            if isinstance(value, Enum):
+                return value.value
+            if is_dataclass(value):
+                return _sanitise(asdict(value))
             if isinstance(value, dict):
                 return {k: _sanitise(v) for k, v in value.items()}
-            if isinstance(value, list):
+            if isinstance(value, (list, tuple, set)):
                 return [_sanitise(v) for v in value]
             return value
 
         raw = asdict(obj) if is_dataclass(obj) else obj.__dict__.copy()
-        data = {k: _sanitise(v) for k, v in raw.items()}
+        data = _sanitise(raw)
         data["__type__"] = obj.__class__.__name__
         return data
 

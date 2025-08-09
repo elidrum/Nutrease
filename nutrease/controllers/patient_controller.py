@@ -19,10 +19,16 @@ from typing import List
 from nutrease.models.communication import LinkRequest, LinkRequestState
 from nutrease.models.diary import DailyDiary
 from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
-from nutrease.models.record import FoodPortion, MealRecord, Record, SymptomRecord
 from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
+
+from nutrease.models.record import (  # isort: skip
+    FoodPortion,
+    MealRecord,
+    Record,
+    SymptomRecord,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -162,10 +168,6 @@ class PatientController:  # noqa: D101 – documented above
             logger.debug("Delete record non riuscita", exc_info=True)
         logger.info("Record %s eliminato da %s", record_id, self.patient.email)
         
-        try:
-            self._db.save(self.patient)
-        except Exception:  # pragma: no cover
-            logger.debug("Persistenza paziente non riuscita", exc_info=True)
     # ---------- NUTRIENT TOTAL -------------------------------------------
     def nutrient_total(  # noqa: D401 – imperative
         self, day: date, nutrient: Nutrient
@@ -210,10 +212,10 @@ class PatientController:  # noqa: D101 – documented above
             portions=portions,
             note=note,
         )
+        object.__setattr__(new, "patient_email", self.patient.email)
         diary.modify_record(meal, new)
         try:
             self._db.save(new)
-            self._db.save(self.patient)
         except Exception:  # pragma: no cover
             logger.debug("Persistenza update meal non riuscita", exc_info=True)
 
@@ -243,19 +245,19 @@ class PatientController:  # noqa: D101 – documented above
             severity=severity,
             note=note,
         )
+        object.__setattr__(new, "patient_email", self.patient.email)
         diary.modify_record(sym, new)
         try:
             self._db.save(new)
-            self._db.save(self.patient)
         except Exception:  # pragma: no cover
             logger.debug("Persistenza update symptom non riuscita", exc_info=True)
 
     # ---------- Metodo legacy add_record (resta invariato) ---------------
     def add_record(self, record: Record) -> None:  # noqa: D401 – imperative
         self.patient.register_record(record.created_at.date(), record)
+        object.__setattr__(record, "patient_email", self.patient.email)
         try:
             self._db.save(record)
-            self._db.save(self.patient)
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza record non riuscita", exc_info=True)
         logger.info(
@@ -355,7 +357,9 @@ class PatientController:  # noqa: D101 – documented above
         if not rows:
             raise ValueError("Specialista non trovato")
         data = rows[0]
-        specialist = Specialist(**{k: v for k, v in data.items() if not k.startswith("__")})
+        specialist = Specialist(
+            **{k: v for k, v in data.items() if not k.startswith("__")}
+        )
         return self.send_link_request(specialist, comment)
 
     # ------------------------------------------------------------------

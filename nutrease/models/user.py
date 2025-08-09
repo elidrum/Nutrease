@@ -3,12 +3,13 @@ from __future__ import annotations
 """User domain models (abstract & concrete).
 
 * Gestisce la **validazione password** (RNF4).
-* L’unicità dell’e-mail (RNF6) è ora demandata a :class:`nutrease.services.auth_service.AuthService`,
-  che effettua il check sul database; non serve più un registry in-memory.
+* L’unicità dell’e-mail (RNF6) è demandata a
+  :class:`nutrease.services.auth_service.AuthService`, che effettua il check
+  sul database; non serve più un registry in-memory.
 """
 
 from abc import ABC
-from dataclasses import field
+from dataclasses import field, asdict
 from datetime import date
 from typing import List, TYPE_CHECKING
 
@@ -81,11 +82,20 @@ class Patient(User):
                 return
 
         # Deferred import per evitare cicli
-        from .diary import Day, DailyDiary  # local
+        from .diary import DailyDiary, Day   # local
 
         new_diary = DailyDiary(day=Day(date=work_date), patient=self, records=[record])
         self.diaries.append(new_diary)
 
+    def as_dict(self) -> dict:  # noqa: D401
+        """Serializza il paziente in forma JSON-friendly senza i diari."""
+        return {
+            "email": self.email,
+            "name": self.name,
+            "surname": self.surname,
+            "password": self.password,
+            "alarms": [asdict(a) for a in self.alarms],
+        }
 
 @dataclass
 class Specialist(User):
