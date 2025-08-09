@@ -11,7 +11,7 @@ from datetime import datetime
 from typing import List
 
 import streamlit as st
-
+from datetime import datetime
 from nutrease.controllers.messaging_controller import MessagingController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.communication import Message
@@ -95,9 +95,15 @@ def main() -> None:  # noqa: D401 – imperative name by design
         if st.button("Invia", use_container_width=True):
             text = st.session_state.msg_text.strip()
             if text:
-                mc.send(sender=user, receiver=peer, text=text)
-                st.session_state.msg_text = ""  # clear
-                st.rerun()
+                try:
+                    mc.send(sender=user, receiver=peer, text=text)
+                    st.session_state.msg_text = ""  # clear
+                    st.rerun()
+                except RecursionError:
+                    st.error(
+                        "Errore interno durante l'invio del messaggio. "
+                        "Riprova più tardi."
+                    )
     else:
         st.info("Solo lo specialista può inviare messaggi. Attendi una risposta.")
 

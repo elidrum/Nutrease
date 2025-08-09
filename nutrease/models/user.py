@@ -72,7 +72,7 @@ class Patient(User):
 
     alarms: List["AlarmConfig"] = field(default_factory=list, repr=False)
     diaries: List["DailyDiary"] = field(default_factory=list, repr=False)
-
+    profile_note: str = ""
     # API façade -----------------------------------------------------------
     def register_record(self, work_date: date, record: "Record") -> None:
         """Aggiunge *record* al diario di *work_date* (creandolo se assente)."""

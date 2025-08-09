@@ -11,15 +11,16 @@ Funzionalità:
 """
 
 from datetime import date, datetime, time
-from typing import List, Sequence   # noqa: F401 (usati in forward refs)
+from typing import List, Sequence  # noqa: F401 (usati in forward refs)
 
 import streamlit as st
 
 from nutrease.models.diary import DailyDiary, Day
-from nutrease.models.enums import RecordType, Severity, Unit
+from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
 from nutrease.models.record import MealRecord, SymptomRecord
-from nutrease.utils.database import Database  # noqa: F401 – placeholder per futuri use-cases
-
+from nutrease.utils.database import (  # noqa: F401 – placeholder per futuri use-cases
+    Database,
+)
 
 # ---------------------------------------------------------------------------
 # MAIN
@@ -65,7 +66,11 @@ def main() -> None:  # noqa: D401
             save_col, del_col = st.columns(2)
             if save_col.button("Salva", key=f"al_save_{idx}"):
                 pc.update_alarm(
-                    idx, t.hour, t.minute, [DAY_NAMES.index(d) for d in days_sel], enabled
+                    idx,
+                    t.hour,
+                    t.minute,
+                    [DAY_NAMES.index(d) for d in days_sel],
+                    enabled,
                 )
                 st.sidebar.success("Notifica aggiornata")
                 st.rerun()
@@ -74,20 +79,12 @@ def main() -> None:  # noqa: D401
                 st.sidebar.warning("Notifica eliminata")
                 st.rerun()
 
-    st.sidebar.header("🔗 Collegamento Specialista")
-    spec_email = st.sidebar.text_input("E-mail specialista")
-    comment = st.sidebar.text_input("Commento", key="link_comment")
-    if st.sidebar.button("Richiedi collegamento"):
-        try:
-            pc.send_link_request_by_email(spec_email, comment)
-            st.sidebar.success("Richiesta inviata")
-        except Exception as exc:
-            st.sidebar.error(str(exc))
-
     # ---------------- Selettore giorno -----------------------------------
     st.title("📒 Diario alimentare")
     sel_day: date = st.date_input("Giorno", value=date.today())
-    diary = pc.get_diary(sel_day) or DailyDiary(day=Day(date=sel_day), patient=pc.patient)
+    diary = pc.get_diary(sel_day) or DailyDiary(
+        day=Day(date=sel_day), patient=pc.patient
+    )
 
     # ---------------- Lista record ---------------------------------------
     st.subheader("Record del giorno")
@@ -101,21 +98,32 @@ def main() -> None:  # noqa: D401
                     meal: MealRecord = rec  # type: ignore[assignment]
                     for p in meal.portions:
                         st.markdown(
-                            f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
+                            f"- {p.quantity} {p.unit.value.title()} "
+                            f"di **{p.food_name}**"
                         )
+                    cols = st.columns(len(Nutrient))
+                    for col, n in zip(cols, Nutrient):
+                        col.metric(n.value.title(), f"{meal.get_nutrient_total(n):.1f}")
                     if st.button("Modifica", key=f"edit_{rec.id}"):
-                        st.session_state[f"editing_{rec.id}"] = True
+                        st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()
-                    if st.session_state.get(f"editing_{rec.id}"):
+                    if st.session_state.get(f"edit_{rec.id}"):
                         foods: List[str] = []
                         qtys: List[float] = []
                         units: List[Unit] = []
                         for i, p in enumerate(meal.portions):
                             foods.append(
-                                st.text_input("Alimento", p.food_name, key=f"ef_{rec.id}_{i}")
+                                st.text_input(
+                                    "Alimento", p.food_name, key=f"ef_{rec.id}_{i}"
+                                )
                             )
                             qtys.append(
-                                st.number_input("Quantità", value=p.quantity, step=0.1, key=f"eq_{rec.id}_{i}")
+                                st.number_input(
+                                    "Quantità",
+                                    value=p.quantity,
+                                    step=0.1,
+                                    key=f"eq_{rec.id}_{i}",
+                                )
                             )
                             units.append(
                                 Unit.from_str(
@@ -129,19 +137,22 @@ def main() -> None:  # noqa: D401
                             )
                         if st.button("Salva", key=f"save_{rec.id}"):
                             pc.modify_meal(sel_day, rec.id, foods, qtys, units)
-                            st.session_state.pop(f"editing_{rec.id}")
+                            st.session_state.pop(f"edit_{rec.id}")
                             st.success("Record aggiornato")
                             st.rerun()
                 else:
                     sym: SymptomRecord = rec  # type: ignore[assignment]
                     st.markdown(
-                        f"Sintomo: **{sym.symptom}**  \nIntensità: **{sym.severity.value}**",
+                        f"Sintomo: **{sym.symptom}**  \n"
+                        f"Intensità: **{sym.severity.value}**",
                     )
                     if st.button("Modifica", key=f"edit_{rec.id}"):
-                        st.session_state[f"editing_{rec.id}"] = True
+                        st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()
-                    if st.session_state.get(f"editing_{rec.id}"):
-                        sym_val = st.text_input("Sintomo", sym.symptom, key=f"sym_{rec.id}")
+                    if st.session_state.get(f"edit_{rec.id}"):
+                        sym_val = st.text_input(
+                            "Sintomo", sym.symptom, key=f"sym_{rec.id}"
+                        )
                         sev_val = st.selectbox(
                             "Intensità",
                             [s.value for s in Severity],
@@ -156,13 +167,13 @@ def main() -> None:  # noqa: D401
                                 Severity.from_str(sev_val),
                                 rec.created_at.time(),
                             )
-                            st.session_state.pop(f"editing_{rec.id}")
+                            st.session_state.pop(f"edit_{rec.id}")
                             st.success("Record aggiornato")
                             st.rerun()
                 if st.button("Elimina", key=f"del_{rec.id}"):
                     pc.remove_record(sel_day, rec.id)
                     st.rerun()
-# ---------------- Form aggiunta record -------------------------------
+    # ---------------- Form aggiunta record -------------------------------
     st.subheader("Aggiungi nuovo record")
 
     # ⏰ time-picker persistente: mantiene l’orario scelto dopo il rerun
@@ -175,28 +186,40 @@ def main() -> None:  # noqa: D401
     )
 
     rec_type = st.radio("Tipo di record", ["Pasto", "Sintomo"], horizontal=True)
+    if st.session_state.pop("meal_added", False):
+        st.success("Pasto aggiunto")
+    if st.session_state.pop("symptom_added", False):
+        st.success("Sintomo aggiunto")
 
     if rec_type == "Pasto":
-        food_name = st.text_input("Alimento")
-        qty = st.number_input("Quantità", min_value=0.0, step=0.1)
-        unit_str = st.selectbox("Unità", [u.value for u in Unit])
+        food_name = st.text_input("Alimento", key="meal_food")
+        qty = st.number_input("Quantità", min_value=0.0, step=0.1, key="meal_qty")
+        unit_str = st.selectbox("Unità", [u.value for u in Unit], key="meal_unit")
         if st.button("Aggiungi Pasto", use_container_width=True):
             if food_name and qty > 0:
-                pc.add_meal(
-                    sel_day,
-                    record_time,
-                    [food_name],
-                    [qty],
-                    [Unit.from_str(unit_str)],
-                )
-                st.success("Pasto salvato!")
-                st.rerun()
+                try:
+                    pc.add_meal(
+                        sel_day,
+                        record_time,
+                        [food_name],
+                        [qty],
+                        [Unit.from_str(unit_str)],
+                    )
+                    st.session_state.meal_food = ""
+                    st.session_state.meal_qty = 0.0
+                    st.session_state.meal_unit = [u.value for u in Unit][0]
+                    st.session_state.meal_added = True
+                    st.rerun()
+                except ValueError as exc:
+                    st.error(str(exc))
             else:
                 st.warning("Compila nome alimento e quantità > 0.")
 
     else:
-        symptom = st.text_input("Sintomo")
-        severity_str = st.selectbox("Intensità", [s.value for s in Severity])
+        symptom = st.text_input("Sintomo", key="symptom_desc")
+        severity_str = st.selectbox(
+            "Intensità", [s.value for s in Severity], key="symptom_sev"
+        )
         if st.button("Aggiungi Sintomo", use_container_width=True):
             if symptom:
                 pc.add_symptom(
@@ -205,10 +228,13 @@ def main() -> None:  # noqa: D401
                     Severity.from_str(severity_str),
                     record_time,
                 )
-                st.success("Sintomo salvato!")
+                st.session_state.symptom_desc = ""
+                st.session_state.symptom_sev = [s.value for s in Severity][0]
+                st.session_state.symptom_added = True
                 st.rerun()
             else:
                 st.warning("Inserisci il nome del sintomo.")
+
 
 # ---------------------------------------------------------------------------
 # Debug standalone

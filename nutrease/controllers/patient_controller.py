@@ -113,6 +113,13 @@ class PatientController:  # noqa: D101 – documented above
         note: str | None = None,
     ) -> None:
         """Crea un `MealRecord` e lo salva."""
+        diary = self.get_diary(day)
+        if diary and any(
+            r.record_type == RecordType.MEAL and r.created_at.time() == when
+            for r in diary.records
+        ):
+            raise ValueError("Esiste già un pasto registrato per questo orario.")
+
         
         portions = [
             FoodPortion(food_name=fn, quantity=q, unit=u)

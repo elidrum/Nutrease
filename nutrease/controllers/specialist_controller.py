@@ -16,12 +16,47 @@ logger = logging.getLogger(__name__)
 
 __all__ = ["SpecialistController"]
 
-# Re‑use shared list defined in patient_controller to keep state in‑sync
-try:  # defensive import in case patient_controller not yet evaluated
+# Re‑use shared list defined in patient_controller to keep state in‑sync.
+# If patient_controller hasn't been imported yet (e.g. specialist logs in first),
+# load existing link requests from DB so connections persist across sessions.
+try:  # defensive import
     from nutrease.controllers.patient_controller import _LINK_REQUESTS as _GLOBAL_LR
+    from nutrease.controllers.patient_controller import _load_link_requests_from_db
 except ModuleNotFoundError:
     _GLOBAL_LR: List[LinkRequest] = []
 
+    def _load_link_requests_from_db() -> None:
+        db = Database.default()
+        try:
+            rows = db.all(LinkRequest)
+        except Exception:
+            logger.debug("Caricamento LinkRequest non riuscito", exc_info=True)
+            return
+        for row in rows:
+            try:
+                p_data = row["patient"]
+                s_data = row["specialist"]
+                patient = Patient(
+                    **{k: v for k, v in p_data.items() if not k.startswith("__")}
+                )
+                specialist = Specialist(
+                    **{k: v for k, v in s_data.items() if not k.startswith("__")}
+                )
+                state = LinkRequestState(row.get("state", LinkRequestState.PENDING))
+                lr = LinkRequest(
+                    patient=patient,
+                    specialist=specialist,
+                    state=state,
+                    comment=row.get("comment", ""),
+                )
+                lr.id = row.get("id", 0)
+                _GLOBAL_LR.append(lr)
+            except Exception:
+                logger.debug("LinkRequest non valida nel DB", exc_info=True)
+
+
+if not _GLOBAL_LR:
+    _load_link_requests_from_db()
 
 class SpecialistController:  # noqa: D101 – documented above
     def __init__(
