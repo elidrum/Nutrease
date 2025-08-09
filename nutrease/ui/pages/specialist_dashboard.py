@@ -79,7 +79,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
         sel_label = st.selectbox("Seleziona paziente", list(patient_options.keys()))
         selected_patient: Patient = patient_options[sel_label]
 
-              # ---------------- intervallo date ------------------------------
+# ---------------- intervallo date ------------------------------
         st.divider()
         st.subheader("Diario paziente")
         col_from, col_to = st.columns(2)
@@ -98,40 +98,42 @@ def main() -> None:  # noqa: D401 – imperative name by design
             st.error("La data iniziale deve precedere la data finale.")
             st.stop()
 
+        n_sel = None if nutrient_filter == "Tutti" else Nutrient.from_str(nutrient_filter)
+
         for offset in range((end_day - start_day).days + 1):
             day = start_day + timedelta(days=offset)
             st.markdown(f"### {day:%Y-%m-%d}")
             diary = sc.get_patient_diary(selected_patient, day)
             if diary is None or not diary.records:
                 st.info("Nessun record per questo giorno.")
-            else:
-                for rec in diary.records:
-                    if rec.record_type == RecordType.MEAL:
-                        meal: MealRecord = rec  # type: ignore[assignment]
-                        with st.expander(f"🍽️ Pasto – {rec.created_at:%H:%M}"):
-                            for p in meal.portions:
-                                st.markdown(
-                                    f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
+                continue
+            for rec in diary.records:
+                if rec.record_type == RecordType.MEAL:
+                    meal: MealRecord = rec  # type: ignore[assignment]
+                    if n_sel and meal.get_nutrient_total(n_sel) == 0:
+                        continue
+                    with st.expander(f"🍽️ Pasto – {rec.created_at:%H:%M}"):
+                        for p in meal.portions:
+                            st.markdown(
+                                f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
+                            )
+                        if n_sel is None:
+                            cols = st.columns(len(Nutrient))
+                            for col, n in zip(cols, Nutrient):
+                                col.metric(
+                                    n.value.title(),
+                                    f"{meal.get_nutrient_total(n):.1f}",
                                 )
-                            if nutrient_filter == "Tutti":
-                                cols = st.columns(len(Nutrient))
-                                for col, n in zip(cols, Nutrient):
-                                    col.metric(
-                                        n.value.title(),
-                                        f"{meal.get_nutrient_total(n):.1f}",
-                                    )
-                            else:
-                                n_sel = Nutrient.from_str(nutrient_filter)
-                                st.metric(
-                                    n_sel.value.title(),
-                                    f"{meal.get_nutrient_total(n_sel):.1f}",
-                                )
-                    else:
-                        sym: SymptomRecord = rec  # type: ignore[assignment]
-                        with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
-                            st.write(sym.symptom)
-                            st.write(f"Intensità: {sym.severity.value}")
-
+                        else:
+                            st.metric(
+                                n_sel.value.title(),
+                                f"{meal.get_nutrient_total(n_sel):.1f}",
+                            )
+                else:
+                    sym: SymptomRecord = rec  # type: ignore[assignment]
+                    with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
+                        st.write(sym.symptom)
+                        st.write(f"Intensità: {sym.severity.value}")
 
 # ---------------------------------------------------------------------------
 # Debug standalone (facoltativo)

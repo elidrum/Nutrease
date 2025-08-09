@@ -16,8 +16,8 @@ from typing import List, Sequence   # noqa: F401 (usati in forward refs)
 import streamlit as st
 
 from nutrease.models.diary import DailyDiary, Day
-from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
-from nutrease.models.record import FoodPortion, MealRecord, SymptomRecord
+from nutrease.models.enums import RecordType, Severity, Unit
+from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.utils.database import Database  # noqa: F401 – placeholder per futuri use-cases
 
 
@@ -103,13 +103,10 @@ def main() -> None:  # noqa: D401
                         st.markdown(
                             f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
                         )
-                    cols = st.columns(len(Nutrient))
-                    for col, n in zip(cols, Nutrient):
-                        col.metric(n.value.title(), f"{meal.get_nutrient_total(n):.1f}")
                     if st.button("Modifica", key=f"edit_{rec.id}"):
-                        st.session_state[f"edit_{rec.id}"] = True
+                        st.session_state[f"editing_{rec.id}"] = True
                         st.rerun()
-                    if st.session_state.get(f"edit_{rec.id}"):
+                    if st.session_state.get(f"editing_{rec.id}"):
                         foods: List[str] = []
                         qtys: List[float] = []
                         units: List[Unit] = []
@@ -132,7 +129,7 @@ def main() -> None:  # noqa: D401
                             )
                         if st.button("Salva", key=f"save_{rec.id}"):
                             pc.modify_meal(sel_day, rec.id, foods, qtys, units)
-                            st.session_state.pop(f"edit_{rec.id}")
+                            st.session_state.pop(f"editing_{rec.id}")
                             st.success("Record aggiornato")
                             st.rerun()
                 else:
@@ -141,9 +138,9 @@ def main() -> None:  # noqa: D401
                         f"Sintomo: **{sym.symptom}**  \nIntensità: **{sym.severity.value}**",
                     )
                     if st.button("Modifica", key=f"edit_{rec.id}"):
-                        st.session_state[f"edit_{rec.id}"] = True
+                        st.session_state[f"editing_{rec.id}"] = True
                         st.rerun()
-                    if st.session_state.get(f"edit_{rec.id}"):
+                    if st.session_state.get(f"editing_{rec.id}"):
                         sym_val = st.text_input("Sintomo", sym.symptom, key=f"sym_{rec.id}")
                         sev_val = st.selectbox(
                             "Intensità",
@@ -159,7 +156,7 @@ def main() -> None:  # noqa: D401
                                 Severity.from_str(sev_val),
                                 rec.created_at.time(),
                             )
-                            st.session_state.pop(f"edit_{rec.id}")
+                            st.session_state.pop(f"editing_{rec.id}")
                             st.success("Record aggiornato")
                             st.rerun()
                 if st.button("Elimina", key=f"del_{rec.id}"):

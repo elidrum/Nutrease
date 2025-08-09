@@ -7,7 +7,8 @@ Definisce:
 * ``Record``            – base astratta con metadata comuni.
 * ``MealRecord``        – insieme di ``FoodPortion`` consumate.
 * ``SymptomRecord``     – sintomo riportato dal paziente.
-* ``FoodPortion``       – alimento + quantità + unità con conversione in grammi.
+* ``FoodPortion``       – alimento + quantità + unità.
+  Conversione in grammi tramite dataset.
 
 `FoodPortion.to_grams()` sfrutta il servizio
 ``nutrease.services.dataset_service.AlimentazioneDataset`` ottenuto lazily
@@ -37,8 +38,8 @@ def _dataset() -> "AlimentazioneDataset":  # noqa: D401
     from nutrease.services.dataset_service import AlimentazioneDataset  # local import
 
     if not hasattr(_dataset, "_instance"):
-        setattr(_dataset, "_instance", AlimentazioneDataset.default())  # type: ignore[attr-defined]
-    return getattr(_dataset, "_instance")  # type: ignore[return-value]
+        _dataset._instance = AlimentazioneDataset.default()
+    return _dataset._instance  # type: ignore[attr-defined]
 
 
 # ---------------------------------------------------------------------------
@@ -59,8 +60,17 @@ class Record(ABC):
 
     # ---------------------------------------------------------------------
     def as_dict(self) -> dict:  # noqa: D401
-        """Serializza in dict semplice (per JSON / DB)."""
-        return self.__dict__.copy()
+        """Serializza in dict semplice (per JSON/DB)."""
+        data = {
+            "id": self.id,
+            "created_at": self.created_at.isoformat(),
+            "note": self.note,
+            "record_type": (self.record_type.value if self.record_type else None),
+        }
+        if "patient_email" in self.__dict__:
+            data["patient_email"] = self.__dict__["patient_email"]
+        return data
+
 
 
 # ---------------------------------------------------------------------------
@@ -81,6 +91,13 @@ class FoodPortion:
         grams = _dataset().get_grams_per_unit(self.food_name, self.unit)
         return grams * self.quantity
 
+    def as_dict(self) -> dict:  # noqa: D401
+        """Serializza in dict JSON-friendly."""
+        return {
+            "food_name": self.food_name,
+            "quantity": self.quantity,
+            "unit": self.unit.value,
+        }
 
 # ---------------------------------------------------------------------------
 # MealRecord
@@ -109,6 +126,12 @@ class MealRecord(Record):
                 continue
             total += food_info.get(nutrient.name.lower(), 0.0) * p.quantity
         return total
+    
+    def as_dict(self) -> dict:  # noqa: D401
+        data = super().as_dict()
+        data["portions"] = [p.as_dict() for p in self.portions]
+        return data
+
 
 
 # ---------------------------------------------------------------------------
@@ -125,3 +148,8 @@ class SymptomRecord(Record):
 
     def __post_init__(self) -> None:  # noqa: D401
         object.__setattr__(self, "record_type", RecordType.SYMPTOM)
+
+    def as_dict(self) -> dict:  # noqa: D401
+        data = super().as_dict()
+        data.update({"symptom": self.symptom, "severity": self.severity.value})
+        return data

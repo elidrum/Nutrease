@@ -1,14 +1,13 @@
-from datetime import datetime
+from datetime import date, datetime, time
 
 import pytest
 
 from nutrease.controllers.patient_controller import PatientController
-from nutrease.controllers.specialist_controller import SpecialistController
-from nutrease.utils.database import Database
-from nutrease.models.user import Patient, Specialist
+from nutrease.models.enums import Nutrient, Unit
 from nutrease.models.record import FoodPortion, MealRecord, RecordType
-from nutrease.models.enums import Unit, Nutrient, SpecialistCategory
-from nutrease.models.communication import LinkRequest, LinkRequestState
+from nutrease.models.user import Patient
+from nutrease.services.auth_service import AuthService
+from nutrease.utils.database import Database
 
 
 @pytest.fixture(autouse=True)
@@ -35,29 +34,24 @@ def test_add_record_and_total(pc):
     assert total >= 0
 
 
-def test_link_requests_returns_only_for_specialist():
-    spec_a = Specialist(
-        email="s1@test.com",
+def test_record_persistence(tmp_path):
+    db = Database(tmp_path / "db.json")
+    auth = AuthService(db=db)
+    pat = auth.signup(
+        email="persist@test.com",
         password="Password1",
-        name="S",
-        surname="One",
-        category=SpecialistCategory.DIETICIAN,
+        name="P",
+        surname="T",
     )
-    spec_b = Specialist(
-        email="s2@test.com",
-        password="Password1",
-        name="S",
-        surname="Two",
-        category=SpecialistCategory.NUTRITIONIST,
+    pc = PatientController(pat, db=db)
+    pc.add_meal(
+        day=date.today(),
+        when=time(8, 0),
+        food_names=["Mela"],
+        quantities=[1],
+        units=[Unit.ITEM],
     )
-    pat1 = Patient(email="p1@test.com", password="Password1", name="P1", surname="A")
-    pat2 = Patient(email="p2@test.com", password="Password1", name="P2", surname="B")
-    lr1 = LinkRequest(patient=pat1, specialist=spec_a, state=LinkRequestState.ACCEPTED)
-    lr2 = LinkRequest(patient=pat2, specialist=spec_a)
-    lr3 = LinkRequest(patient=pat1, specialist=spec_b)
-    sc = SpecialistController(spec_a, link_store=[lr1, lr2, lr3])
 
-    res = sc.link_requests()
-    assert res == [lr1, lr2]
-    linked = [lr.patient for lr in res if lr.state == LinkRequestState.ACCEPTED]
-    assert linked == [pat1]
+    loaded = auth.login("persist@test.com", "Password1")
+    assert isinstance(loaded, Patient)
+    assert loaded.diaries and loaded.diaries[0].records

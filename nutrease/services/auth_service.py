@@ -27,14 +27,15 @@ from nutrease.utils.database import Database
 
 Role = Literal["PATIENT", "SPECIALIST"]
 
-# Riutilizza un `TypeAdapter` per validare le e-mail senza dover istanziare
-# direttamente ``EmailStr`` (in Pydantic v2 non è più chiamabile come funzione).
+# Usa un `TypeAdapter` per validare le e-mail senza dover istanziare
+# direttamente ``EmailStr`` (in Pydantic v2 non è più chiamabile).
 _email_adapter = TypeAdapter(EmailStr)
 
 
 def _hash(raw_pw: str) -> str:
     """Hash elementare SHA-256; da sostituire con bcrypt in prod."""
     return sha256(raw_pw.encode()).hexdigest()
+
 
 # ---------------------------------------------------------------------------
 # Repository Protocol
@@ -62,23 +63,75 @@ class _DBUserRepo:  # noqa: D101 – interno
 
     def add(self, user: User) -> None:
         # ``EmailStr`` in Pydantic v2 non è più invocabile direttamente.
-        # Usiamo il TypeAdapter condiviso per normalizzare e
-        # validare l'indirizzo e-mail, forzando anche il lowercase
+        # Usiamo il TypeAdapter condiviso per normalizzare e validare
+        # l'indirizzo e-mail, forzando anche il lowercase
         # per garantire unicità.
         user.email = _email_adapter.validate_python(self._key(str(user.email)))
         self._db.save(user)
 
     def get(self, email: str) -> User | None:  # noqa: D401
-        key = self._key(email)
-        for cls in (Patient, Specialist):
-            rows = self._db.search(cls, email=key)
-            if rows:
-                data = rows[0]
-                filtered = dict(
-                    (k, v) for k, v in data.items() if not k.startswith("__")
+        rows = self._db.search(Patient, email=self._key(email))
+        is_patient = True
+        if not rows:
+            rows = self._db.search(Specialist, email=self._key(email))
+            is_patient = False
+        if not rows:
+            return None
+        data = rows[0]
+        filtered = {k: v for k, v in data.items() if not k.startswith("__")}
+        cls: Type[User] = Patient if is_patient else Specialist
+        if is_patient:
+            patient: Patient = cls(**filtered)  # type: ignore[call-arg]
+            self._populate_diaries(patient)
+            return patient
+        return cls(**filtered)
+
+    def _populate_diaries(self, patient: Patient) -> None:
+        from collections import defaultdict
+        from datetime import datetime
+
+        from nutrease.models.diary import DailyDiary, Day
+        from nutrease.models.enums import Severity, Unit
+
+        from nutrease.models.record import (  # isort: skip
+            FoodPortion,
+            MealRecord,
+            SymptomRecord,
+        )
+
+        rows = self._db.search(MealRecord, patient_email=patient.email)
+        rows += self._db.search(SymptomRecord, patient_email=patient.email)
+        records_by_day = defaultdict(list)
+        for row in rows:
+            created_at = datetime.fromisoformat(row["created_at"])
+            if row["__type__"] == "MealRecord":
+                portions = [
+                    FoodPortion(
+                        food_name=p["food_name"],
+                        quantity=p["quantity"],
+                        unit=Unit(p["unit"]),
+                    )
+                    for p in row.get("portions", [])
+                ]
+                rec = MealRecord(
+                    id=row["id"],
+                    created_at=created_at,
+                    portions=portions,
+                    note=row.get("note"),
                 )
-                return cls(**filtered)
-        return None
+            else:
+                rec = SymptomRecord(
+                    id=row["id"],
+                    created_at=created_at,
+                    symptom=row.get("symptom", ""),
+                    severity=Severity(row.get("severity", "NONE")),
+                    note=row.get("note"),
+                )
+            records_by_day[created_at.date()].append(rec)
+
+        for d, recs in records_by_day.items():
+            diary = DailyDiary(day=Day(date=d), patient=patient, records=recs)
+            patient.diaries.append(diary)
 
 
 # ---------------------------------------------------------------------------
@@ -95,6 +148,7 @@ class _InMemoryUserRepo:  # noqa: D101
 
     def get(self, email: str) -> User | None:  # noqa: D401
         return self._store.get(email.lower())
+
 
 
 # ---------------------------------------------------------------------------
