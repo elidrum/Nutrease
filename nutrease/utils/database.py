@@ -10,6 +10,8 @@ from threading import Lock
 from typing import Any, Dict, List, Type, TypeVar, overload
 
 from tinydb import Query, TinyDB
+from nutrease.models.user import User
+
 
 T = TypeVar("T")
 
@@ -56,15 +58,26 @@ class Database:
                 return value.isoformat()
             if isinstance(value, Enum):
                 return value.value
+            if isinstance(value, User):
+                return value.email
             if is_dataclass(value):
+                if hasattr(value, "as_dict"):
+                    return _sanitise(value.as_dict())
                 return _sanitise(asdict(value))
+            if hasattr(value, "as_dict"):
+                return _sanitise(value.as_dict())
             if isinstance(value, dict):
                 return {k: _sanitise(v) for k, v in value.items()}
             if isinstance(value, (list, tuple, set)):
                 return [_sanitise(v) for v in value]
             return value
 
-        raw = asdict(obj) if is_dataclass(obj) else obj.__dict__.copy()
+        if hasattr(obj, "as_dict"):
+            raw = obj.as_dict()
+        elif is_dataclass(obj):
+            raw = asdict(obj)
+        else:
+            raw = obj.__dict__.copy()
         data = _sanitise(raw)
         data["__type__"] = obj.__class__.__name__
         return data

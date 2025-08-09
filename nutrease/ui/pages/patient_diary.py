@@ -188,6 +188,9 @@ def main() -> None:  # noqa: D401
     rec_type = st.radio("Tipo di record", ["Pasto", "Sintomo"], horizontal=True)
     if st.session_state.pop("meal_added", False):
         st.success("Pasto aggiunto")
+        st.session_state.meal_food = ""
+        st.session_state.meal_qty = 0.0
+        st.session_state.meal_unit = [u.value for u in Unit][0]
     if st.session_state.pop("symptom_added", False):
         st.success("Sintomo aggiunto")
 
@@ -205,9 +208,6 @@ def main() -> None:  # noqa: D401
                         [qty],
                         [Unit.from_str(unit_str)],
                     )
-                    st.session_state.meal_food = ""
-                    st.session_state.meal_qty = 0.0
-                    st.session_state.meal_unit = [u.value for u in Unit][0]
                     st.session_state.meal_added = True
                     st.rerun()
                 except ValueError as exc:
