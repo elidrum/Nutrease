@@ -67,6 +67,13 @@ class _DBUserRepo:  # noqa: D101 – interno
         # l'indirizzo e-mail, forzando anche il lowercase
         # per garantire unicità.
         user.email = _email_adapter.validate_python(self._key(str(user.email)))
+        # Se esiste già un utente con la stessa e-mail, solleva errore
+        # senza modificare il database.
+        if (
+            self._db.search(Patient, email=user.email)
+            or self._db.search(Specialist, email=user.email)
+        ):
+            raise ValueError("E-mail già registrata.")
         self._db.save(user)
 
     def get(self, email: str) -> User | None:  # noqa: D401
@@ -144,7 +151,10 @@ class _InMemoryUserRepo:  # noqa: D101
         self._store: Dict[str, User] = {}
 
     def add(self, user: User) -> None:  # noqa: D401
-        self._store[user.email.lower()] = user
+        key = user.email.lower()
+        if key in self._store:
+            raise ValueError("E-mail già registrata.")
+        self._store[key] = user
 
     def get(self, email: str) -> User | None:  # noqa: D401
         return self._store.get(email.lower())

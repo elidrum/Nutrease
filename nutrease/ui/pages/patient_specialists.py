@@ -22,10 +22,16 @@ def main() -> None:  # noqa: D401 – imperative
 
     db = Database.default()
     rows = db.all(Specialist)
-    specialists = [
-        Specialist(**{k: v for k, v in r.items() if not k.startswith("__")})
-        for r in rows
-    ]
+    seen: set[str] = set()
+    specialists: list[Specialist] = []
+    for r in rows:
+        email = r.get("email")
+        if email in seen:
+            continue
+        seen.add(email)
+        specialists.append(
+            Specialist(**{k: v for k, v in r.items() if not k.startswith("__")})
+        )
 
     # --------------------- elenco completo ------------------------------
     with tabs[0]:
