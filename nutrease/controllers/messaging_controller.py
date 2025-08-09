@@ -50,7 +50,17 @@ class MessagingController:
                 sender=u2.email,
                 receiver=u1.email,
             )
-            conv: Sequence[Message] = [Message(**d) for d in raw]
+            conv = [
+                Message(
+                    sender=u1 if d["sender"] == u1.email else u2,
+                    receiver=u2 if d["receiver"] == u2.email else u1,
+                    text=d["text"],
+                    sent_at=datetime.fromisoformat(d["sent_at"])
+                    if isinstance(d["sent_at"], str)
+                    else d["sent_at"],
+                )
+                for d in raw
+            ]
         else:
             conv = [
                 m
