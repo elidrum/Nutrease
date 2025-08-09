@@ -1,2 +1,429 @@
 food_name,unit,grams,lactose,sorbitol,gluten
-Mela,ITEM,100,0,3.5,0
+Pane di grano duro,Grams,100.0,0.0,0.0,9.0
+Pane di grano duro,Item,100.0,0.0,0.0,9.0
+Pasta di semola di grano duro,Grams,100.0,0.0,0.0,9.375
+Pasta di semola di grano duro,Item,80.0,0.0,0.0,7.5
+Pizza Margherita,Grams,100.0,1.25,0.0,5.417
+Pizza Margherita,Slice,120.0,1.5,0.0,6.5
+Focaccia,Grams,100.0,0.0,0.0,8.5
+Focaccia,Item,100.0,0.0,0.0,8.5
+Couscous,Grams,100.0,0.0,0.0,3.5
+Couscous,Item,100.0,0.0,0.0,3.5
+Polenta,Grams,100.0,0.0,0.0,0.0
+Polenta,Item,100.0,0.0,0.0,0.0
+Risotto alla milanese,Grams,100.0,0.5,0.0,0.0
+Risotto alla milanese,Item,150.0,0.75,0.0,0.0
+Lasagne alla bolognese,Grams,100.0,1.75,0.0,5.5
+Lasagne alla bolognese,Item,200.0,3.5,0.0,11.0
+Gnocchi di patate,Cup,240.0,0.0,0.0,6.4
+Gnocchi di patate,Glass,200.0,0.0,0.0,5.333
+Gnocchi di patate,Grams,100.0,0.0,0.0,2.667
+Gnocchi di patate,Item,150.0,0.0,0.0,4.0
+Gnocchi di patate,Liters,1000.0,0.0,0.0,26.667
+Parmigiana di melanzane,Grams,100.0,1.25,0.0,2.0
+Parmigiana di melanzane,Item,200.0,2.5,0.0,4.0
+Mozzarella vaccina,Grams,100.0,2.5,0.0,0.0
+Mozzarella vaccina,Item,100.0,2.5,0.0,0.0
+Feta,Grams,100.0,1.5,0.0,0.0
+Feta,Item,100.0,1.5,0.0,0.0
+Yogurt bianco intero,Cup,240.0,8.64,0.0,0.0
+Yogurt bianco intero,Glass,200.0,7.2,0.0,0.0
+Yogurt bianco intero,Grams,100.0,3.6,0.0,0.0
+Yogurt bianco intero,Item,125.0,4.5,0.0,0.0
+Yogurt bianco intero,Liters,1000.0,36.0,0.0,0.0
+Gelato artigianale,Grams,100.0,4.5,0.0,1.0
+Gelato artigianale,Item,100.0,4.5,0.0,1.0
+Plumcake,Grams,100.0,1.0,0.0,10.0
+Plumcake,Item,100.0,1.0,0.0,10.0
+Bastoncini Findus,Grams,100.0,0.0,0.0,7.0
+Bastoncini Findus,Item,100.0,0.0,0.0,7.0
+Tzatziki,Grams,100.0,2.5,0.0,0.0
+Tzatziki,Item,100.0,2.5,0.0,0.0
+Tzatziki,Spoon,15.0,0.375,0.0,0.0
+Hummus,Grams,100.0,0.0,0.0,0.0
+Hummus,Item,100.0,0.0,0.0,0.0
+Hummus,Spoon,15.0,0.0,0.0,0.0
+Falafel,Grams,100.0,0.0,0.0,1.0
+Falafel,Item,100.0,0.0,0.0,1.0
+Pane Pita,Grams,100.0,0.0,0.0,7.5
+Pane Pita,Item,60.0,0.0,0.0,4.5
+Insalata greca,Grams,100.0,1.0,0.0,0.0
+Insalata greca,Item,150.0,1.5,0.0,0.0
+Olive,Grams,100.0,0.0,0.0,0.0
+Olive,Item,50.0,0.0,0.0,0.0
+Caponata,Grams,100.0,0.0,0.0,0.0
+Caponata,Item,150.0,0.0,0.0,0.0
+Bruschetta al pomodoro,Grams,100.0,0.0,0.0,7.0
+Bruschetta al pomodoro,Slice,50.0,0.0,0.0,3.5
+Tiramisù,Grams,100.0,3.667,0.0,2.0
+Tiramisù,Item,150.0,5.5,0.0,3.0
+Crostata di frutta,Grams,100.0,1.5,0.0,5.0
+Crostata di frutta,Item,100.0,1.5,0.0,5.0
+Pane integrale,Grams,100.0,0.0,0.0,11.0
+Pane integrale,Item,100.0,0.0,0.0,11.0
+Pane di segale,Grams,100.0,0.0,0.0,6.5
+Pane di segale,Item,100.0,0.0,0.0,6.5
+Piadina romagnola,Grams,100.0,0.5,0.0,7.5
+Piadina romagnola,Item,100.0,0.5,0.0,7.5
+Pane Carasau,Grams,100.0,0.0,0.0,9.0
+Pane Carasau,Item,50.0,0.0,0.0,4.5
+Couscous di verdure,Grams,100.0,0.0,0.0,3.5
+Couscous di verdure,Item,200.0,0.0,0.0,7.0
+Gnocchi di semolino,Grams,100.0,1.5,0.0,5.5
+Gnocchi di semolino,Item,100.0,1.5,0.0,5.5
+Frutta secca,Grams,100.0,0.0,0.0,0.0
+Frutta secca,Item,30.0,0.0,0.0,0.0
+Vino rosso,Cup,240.0,0.0,0.0,0.0
+Vino rosso,Glass,200.0,0.0,0.0,0.0
+Vino rosso,Grams,100.0,0.0,0.0,0.0
+Vino rosso,Item,150.0,0.0,0.0,0.0
+Vino rosso,Liters,1000.0,0.0,0.0,0.0
+Miele,Grams,100.0,0.0,0.0,0.0
+Miele,Item,20.0,0.0,0.0,0.0
+Cioccolato fondente,Cup,240.0,0.0,0.0,0.0
+Cioccolato fondente,Glass,200.0,0.0,0.0,0.0
+Cioccolato fondente,Grams,100.0,0.0,0.0,0.0
+Cioccolato fondente,Item,30.0,0.0,0.0,0.0
+Cioccolato fondente,Liters,1000.0,0.0,0.0,0.0
+Latte vaccino intero,Cup,240.0,11.4,0.0,0.0
+Latte vaccino intero,Glass,200.0,9.5,0.0,0.0
+Latte vaccino intero,Grams,100.0,4.75,0.0,0.0
+Latte vaccino intero,Item,200.0,9.5,0.0,0.0
+Latte vaccino intero,Liters,1000.0,47.5,0.0,0.0
+Latte di capra,Cup,240.0,10.2,0.0,0.0
+Latte di capra,Glass,200.0,8.5,0.0,0.0
+Latte di capra,Grams,100.0,4.25,0.0,0.0
+Latte di capra,Item,200.0,8.5,0.0,0.0
+Latte di capra,Liters,1000.0,42.5,0.0,0.0
+Fiocchi di latte,Cup,240.0,6.0,0.0,0.0
+Fiocchi di latte,Glass,200.0,5.0,0.0,0.0
+Fiocchi di latte,Grams,100.0,2.5,0.0,0.0
+Fiocchi di latte,Item,100.0,2.5,0.0,0.0
+Fiocchi di latte,Liters,1000.0,25.0,0.0,0.0
+Scamorza,Grams,100.0,1.0,0.0,0.0
+Scamorza,Item,100.0,1.0,0.0,0.0
+Ricotta di mucca,Grams,100.0,2.5,0.0,0.0
+Ricotta di mucca,Item,100.0,2.5,0.0,0.0
+Formaggio Grana Padano o Parmigiano Reggiano,Grams,100.0,0.833,0.0,0.0
+Formaggio Grana Padano o Parmigiano Reggiano,Item,30.0,0.25,0.0,0.0
+Fichi freschi,Grams,100.0,0.0,2.0,0.0
+Fichi freschi,Item,100.0,0.0,2.0,0.0
+Prugne secche,Grams,100.0,0.0,15.0,0.0
+Prugne secche,Item,100.0,0.0,15.0,0.0
+Arancia,Grams,100.0,0.0,0.2,0.0
+Arancia,Item,100.0,0.0,0.2,0.0
+Mela,Grams,100.0,0.0,0.8,0.0
+Mela,Item,100.0,0.0,0.8,0.0
+Pera,Grams,100.0,0.0,2.0,0.0
+Pera,Item,100.0,0.0,2.0,0.0
+Pera,Slice,15.0,0.0,0.3,0.0
+Pesca,Grams,100.0,0.0,1.0,0.0
+Pesca,Item,100.0,0.0,1.0,0.0
+Albicocca,Grams,100.0,0.0,0.4,0.0
+Albicocca,Item,100.0,0.0,0.4,0.0
+Uva,Grams,100.0,0.0,0.25,0.0
+Uva,Item,100.0,0.0,0.25,0.0
+Anguria,Grams,100.0,0.0,0.2,0.0
+Anguria,Item,100.0,0.0,0.2,0.0
+Melone,Grams,100.0,0.0,0.15,0.0
+Melone,Item,100.0,0.0,0.15,0.0
+Pomodori,Grams,100.0,0.0,0.1,0.0
+Pomodori,Item,100.0,0.0,0.1,0.0
+Zucchine,Grams,100.0,0.0,0.0,0.0
+Zucchine,Item,100.0,0.0,0.0,0.0
+Peperoni,Grams,100.0,0.0,0.1,0.0
+Peperoni,Item,100.0,0.0,0.1,0.0
+Melanzane,Grams,100.0,0.0,0.0,0.0
+Melanzane,Item,100.0,0.0,0.0,0.0
+Patate,Cup,240.0,0.0,0.0,0.0
+Patate,Glass,200.0,0.0,0.0,0.0
+Patate,Grams,100.0,0.0,0.0,0.0
+Patate,Item,100.0,0.0,0.0,0.0
+Patate,Liters,1000.0,0.0,0.0,0.0
+Cipolle,Grams,100.0,0.0,0.2,0.0
+Cipolle,Item,100.0,0.0,0.2,0.0
+Aglio,Clove,5.0,0.0,0.0,0.0
+Aglio,Grams,100.0,0.0,0.0,0.0
+Aglio,Item,5.0,0.0,0.0,0.0
+Cannolo siciliano,Grams,100.0,3.75,0.0,6.25
+Cannolo siciliano,Slice,80.0,3.0,0.0,5.0
+Cassata siciliana,Grams,100.0,4.0,0.0,5.5
+Cassata siciliana,Item,100.0,4.0,0.0,5.5
+Pastiera napoletana,Grams,100.0,3.0,0.0,4.5
+Pastiera napoletana,Item,100.0,3.0,0.0,4.5
+Babà,Grams,100.0,0.625,0.0,5.625
+Babà,Item,80.0,0.5,0.0,4.5
+Panna cotta,Grams,100.0,4.0,0.0,0.0
+Panna cotta,Item,100.0,4.0,0.0,0.0
+Panna cotta,Spoon,15.0,0.6,0.0,0.0
+Cantucci toscani,Grams,100.0,2.5,0.0,8.333
+Cantucci toscani,Item,30.0,0.75,0.0,2.5
+Panettone,Grams,100.0,2.5,0.0,6.5
+Panettone,Item,100.0,2.5,0.0,6.5
+Colomba pasquale,Grams,100.0,2.5,0.0,6.5
+Colomba pasquale,Item,100.0,2.5,0.0,6.5
+Torrone,Grams,100.0,0.833,0.0,0.0
+Torrone,Item,30.0,0.25,0.0,0.0
+Crema catalana,Grams,100.0,3.5,0.0,0.0
+Crema catalana,Item,100.0,3.5,0.0,0.0
+Crema catalana,Spoon,15.0,0.525,0.0,0.0
+Crème brûlée,Grams,100.0,3.5,0.0,0.0
+Crème brûlée,Item,100.0,3.5,0.0,0.0
+Kourabiedes,Grams,100.0,5.0,0.0,8.333
+Kourabiedes,Item,30.0,1.5,0.0,2.5
+Baklava,Grams,100.0,1.0,0.0,7.0
+Baklava,Slice,50.0,0.5,0.0,3.5
+Spanakopita,Grams,100.0,1.5,0.0,5.0
+Spanakopita,Slice,100.0,1.5,0.0,5.0
+Briam / Ratatouille,Grams,100.0,0.0,0.0,0.0
+Briam / Ratatouille,Item,200.0,0.0,0.0,0.0
+Minestrone di verdure,Grams,100.0,0.0,0.05,0.0
+Minestrone di verdure,Item,200.0,0.0,0.1,0.0
+Zuppa di legumi,Cup,240.0,0.0,0.0,0.0
+Zuppa di legumi,Glass,200.0,0.0,0.0,0.0
+Zuppa di legumi,Grams,100.0,0.0,0.0,0.0
+Zuppa di legumi,Item,200.0,0.0,0.0,0.0
+Zuppa di legumi,Liters,1000.0,0.0,0.0,0.0
+Gelato alla frutta,Grams,100.0,3.0,0.5,0.5
+Gelato alla frutta,Item,100.0,3.0,0.5,0.5
+Moussaka,Grams,100.0,2.0,0.0,2.667
+Moussaka,Item,150.0,3.0,0.0,4.0
+Pastitsio,Grams,100.0,2.667,0.0,5.333
+Pastitsio,Item,150.0,4.0,0.0,8.0
+Dolmades,Grams,100.0,0.0,0.0,0.0
+Dolmades,Item,100.0,0.0,0.0,0.0
+Mjadra,Grams,100.0,0.0,0.0,0.0
+Mjadra,Item,200.0,0.0,0.0,0.0
+Tabulé / Tabbouleh,Grams,100.0,0.0,0.0,2.5
+Tabulé / Tabbouleh,Item,100.0,0.0,0.0,2.5
+Kibbeh,Grams,100.0,0.0,0.0,5.0
+Kibbeh,Item,100.0,0.0,0.0,5.0
+Paella valenciana,Grams,100.0,0.0,0.0,0.0
+Paella valenciana,Item,200.0,0.0,0.0,0.0
+Tortilla de patatas,Grams,100.0,0.0,0.0,0.0
+Tortilla de patatas,Item,150.0,0.0,0.0,0.0
+Gazpacho,Cup,240.0,0.0,0.12,0.0
+Gazpacho,Glass,200.0,0.0,0.1,0.0
+Gazpacho,Grams,100.0,0.0,0.05,0.0
+Gazpacho,Item,200.0,0.0,0.1,0.0
+Gazpacho,Liters,1000.0,0.0,0.5,0.0
+Salmorejo,Cup,240.0,0.0,0.12,3.0
+Salmorejo,Glass,200.0,0.0,0.1,2.5
+Salmorejo,Grams,100.0,0.0,0.05,1.25
+Salmorejo,Item,200.0,0.0,0.1,2.5
+Salmorejo,Liters,1000.0,0.0,0.5,12.5
+Pissaladière,Grams,100.0,0.0,0.1,5.5
+Pissaladière,Slice,100.0,0.0,0.1,5.5
+Salade niçoise,Grams,100.0,0.0,0.0,0.0
+Salade niçoise,Item,150.0,0.0,0.0,0.0
+Tapenade,Grams,100.0,0.0,0.0,0.0
+Tapenade,Item,30.0,0.0,0.0,0.0
+Tapenade,Spoon,15.0,0.0,0.0,0.0
+Pita gyros,Grams,100.0,0.75,0.0,3.5
+Pita gyros,Slice,200.0,1.5,0.0,7.0
+Shawarma,Grams,100.0,0.25,0.0,3.5
+Shawarma,Item,200.0,0.5,0.0,7.0
+Torta al testo,Grams,100.0,0.0,0.0,7.5
+Torta al testo,Item,100.0,0.0,0.0,7.5
+Provolone,Grams,100.0,0.5,0.0,0.0
+Provolone,Item,100.0,0.5,0.0,0.0
+Pecorino,Grams,100.0,0.333,0.0,0.0
+Pecorino,Item,30.0,0.1,0.0,0.0
+Burrata,Grams,100.0,3.0,0.0,0.0
+Burrata,Item,100.0,3.0,0.0,0.0
+Bresaola,Grams,100.0,0.0,0.0,0.0
+Bresaola,Item,50.0,0.0,0.0,0.0
+Prosciutto crudo,Grams,100.0,0.0,0.0,0.0
+Prosciutto crudo,Item,50.0,0.0,0.0,0.0
+Salame,Grams,100.0,1.0,0.0,1.0
+Salame,Item,50.0,0.5,0.0,0.5
+Lupini,Grams,100.0,0.0,0.0,0.0
+Lupini,Item,100.0,0.0,0.0,0.0
+Cozze alla marinara,Grams,100.0,0.0,0.0,0.0
+Cozze alla marinara,Item,200.0,0.0,0.0,0.0
+Polpo alla gallega,Grams,100.0,0.0,0.0,0.0
+Polpo alla gallega,Item,150.0,0.0,0.0,0.0
+Baccalà mantecato,Grams,100.0,0.5,0.0,0.5
+Baccalà mantecato,Spoon,15.0,0.075,0.0,0.075
+Focaccia di Recco,Grams,100.0,2.5,0.0,7.5
+Focaccia di Recco,Item,100.0,2.5,0.0,7.5
+Melanzane ripiene,Grams,100.0,0.667,0.0,2.667
+Melanzane ripiene,Item,150.0,1.0,0.0,4.0
+Panelle,Grams,100.0,0.0,0.0,0.0
+Panelle,Item,100.0,0.0,0.0,0.0
+Minestra maritata,Cup,240.0,0.0,0.0,1.2
+Minestra maritata,Glass,200.0,0.0,0.0,1.0
+Minestra maritata,Grams,100.0,0.0,0.0,0.5
+Minestra maritata,Liters,1000.0,0.0,0.0,5.0
+Ribollita,Grams,100.0,0.0,0.05,1.5
+Ribollita,Item,200.0,0.0,0.1,3.0
+Cacciucco,Grams,100.0,0.0,0.0,0.0
+Cacciucco,Item,200.0,0.0,0.0,0.0
+Bagna càuda,Cup,240.0,0.0,0.0,0.0
+Bagna càuda,Glass,200.0,0.0,0.0,0.0
+Bagna càuda,Grams,100.0,0.0,0.0,0.0
+Bagna càuda,Liters,1000.0,0.0,0.0,0.0
+Bagna càuda,Spoon,15.0,0.0,0.0,0.0
+Bollito misto,Grams,100.0,0.0,0.0,0.0
+Bollito misto,Item,200.0,0.0,0.0,0.0
+Pesto alla genovese,Grams,100.0,1.667,0.0,0.0
+Pesto alla genovese,Spoon,15.0,0.25,0.0,0.0
+Orecchiette con cime di rapa,Cup,240.0,0.0,0.0,14.0
+Orecchiette con cime di rapa,Glass,200.0,0.0,0.0,11.667
+Orecchiette con cime di rapa,Grams,100.0,0.0,0.0,5.833
+Orecchiette con cime di rapa,Liters,1000.0,0.0,0.0,58.333
+Arancini/Arancine,Grams,100.0,0.833,0.0,3.333
+Arancini/Arancine,Slice,120.0,1.0,0.0,4.0
+Timballo abruzzese,Grams,100.0,2.0,0.0,5.5
+Timballo abruzzese,Item,200.0,4.0,0.0,11.0
+Pollo alla cacciatora,Grams,100.0,0.0,0.05,0.0
+Pollo alla cacciatora,Item,200.0,0.0,0.1,0.0
+Ossobuco alla milanese,Grams,100.0,0.0,0.0,0.25
+Ossobuco alla milanese,Item,200.0,0.0,0.0,0.5
+Casoncelli alla bergamasca,Grams,100.0,1.0,0.0,7.333
+Casoncelli alla bergamasca,Item,150.0,1.5,0.0,11.0
+Canederli in brodo,Cup,240.0,2.182,0.0,15.273
+Canederli in brodo,Glass,200.0,1.818,0.0,12.727
+Canederli in brodo,Grams,100.0,0.909,0.0,6.364
+Canederli in brodo,Liters,1000.0,9.091,0.0,63.636
+Canederli in brodo,Slice,110.0,1.0,0.0,7.0
+Passatelli in brodo,Cup,240.0,3.6,0.0,16.8
+Passatelli in brodo,Glass,200.0,3.0,0.0,14.0
+Passatelli in brodo,Grams,100.0,1.5,0.0,7.0
+Passatelli in brodo,Liters,1000.0,15.0,0.0,70.0
+Tortelli di zucca,Grams,100.0,1.0,0.0,7.333
+Tortelli di zucca,Item,150.0,1.5,0.0,11.0
+Gnocchi alla sorrentina,Grams,100.0,1.5,0.0,3.5
+Gnocchi alla sorrentina,Item,200.0,3.0,0.0,7.0
+Sarde in saor,Grams,100.0,0.0,0.083,0.833
+Sarde in saor,Item,120.0,0.0,0.1,1.0
+Baccalà alla vicentina,Grams,100.0,1.667,0.0,0.333
+Baccalà alla vicentina,Item,150.0,2.5,0.0,0.5
+Brasato al Barolo,Grams,100.0,0.0,0.05,0.25
+Brasato al Barolo,Item,200.0,0.0,0.1,0.5
+Torta Caprese,Grams,100.0,1.5,0.0,0.0
+Torta Caprese,Item,100.0,1.5,0.0,0.0
+Torta della nonna,Grams,100.0,3.0,0.0,5.0
+Torta della nonna,Item,100.0,3.0,0.0,5.0
+Fette biscottate,Cup,240.0,4.0,0.0,28.0
+Fette biscottate,Glass,200.0,3.333,0.0,23.333
+Fette biscottate,Grams,100.0,1.667,0.0,11.667
+Fette biscottate,Liters,1000.0,16.667,0.0,116.667
+Crackers classici,Grams,100.0,1.667,0.0,11.667
+Crackers classici,Item,30.0,0.5,0.0,3.5
+Grissini,Grams,100.0,1.667,0.0,11.667
+Grissini,Slice,30.0,0.5,0.0,3.5
+Taralli,Grams,100.0,1.667,0.0,11.667
+Taralli,Item,30.0,0.5,0.0,3.5
+Biscotti secchi,Grams,100.0,1.667,0.0,11.667
+Biscotti secchi,Item,30.0,0.5,0.0,3.5
+Cereali da colazione a base di mais,Grams,100.0,0.0,0.0,3.333
+Cereali da colazione a base di mais,Item,30.0,0.0,0.0,1.0
+Cereali integrali/muesli,Grams,100.0,0.0,1.667,6.667
+Cereali integrali/muesli,Item,30.0,0.0,0.5,2.0
+Uova sode,Grams,100.0,0.0,0.0,0.0
+Uova sode,Item,100.0,0.0,0.0,0.0
+Tonno in scatola al naturale,Grams,100.0,0.0,0.0,0.0
+Tonno in scatola al naturale,Item,80.0,0.0,0.0,0.0
+Prosciutto cotto,Grams,100.0,1.0,0.0,1.0
+Prosciutto cotto,Item,50.0,0.5,0.0,0.5
+Mortadella,Grams,100.0,1.0,0.0,1.0
+Mortadella,Item,50.0,0.5,0.0,0.5
+Latte di soia,Cup,240.0,0.0,0.0,0.0
+Latte di soia,Glass,200.0,0.0,0.0,0.0
+Latte di soia,Grams,100.0,0.0,0.0,0.0
+Latte di soia,Liters,1000.0,0.0,0.0,0.0
+Caffè espresso,Cup,240.0,0.0,0.0,0.0
+Caffè espresso,Glass,200.0,0.0,0.0,0.0
+Caffè espresso,Grams,100.0,0.0,0.0,0.0
+Caffè espresso,Liters,1000.0,0.0,0.0,0.0
+Tè,Cup,240.0,0.0,0.0,0.0
+Tè,Glass,200.0,0.0,0.0,0.0
+Tè,Grams,100.0,0.0,0.0,0.0
+Tè,Liters,1000.0,0.0,0.0,0.0
+Marmellata/Confettura,Grams,100.0,0.0,2.5,0.0
+Marmellata/Confettura,Spoon,15.0,0.0,0.375,0.0
+Seitan,Grams,100.0,0.0,0.0,22.5
+Seitan,Item,100.0,0.0,0.0,22.5
+Farina Manitoba,Grams,100.0,0.0,0.0,12.0
+Farina Manitoba,Item,100.0,0.0,0.0,12.0
+Latte condensato,Cup,240.0,26.4,0.0,0.0
+Latte condensato,Glass,200.0,22.0,0.0,0.0
+Latte condensato,Grams,100.0,11.0,0.0,0.0
+Latte condensato,Liters,1000.0,110.0,0.0,0.0
+Latte in polvere,Cup,240.0,102.0,0.0,0.0
+Latte in polvere,Glass,200.0,85.0,0.0,0.0
+Latte in polvere,Grams,100.0,42.5,0.0,0.0
+Latte in polvere,Liters,1000.0,425.0,0.0,0.0
+Gelato fiordilatte,Cup,240.0,12.0,0.0,1.2
+Gelato fiordilatte,Glass,200.0,10.0,0.0,1.0
+Gelato fiordilatte,Grams,100.0,5.0,0.0,0.5
+Gelato fiordilatte,Liters,1000.0,50.0,0.0,5.0
+Succo di prugna,Cup,240.0,0.0,8.4,0.0
+Succo di prugna,Glass,200.0,0.0,7.0,0.0
+Succo di prugna,Grams,100.0,0.0,3.5,0.0
+Succo di prugna,Liters,1000.0,0.0,35.0,0.0
+Albicocche secche,Grams,100.0,0.0,7.5,0.0
+Albicocche secche,Item,100.0,0.0,7.5,0.0
+Mele essiccate,Cup,240.0,0.0,12.0,0.0
+Mele essiccate,Glass,200.0,0.0,10.0,0.0
+Mele essiccate,Grams,100.0,0.0,5.0,0.0
+Mele essiccate,Liters,1000.0,0.0,50.0,0.0
+Caramelle sugar-free con sorbitolo,Grams,100.0,0.0,155.556,0.0
+Caramelle sugar-free con sorbitolo,Item,30.0,0.0,46.667,0.0
+Gomme da masticare sugar-free,Grams,100.0,0.0,60.0,0.0
+Gomme da masticare sugar-free,Item,10.0,0.0,6.0,0.0
+Glutine di frumento,Grams,100.0,0.0,0.0,77.5
+Glutine di frumento,Item,100.0,0.0,0.0,77.5
+Pane proteico con glutine aggiunto,Grams,100.0,0.5,0.0,17.5
+Pane proteico con glutine aggiunto,Item,100.0,0.5,0.0,17.5
+Mascarpone,Grams,100.0,3.5,0.0,0.0
+Mascarpone,Item,100.0,3.5,0.0,0.0
+Formaggio fresco spalmabile,Grams,100.0,4.0,0.0,0.0
+Formaggio fresco spalmabile,Spoon,15.0,0.6,0.0,0.0
+Gelato alla crema,Grams,100.0,5.5,0.0,0.5
+Gelato alla crema,Spoon,15.0,0.825,0.0,0.075
+Dulce de leche,Grams,100.0,9.5,0.0,0.0
+Dulce de leche,Spoon,15.0,1.425,0.0,0.0
+Pere secche,Grams,100.0,0.0,8.5,0.0
+Pere secche,Item,100.0,0.0,8.5,0.0
+Pesche essiccate,Cup,240.0,0.0,15.6,0.0
+Pesche essiccate,Glass,200.0,0.0,13.0,0.0
+Pesche essiccate,Grams,100.0,0.0,6.5,0.0
+Pesche essiccate,Liters,1000.0,0.0,65.0,0.0
+Cioccolato sugar-free con polialcoli,Grams,100.0,3.333,25.0,0.0
+Cioccolato sugar-free con polialcoli,Item,30.0,1.0,7.5,0.0
+Sciroppo di sorbitolo,Cup,240.0,0.0,240.0,0.0
+Sciroppo di sorbitolo,Glass,200.0,0.0,200.0,0.0
+Sciroppo di sorbitolo,Grams,100.0,0.0,100.0,0.0
+Sciroppo di sorbitolo,Liters,1000.0,0.0,1000.0,0.0
+Pane di farro integrale,Grams,100.0,0.0,0.0,9.0
+Pane di farro integrale,Item,100.0,0.0,0.0,9.0
+Yogurt greco intero,Cup,240.0,8.8,0.0,0.0
+Yogurt greco intero,Glass,200.0,7.333,0.0,0.0
+Yogurt greco intero,Grams,100.0,3.667,0.0,0.0
+Yogurt greco intero,Liters,1000.0,36.667,0.0,0.0
+Stracchino,Grams,100.0,3.5,0.0,0.0
+Stracchino,Item,100.0,3.5,0.0,0.0
+Taleggio,Grams,100.0,2.5,0.0,0.0
+Taleggio,Item,100.0,2.5,0.0,0.0
+Composta di mele,Grams,100.0,0.0,3.0,0.0
+Composta di mele,Spoon,15.0,0.0,0.45,0.0
+Pere sciroppate,Cup,240.0,0.0,14.4,0.0
+Pere sciroppate,Glass,200.0,0.0,12.0,0.0
+Pere sciroppate,Grams,100.0,0.0,6.0,0.0
+Pere sciroppate,Liters,1000.0,0.0,60.0,0.0
+Succo di pera concentrato,Cup,240.0,0.0,9.6,0.0
+Succo di pera concentrato,Glass,200.0,0.0,8.0,0.0
+Succo di pera concentrato,Grams,100.0,0.0,4.0,0.0
+Succo di pera concentrato,Liters,1000.0,0.0,40.0,0.0
+Concentrato di prugne,Grams,100.0,0.0,25.0,0.0
+Concentrato di prugne,Item,20.0,0.0,5.0,0.0
+Kiwi,Grams,100.0,0.0,1.4,0.0
+Kiwi,Item,100.0,0.0,1.4,0.0
+Barrette proteiche con glutine aggiunto,Cup,240.0,4.8,12.0,31.2
+Barrette proteiche con glutine aggiunto,Glass,200.0,4.0,10.0,26.0
+Barrette proteiche con glutine aggiunto,Grams,100.0,2.0,5.0,13.0
+Barrette proteiche con glutine aggiunto,Liters,1000.0,20.0,50.0,130.0
+Formaggino fuso / Sottiletta,Grams,100.0,5.0,0.0,0.0
+Formaggino fuso / Sottiletta,Item,100.0,5.0,0.0,0.0

@@ -7,6 +7,72 @@
       "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
       "alarms": [],
       "__type__": "Patient"
+    },
+    "5": {
+      "email": "elidrum04@gmail.com",
+      "name": "Elia",
+      "surname": "Sampaolesi",
+      "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+      "alarms": [],
+      "__type__": "Patient"
+    },
+    "6": {
+      "email": "sergioridolfi@gmail.com",
+      "name": "Sergio",
+      "surname": "Ridolfi",
+      "password": "6aee45787f116f28ff205b415621da1ce65185f91c627a7489eccc9e09db3010",
+      "alarms": [],
+      "__type__": "Patient"
+    },
+    "7": {
+      "email": "elidrum04@gmail.com",
+      "name": "Elia",
+      "surname": "",
+      "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+      "alarms": [],
+      "__type__": "Patient"
+    }
+  },
+  "MealRecord": {
+    "1": {
+      "id": 1,
+      "created_at": "2025-08-09T18:30:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "elidrum04@gmail.com",
+      "portions": [
+        {
+          "food_name": "mela",
+          "quantity": 4.0,
+          "unit": "ITEM"
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "2": {
+      "id": 2,
+      "created_at": "2025-08-07T18:30:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "elidrum04@gmail.com",
+      "portions": [
+        {
+          "food_name": "pera",
+          "quantity": 4.0,
+          "unit": "SLICE"
+        }
+      ],
+      "__type__": "MealRecord"
+    }
+  },
+  "Specialist": {
+    "1": {
+      "email": "sergioridolfi2@gmail.com",
+      "name": "Sergio",
+      "surname": "Ridolfi",
+      "password": "6aee45787f116f28ff205b415621da1ce65185f91c627a7489eccc9e09db3010",
+      "category": "NUTRITIONIST",
+      "__type__": "Specialist"
     }
   }
 }

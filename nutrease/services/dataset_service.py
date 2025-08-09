@@ -17,10 +17,11 @@ The default singleton path is read from env‐var ``NUTREASE_DATASET_PATH`` or
 falls back to ``data/alimentazione_demo.csv`` (created by *scripts.bootstrap*).
 """
 
+import os
+from difflib import get_close_matches
 from functools import lru_cache
 from pathlib import Path
 from typing import ClassVar, Dict, Mapping
-import os
 
 import pandas as pd
 
@@ -57,17 +58,16 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
     # Public API
     # ---------------------------------------------------------------------
 
-    @lru_cache(maxsize=None)
+    @lru_cache(maxsize=None)  # noqa: B019
     def lookup(self, food_name: str) -> Mapping[str, float]:  # noqa: D401 – imperative
-        """Return a *copy* of nutrient dict for *food_name* (case‑insensitive)."""
-        key = food_name.lower()
-        try:
-            return dict(self._nutrients[key])  # shallow copy to avoid mutation
-        except KeyError as err:
-            raise KeyError(f"Alimento '{food_name}' non presente nel dataset.") from err
+        """Return nutrients per gram for *food_name* (fuzzy match)."""
+        key = self._match_food(food_name)
+        return dict(self._nutrients[key])  # shallow copy to avoid mutation
 
-    @lru_cache(maxsize=None)
-    def get_grams_per_unit(self, food_name: str, unit: Unit) -> float:  # noqa: D401 – imperative
+    @lru_cache(maxsize=None)  # noqa: B019
+    def get_grams_per_unit(
+        self, food_name: str, unit: Unit
+    ) -> float:  # noqa: D401 – imperative
         """Return conversion factor grams per *unit* for *food_name*.
 
         Raises
@@ -75,7 +75,7 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
         KeyError
             If the food or the specific unit is missing in the dataset.
         """
-        key = food_name.lower()
+        key = self._match_food(food_name)
         try:
             unit_map = self._unit_grams[key]
             return unit_map[unit]
@@ -101,11 +101,14 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
             if not food:
                 continue  # skip malformed row
 
-            # 1) nutrient amounts -------------------------------------------------
+            grams = float(row.get("grams", 1.0)) or 1.0
+
+            # 1) nutrient amounts per gram -------------------------------------
             nutrients.setdefault(food, {})
             for n in Nutrient:
-                if n.name.lower() in row and row[n.name.lower()] != "":
-                    nutrients[food][n.name] = float(row[n.name.lower()])
+                col = n.name.lower()
+                if col in row and row[col] != "":
+                    nutrients[food][col] = float(row[col]) / grams
 
             # 2) per‑unit grams ---------------------------------------------------
             unit_val = str(row.get("unit", "GRAMS")).strip().upper() or "GRAMS"
@@ -113,7 +116,6 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
                 unit = Unit.from_str(unit_val)
             except ValueError:
                 unit = Unit.GRAMS  # fallback safe default
-            grams = float(row.get("grams", 1.0))
             unit_grams.setdefault(food, {})[unit] = grams
 
         self._nutrients = nutrients  # type: ignore[attr-defined]
@@ -128,4 +130,16 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
 
     def __repr__(self) -> str:  # noqa: D401 – imperative
         return f"<AlimentazioneDataset foods={len(self)} path='{self.csv_path.name}'>"
-    
+
+    # ------------------------------------------------------------------
+    # Internal helpers
+    # ------------------------------------------------------------------
+    def _match_food(self, food_name: str) -> str:
+        """Return normalised key matching *food_name* with fuzzy fallback."""
+        key = food_name.lower()
+        if key in self._nutrients:
+            return key
+        matches = get_close_matches(key, self._nutrients.keys(), n=1, cutoff=0.6)
+        if matches:
+            return matches[0]
+        raise KeyError(f"Alimento '{food_name}' non presente nel dataset.")
