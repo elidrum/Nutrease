@@ -1,15 +1,8 @@
 from __future__ import annotations
 
-"""Nutrease – entry point Streamlit multi‑page app.
-
-* Mostra un menù laterale dinamico basato sul **ruolo** dell’utente loggato.
-* Reindirizza alla pagina *Login* se l’utente non è autenticato.
-* Importa on‑demand le pagine (evita costi di import inutili).
-"""
-
 import importlib
 from types import ModuleType
-from typing import Callable, Dict
+from typing import Dict
 
 import streamlit as st
 
@@ -42,7 +35,7 @@ def _render_page(module_path: str) -> None:
 user = st.session_state.get("current_user")
 role = None
 if user:
-    from nutrease.models.user import Patient, Specialist  # local import
+    from nutrease.models.user import Patient # local import
 
     role = "patient" if isinstance(user, Patient) else "specialist"
 
@@ -61,13 +54,16 @@ else:
     if role == "patient":
         items = {
             "Diario": "nutrease.ui.pages.patient_diary",
+            "Specialisti": "nutrease.ui.pages.patient_specialists",
             "Chat": "nutrease.ui.pages.messaging",
+            "Profilo": "nutrease.ui.pages.profile",
             "Logout": None,
         }
     else:  # specialist
         items = {
             "Dashboard": "nutrease.ui.pages.specialist_dashboard",
             "Chat": "nutrease.ui.pages.messaging",
+            "Profilo": "nutrease.ui.pages.profile",
             "Logout": None,
         }
 

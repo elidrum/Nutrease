@@ -17,7 +17,8 @@ import streamlit as st
 from nutrease.models.communication import LinkRequest, LinkRequestState
 from nutrease.models.enums import Nutrient, RecordType
 from nutrease.models.record import MealRecord, SymptomRecord
-from nutrease.models.user import Patient, Specialist
+from nutrease.models.user import Patient
+from nutrease.utils.database import Database
 
 
 # ---------------------------------------------------------------------------
@@ -78,6 +79,27 @@ def main() -> None:  # noqa: D401 – imperative name by design
         }
         sel_label = st.selectbox("Seleziona paziente", list(patient_options.keys()))
         selected_patient: Patient = patient_options[sel_label]
+
+        # --- scheda paziente / scollega ---------------------------------
+        with st.expander("Scheda paziente", expanded=True):
+            st.text_area(
+                "Note personali",
+                value=selected_patient.profile_note,
+                key="pat_note",
+            )
+            info_col, unlink_col = st.columns(2)
+            if info_col.button("Salva scheda", key="save_note"):
+                selected_patient.profile_note = st.session_state.pat_note
+                db = Database.default()
+                db.save(selected_patient)
+                st.success("Scheda paziente aggiornata")
+            if unlink_col.button("Scollega paziente", key="unlink"):
+                try:
+                    sc.remove_link(selected_patient)
+                    st.warning("Paziente scollegato")
+                    st.rerun()
+                except Exception as exc:
+                    st.error(str(exc))
 
 # ---------------- intervallo date ------------------------------
         st.divider()
