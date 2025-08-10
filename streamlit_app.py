@@ -5,7 +5,7 @@ from types import ModuleType
 from typing import Dict
 
 import streamlit as st
-from streamlit.runtime.scriptrunner import StopExecution
+from streamlit.runtime.scriptrunner import StopException
 
 st.set_page_config(page_title="Nutrease", layout="wide", page_icon="🥑")
 
@@ -27,7 +27,7 @@ def _render_page(module_path: str) -> None:
         page = _lazy_import(module_path)
         if callable(getattr(page, "main", None)):
             page.main()  # type: ignore[arg-type]
-    except StopExecution:
+    except StopException:
         return
 
 # ----------------------------------------------------------------------------

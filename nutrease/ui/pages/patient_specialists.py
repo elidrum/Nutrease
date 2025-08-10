@@ -36,30 +36,34 @@ def main() -> None:  # noqa: D401 – imperative
     # --------------------- elenco completo ------------------------------
     with tabs[0]:
         for spec in specialists:
-            st.markdown(f"### {spec.name} {spec.surname} – {spec.category.value}")
-            existing = next(
-                (
-                    lr
-                    for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
-                    if lr.specialist.email == spec.email
-                ),
-                None,
-            )
-            if existing:
-                if existing.state == LinkRequestState.ACCEPTED:
-                    st.success("Collegato")
-                elif existing.state == LinkRequestState.PENDING:
-                    st.info("Richiesta in attesa")
+            with st.expander(
+                f"{spec.name} {spec.surname} – {spec.category.value}",
+                expanded=False,
+            ):
+                st.markdown(spec.bio or "_Nessuna informazione disponibile._")
+                existing = next(
+                    (
+                        lr
+                        for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
+                        if lr.specialist.email == spec.email
+                    ),
+                    None,
+                )
+                if existing:
+                    if existing.state == LinkRequestState.ACCEPTED:
+                        st.success("Collegato")
+                    elif existing.state == LinkRequestState.PENDING:
+                        st.info("Richiesta in attesa")
+                    else:
+                        st.error("Richiesta rifiutata")
                 else:
-                    st.error("Richiesta rifiutata")
-            else:
-                if st.button("Richiedi collegamento", key=f"req_{spec.email}"):
-                    try:
-                        pc.send_link_request(spec)
-                        st.success("Richiesta inviata")
-                        st.rerun()
-                    except Exception as exc:
-                        st.error(str(exc))
+                    if st.button("Richiedi collegamento", key=f"req_{spec.email}"):
+                        try:
+                            pc.send_link_request(spec)
+                            st.success("Richiesta inviata")
+                            st.rerun()
+                        except Exception as exc:
+                            st.error(str(exc))
 
     # --------------------- specialisti collegati ------------------------
     with tabs[1]:
@@ -71,8 +75,11 @@ def main() -> None:  # noqa: D401 – imperative
         if not linked:
             st.info("Nessuno specialista collegato.")
         for spec in linked:
-            with st.container(border=True):
-                st.markdown(f"**{spec.name} {spec.surname}** – {spec.category.value}")
+            with st.expander(
+                f"{spec.name} {spec.surname} – {spec.category.value}",
+                expanded=False,
+            ):
+                st.markdown(spec.bio or "_Nessuna informazione disponibile._")
                 if st.button("Scollega", key=f"un_{spec.email}"):
                     try:
                         pc.remove_link(spec)

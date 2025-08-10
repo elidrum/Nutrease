@@ -115,5 +115,7 @@ class Specialist(User):
 
     category: SpecialistCategory
 
+    bio: str = ""
+
     def get_category(self) -> SpecialistCategory:  # noqa: D401
         return self.category

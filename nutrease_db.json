@@ -31,20 +31,74 @@
       "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
       "alarms": [],
       "__type__": "Patient"
+    },
+    "8": {
+      "email": "elidrum04@gmail.com",
+      "name": "Elia",
+      "surname": "",
+      "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+      "alarms": [
+        {
+          "hour": 20,
+          "minute": 0,
+          "enabled": true,
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "__type__": "Patient"
+    },
+    "9": {
+      "email": "elidrum04@gmail.com",
+      "name": "Elia",
+      "surname": "",
+      "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+      "alarms": [
+        {
+          "hour": 20,
+          "minute": 0,
+          "enabled": true,
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "__type__": "Patient"
+    },
+    "10": {
+      "email": "irenebarsotti@gmail.com",
+      "name": "Irene",
+      "surname": "Barsotti",
+      "password": "64acf3ed202007ae31df60d1769496febb7384fc7fda96c78d4cedadc4a09312",
+      "alarms": [],
+      "__type__": "Patient"
     }
   },
   "MealRecord": {
     "1": {
       "id": 1,
-      "created_at": "2025-08-09T18:30:00",
+      "created_at": "2025-08-10T06:00:00+02:00",
       "note": null,
       "record_type": "MEAL",
-      "patient_email": "elidrum04@gmail.com",
+      "patient_email": "irenebarsotti@gmail.com",
       "portions": [
         {
-          "food_name": "mela",
-          "quantity": 4.0,
-          "unit": "ITEM"
+          "food_name": "pane",
+          "quantity": 50.0,
+          "unit": "GRAMS"
         }
       ],
       "__type__": "MealRecord"
@@ -73,6 +127,85 @@
       "password": "6aee45787f116f28ff205b415621da1ce65185f91c627a7489eccc9e09db3010",
       "category": "NUTRITIONIST",
       "__type__": "Specialist"
+    },
+    "2": {
+      "email": "marcoelisei@gmail.com",
+      "name": "Marco",
+      "surname": "Elisei",
+      "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
+      "category": "DIETICIAN",
+      "__type__": "Specialist"
+    }
+  },
+  "LinkRequest": {
+    "1": {
+      "patient": {
+        "email": "elidrum04@gmail.com",
+        "name": "Elia",
+        "surname": "",
+        "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+        "alarms": []
+      },
+      "specialist": {
+        "email": "sergioridolfi2@gmail.com",
+        "name": "Sergio",
+        "surname": "Ridolfi",
+        "password": "6aee45787f116f28ff205b415621da1ce65185f91c627a7489eccc9e09db3010",
+        "category": "NUTRITIONIST",
+        "bio": ""
+      },
+      "id": 0,
+      "state": "PENDING",
+      "comment": "",
+      "requested_at": "2025-08-10T17:36:36.951397",
+      "responded_at": null,
+      "__type__": "LinkRequest"
+    },
+    "2": {
+      "patient": {
+        "email": "elidrum04@gmail.com",
+        "name": "Elia",
+        "surname": "",
+        "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+        "alarms": []
+      },
+      "specialist": {
+        "email": "marcoelisei@gmail.com",
+        "name": "Marco",
+        "surname": "Elisei",
+        "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
+        "category": "DIETICIAN",
+        "bio": ""
+      },
+      "id": 0,
+      "state": "PENDING",
+      "comment": "",
+      "requested_at": "2025-08-10T17:36:36.951397",
+      "responded_at": null,
+      "__type__": "LinkRequest"
+    },
+    "3": {
+      "patient": {
+        "email": "elidrum04@gmail.com",
+        "name": "Elia",
+        "surname": "",
+        "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
+        "alarms": []
+      },
+      "specialist": {
+        "email": "marcoelisei@gmail.com",
+        "name": "Marco",
+        "surname": "Elisei",
+        "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
+        "category": "DIETICIAN",
+        "bio": ""
+      },
+      "id": 2,
+      "state": "ACCEPTED",
+      "comment": "",
+      "requested_at": "2025-08-10T17:36:36.951397",
+      "responded_at": "2025-08-10T17:39:04.745756",
+      "__type__": "LinkRequest"
     }
   }
 }
