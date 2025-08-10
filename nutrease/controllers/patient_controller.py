@@ -23,6 +23,8 @@ from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
 
+from nutrease.utils.tz import LOCAL_TZ
+
 from nutrease.models.record import (  # isort: skip
     FoodPortion,
     MealRecord,
@@ -127,7 +129,7 @@ class PatientController:  # noqa: D101 – documented above
         ]
         record = MealRecord(
             id=self._next_rec_id,
-            created_at=datetime.combine(day, when),
+            created_at=datetime.combine(day, when, tzinfo=LOCAL_TZ),
             portions=portions,
             note=note,
         )
@@ -147,7 +149,7 @@ class PatientController:  # noqa: D101 – documented above
         """Crea un `SymptomRecord` e lo salva."""
         record = SymptomRecord(
             id=self._next_rec_id,
-            created_at=datetime.combine(day, when),
+            created_at=datetime.combine(day, when, tzinfo=LOCAL_TZ),
             symptom=description,
             severity=severity,
             note=note,
@@ -247,7 +249,7 @@ class PatientController:  # noqa: D101 – documented above
         sym: SymptomRecord = old  # type: ignore[assignment]
         new = SymptomRecord(
             id=record_id,
-            created_at=datetime.combine(day, when),
+            created_at=datetime.combine(day, when, tzinfo=LOCAL_TZ),
             symptom=description,
             severity=severity,
             note=note,
