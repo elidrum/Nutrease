@@ -50,7 +50,17 @@ def _load_link_requests_from_db() -> None:
     for row in rows:
         try:
             p_data = row["patient"]
+            if isinstance(p_data, str):
+                p_rows = db.search(Patient, email=p_data)
+                if not p_rows:
+                    continue
+                p_data = p_rows[0]
             s_data = row["specialist"]
+            if isinstance(s_data, str):
+                s_rows = db.search(Specialist, email=s_data)
+                if not s_rows:
+                    continue
+                s_data = s_rows[0]
             patient = Patient(
                 **{k: v for k, v in p_data.items() if not k.startswith("__")}
             )
@@ -100,9 +110,8 @@ class PatientController:  # noqa: D101 – documented above
     # ---------------------------------------------------------------------
     def _iter_link_requests(self):  # noqa: D401 – internal helper
         """Ritorna un generatore di LinkRequest relative a questo paziente."""
-        yield from (
-            lr for lr in self._link_store if lr.patient == self.patient
-        )
+        yield from (lr for lr in self._link_store if lr.patient == self.patient)
+
         
     # ---------- ADD MEAL --------------------------------------------------
     def add_meal(  # noqa: D401 – imperative
@@ -205,9 +214,10 @@ class PatientController:  # noqa: D101 – documented above
         if diary is None:
             raise KeyError("Diario non trovato")
         old = next(
-            (r for r in diary.records if r.id == record_id and r.record_type == RecordType.MEAL),
-            None,
-        )
+                r
+                for r in diary.records
+                if r.id == record_id and r.record_type == RecordType.MEAL
+            ),
         if old is None:
             raise KeyError("Record non trovato")
         meal: MealRecord = old  # type: ignore[assignment]

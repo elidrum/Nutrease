@@ -35,7 +35,17 @@ except ModuleNotFoundError:
         for row in rows:
             try:
                 p_data = row["patient"]
+                if isinstance(p_data, str):
+                    p_rows = db.search(Patient, email=p_data)
+                    if not p_rows:
+                        continue
+                    p_data = p_rows[0]
                 s_data = row["specialist"]
+                if isinstance(s_data, str):
+                    s_rows = db.search(Specialist, email=s_data)
+                    if not s_rows:
+                        continue
+                    s_data = s_rows[0]
                 patient = Patient(
                     **{k: v for k, v in p_data.items() if not k.startswith("__")}
                 )
@@ -58,6 +68,7 @@ except ModuleNotFoundError:
 if not _GLOBAL_LR:
     _load_link_requests_from_db()
 
+
 class SpecialistController:  # noqa: D101 – documented above
     def __init__(
         self,
@@ -67,7 +78,7 @@ class SpecialistController:  # noqa: D101 – documented above
         link_store: List[LinkRequest] | None = None,
     ) -> None:
         self.specialist = specialist
-        self._db = db if db is not None else Database.default()    
+        self._db = db if db is not None else Database.default()
 
         self._link_store = link_store if link_store is not None else _GLOBAL_LR
 
@@ -83,7 +94,11 @@ class SpecialistController:  # noqa: D101 – documented above
         return [lr for lr in self._link_store if lr.specialist == self.specialist]
 
     def pending_requests(self) -> List[LinkRequest]:  # noqa: D401 – imperative
-        return [lr for lr in self._link_store if lr.specialist == self.specialist and lr.state == LinkRequestState.PENDING]
+        return [
+            lr
+            for lr in self._link_store
+            if lr.specialist == self.specialist and lr.state == LinkRequestState.PENDING
+        ]
 
     def accept_request(self, lr: LinkRequest) -> None:  # noqa: D401 – imperative
         if lr not in self._link_store or lr.specialist != self.specialist:
@@ -109,12 +124,16 @@ class SpecialistController:  # noqa: D101 – documented above
     # Diary & analytics helpers
     # .....................................................................
 
-    def get_patient_diary(self, patient: Patient, day: date) -> DailyDiary | None:  # noqa: D401 – imperative
+    def get_patient_diary(
+        self, patient: Patient, day: date
+    ) -> DailyDiary | None:  # noqa: D401 – imperative
         if not self._is_linked(patient):
             raise PermissionError("Specialist non collegato a questo paziente.")
         return next((d for d in patient.diaries if d.day.date == day), None)
 
-    def nutrient_total(self, patient: Patient, day: date, nutrient: Nutrient) -> float:  # noqa: D401 – imperative
+    def nutrient_total(
+        self, patient: Patient, day: date, nutrient: Nutrient
+    ) -> float:  # noqa: D401 – imperative
         diary = self.get_patient_diary(patient, day)
         return diary.get_totals(nutrient) if diary else 0.0
 
@@ -124,7 +143,9 @@ class SpecialistController:  # noqa: D101 – documented above
 
     def _is_linked(self, patient: Patient) -> bool:  # noqa: D401 – imperative
         return any(
-            lr.patient == patient and lr.specialist == self.specialist and lr.state == LinkRequestState.ACCEPTED
+            lr.patient == patient
+            and lr.specialist == self.specialist
+            and lr.state == LinkRequestState.ACCEPTED
             for lr in self._link_store
         )
 

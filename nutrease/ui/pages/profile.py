@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import streamlit as st
 
-from nutrease.models.user import Patient
+from nutrease.models.user import Patient, Specialist
 from nutrease.utils.database import Database
 
 
@@ -21,12 +21,17 @@ def main() -> None:  # noqa: D401
     extra = None
     if isinstance(user, Patient):
         extra = st.text_area("Note personali", user.profile_note)
+    elif isinstance(user, Specialist):
+        extra = st.text_area("Informazioni professionali", user.bio)
 
     if st.button("Salva", use_container_width=True):
         user.name = name
         user.surname = surname
         if extra is not None:
-            user.profile_note = extra
+            if isinstance(user, Patient):
+                user.profile_note = extra
+            else:
+                user.bio = extra
         db = Database.default()
         try:
             db.save(user)

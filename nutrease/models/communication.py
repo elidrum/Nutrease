@@ -13,6 +13,7 @@ Implemented behaviours
   connection log and returns it.
 """
 
+from dataclasses import asdict
 from datetime import datetime
 from typing import List
 
@@ -27,6 +28,7 @@ __all__ = ["Message", "Connection", "LinkRequest"]
 # ---------------------------------------------------------------------------
 # Message
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class Message:
@@ -46,6 +48,7 @@ class Message:
 # Connection (established link)
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Connection:
     """Established link between a *patient* and a *specialist*."""
@@ -63,12 +66,16 @@ class Connection:
     # Messaging
     # .....................................................................
 
-    def send_message(self, sender: User, text: str) -> Message:  # noqa: D401 – imperative
+    def send_message(
+        self, sender: User, text: str
+    ) -> Message:  # noqa: D401 – imperative
         """Send a chat *text* if *sender* belongs to this connection."""
         if sender not in {self.patient, self.specialist}:
             raise PermissionError("Mittente non autorizzato in questa connessione.")
         receiver: User = self.specialist if sender is self.patient else self.patient
-        msg = Message(sender=sender, receiver=receiver, text=text, sent_at=datetime.now())
+        msg = Message(
+            sender=sender, receiver=receiver, text=text, sent_at=datetime.now()
+        )
         self.messages.append(msg)
         return msg
 
@@ -76,6 +83,7 @@ class Connection:
 # ---------------------------------------------------------------------------
 # LinkRequest
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class LinkRequest:
@@ -88,6 +96,26 @@ class LinkRequest:
     comment: str = ""
     requested_at: datetime = datetime.now()
     responded_at: datetime | None = None
+
+    # ..................................................................
+    # Serialisation helpers
+    # ..................................................................
+
+    def as_dict(self) -> dict:  # noqa: D401 – JSON-friendly representation
+        """Return a JSON-serialisable mapping including nested users."""
+        return {
+            "patient": (
+                self.patient.as_dict()
+                if hasattr(self.patient, "as_dict")
+                else asdict(self.patient)
+            ),
+            "specialist": asdict(self.specialist),
+            "id": self.id,
+            "state": self.state,
+            "comment": self.comment,
+            "requested_at": self.requested_at,
+            "responded_at": self.responded_at,
+        }
 
     # .....................................................................
     # Workflow actions
