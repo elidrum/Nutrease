@@ -92,7 +92,31 @@ class NotificationService:  # noqa: D101 – documented in module docstring
             logger.exception("Callback notification fallita: %s", exc)
 
     @staticmethod
-    def _default_callback(patient: Patient, when: datetime) -> None:  # noqa: D401 – imperative
+    def _default_callback(
+        patient: Patient, when: datetime
+    ) -> None:  # noqa: D401 – imperative
         # For now simply print:
-        print(f"\U0001F514  {when:%H:%M} – Ricorda di compilare il diario, {patient.name}!")
+        print(
+            f"\U0001F514  {when:%H:%M} – Ricorda di compilare il diario, "
+            f"{patient.name}!"
+        )
 
+    # ------------------------------------------------------------------
+    # Pickle support (required by Streamlit session state)
+    # ------------------------------------------------------------------
+
+    def __getstate__(self) -> dict:  # noqa: D401 - internal helper
+        """Return state excluding thread primitives for :mod:`pickle`.
+
+        The running thread and synchronisation primitives cannot be pickled.
+        We keep the registered patients and callback so controllers containing
+        this service can be safely stored inside ``st.session_state``.
+        """
+
+        return {"patients": self._patients, "callback": self._callback}
+
+    def __setstate__(self, state: dict) -> None:  # noqa: D401
+        self._patients = state.get("patients", [])
+        self._callback = state.get("callback", self._default_callback)
+        self._stop_evt = threading.Event()
+        self._thread = None

@@ -3,12 +3,13 @@ from __future__ import annotations
 """Specialist‑side application controller (manage patients & link requests)."""
 
 import logging
-from datetime import date
+from datetime import date, datetime
 from typing import List
 
 from nutrease.models.communication import Connection, LinkRequest, LinkRequestState
-from nutrease.models.diary import DailyDiary
-from nutrease.models.enums import Nutrient
+from nutrease.models.diary import DailyDiary, Day
+from nutrease.models.enums import Nutrient, Severity, Unit
+from nutrease.models.record import FoodPortion, MealRecord, Record, SymptomRecord
 from nutrease.models.user import Patient, Specialist
 from nutrease.utils.database import Database
 
@@ -20,16 +21,15 @@ __all__ = ["SpecialistController"]
 # If patient_controller hasn't been imported yet (e.g. specialist logs in first),
 # load existing link requests from DB so connections persist across sessions.
 try:  # defensive import
-    from nutrease.controllers.patient_controller import _LINK_REQUESTS as _GLOBAL_LR
     from nutrease.controllers.patient_controller import _CONNECTIONS as _GLOBAL_CONN
+    from nutrease.controllers.patient_controller import _LINK_REQUESTS as _GLOBAL_LR
     from nutrease.controllers.patient_controller import (
-        _load_link_requests_from_db,
         _load_connections_from_db,
+        _load_link_requests_from_db,
     )
 except ModuleNotFoundError:
     _GLOBAL_LR: List[LinkRequest] = []
     _GLOBAL_CONN: List[Connection] = []
-
     def _load_link_requests_from_db() -> None:
         db = Database.default()
         try:
@@ -177,7 +177,58 @@ class SpecialistController:  # noqa: D101 – documented above
     ) -> DailyDiary | None:  # noqa: D401 – imperative
         if not self._is_linked(patient):
             raise PermissionError("Specialist non collegato a questo paziente.")
-        return next((d for d in patient.diaries if d.day.date == day), None)
+
+        diary = next((d for d in patient.diaries if d.day.date == day), None)
+        if diary is not None:
+            return diary
+
+        records: List[Record] = []
+        try:
+            meal_rows = self._db.search(MealRecord, patient_email=patient.email)
+            for row in meal_rows:
+                ts = datetime.fromisoformat(row["created_at"])
+                if ts.date() != day:
+                    continue
+                portions = [
+                    FoodPortion(
+                        food_name=p["food_name"],
+                        quantity=p["quantity"],
+                        unit=Unit(p["unit"]),
+                    )
+                    for p in row.get("portions", [])
+                ]
+                rec = MealRecord(
+                    id=row.get("id", 0),
+                    created_at=ts,
+                    portions=portions,
+                    note=row.get("note"),
+                )
+                object.__setattr__(rec, "patient_email", patient.email)
+                records.append(rec)
+
+            sym_rows = self._db.search(SymptomRecord, patient_email=patient.email)
+            for row in sym_rows:
+                ts = datetime.fromisoformat(row["created_at"])
+                if ts.date() != day:
+                    continue
+                rec = SymptomRecord(
+                    id=row.get("id", 0),
+                    created_at=ts,
+                    symptom=row.get("symptom", ""),
+                    severity=Severity(row.get("severity", Severity.NONE.value)),
+                    note=row.get("note"),
+                )
+                object.__setattr__(rec, "patient_email", patient.email)
+                records.append(rec)
+        except Exception:  # pragma: no cover - best effort
+            logger.debug("Caricamento diario non riuscito", exc_info=True)
+
+        if not records:
+            return None
+        records.sort(key=lambda r: r.created_at)
+        diary = DailyDiary(day=Day(date=day), patient=patient, records=records)
+        patient.diaries.append(diary)
+        return diary
 
     def nutrient_total(
         self, patient: Patient, day: date, nutrient: Nutrient

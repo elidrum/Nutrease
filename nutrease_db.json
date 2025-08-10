@@ -90,14 +90,14 @@
   "MealRecord": {
     "1": {
       "id": 1,
-      "created_at": "2025-08-10T06:00:00+02:00",
+      "created_at": "2025-08-10T20:58:00+02:00",
       "note": null,
       "record_type": "MEAL",
-      "patient_email": "irenebarsotti@gmail.com",
+      "patient_email": "elidrum04@gmail.com",
       "portions": [
         {
-          "food_name": "pane",
-          "quantity": 50.0,
+          "food_name": "pasta",
+          "quantity": 100.0,
           "unit": "GRAMS"
         }
       ],
@@ -201,6 +201,13 @@
       "receiver": "elidrum04@gmail.com",
       "text": "ciao",
       "sent_at": "2025-08-10T18:36:33.026691",
+      "__type__": "Message"
+    },
+    "4": {
+      "sender": "marcoelisei@gmail.com",
+      "receiver": "elidrum04@gmail.com",
+      "text": "prova",
+      "sent_at": "2025-08-10T18:57:37.482263",
       "__type__": "Message"
     }
   }
