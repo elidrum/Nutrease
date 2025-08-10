@@ -41,37 +41,40 @@ def main() -> None:  # noqa: D401 – imperative
                 expanded=False,
             ):
                 st.markdown(spec.bio or "_Nessuna informazione disponibile._")
-                existing = next(
-                    (
-                        lr
-                        for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
-                        if lr.specialist.email == spec.email
-                    ),
+                conn = next(
+                    (c for c in pc.connections() if c.specialist.email == spec.email),
                     None,
                 )
-                if existing:
-                    if existing.state == LinkRequestState.ACCEPTED:
-                        st.success("Collegato")
-                    elif existing.state == LinkRequestState.PENDING:
-                        st.info("Richiesta in attesa")
-                    else:
-                        st.error("Richiesta rifiutata")
+                if conn:
+                    st.success("Collegato")
                 else:
-                    if st.button("Richiedi collegamento", key=f"req_{spec.email}"):
-                        try:
-                            pc.send_link_request(spec)
-                            st.success("Richiesta inviata")
-                            st.rerun()
-                        except Exception as exc:
-                            st.error(str(exc))
+                    existing = next(
+                        (
+                            lr
+                            for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
+                            if lr.specialist.email == spec.email
+                        ),
+                        None,
+                    )
+                    if existing:
+                        if existing.state == LinkRequestState.PENDING:
+                            st.info("Richiesta in attesa")
+                        elif existing.state == LinkRequestState.REJECTED:
+                            st.error("Richiesta rifiutata")
+                        else:
+                            st.success("Collegato")
+                    else:
+                        if st.button("Richiedi collegamento", key=f"req_{spec.email}"):
+                            try:
+                                pc.send_link_request(spec)
+                                st.success("Richiesta inviata")
+                                st.rerun()
+                            except Exception as exc:
+                                st.error(str(exc))
 
     # --------------------- specialisti collegati ------------------------
     with tabs[1]:
-        linked = [
-            lr.specialist
-            for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
-            if lr.state == LinkRequestState.ACCEPTED
-        ]
+        linked = [c.specialist for c in pc.connections()]
         if not linked:
             st.info("Nessuno specialista collegato.")
         for spec in linked:

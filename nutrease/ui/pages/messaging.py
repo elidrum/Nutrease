@@ -18,7 +18,6 @@ from nutrease.models.communication import Message
 from nutrease.models.user import Patient, Specialist
 
 
-# ---------------------------------------------------------------------------
 # MAIN ENTRY
 # ---------------------------------------------------------------------------
 
@@ -44,25 +43,17 @@ def main() -> None:  # noqa: D401 – imperative name by design
             sc: SpecialistController | None = controllers.get("specialist")  # type: ignore[assignment]
             if sc is None:
                 return None
-            accepted = [
-                lr.patient
-                for lr in sc.link_requests()
-                if lr.state.value == "ACCEPTED"
-            ]
-            if not accepted:
+            connected = [c.patient for c in sc.connections()]
+            if not connected:
                 return None
-            labels = [f"{p.name} {p.surname} ({p.email})" for p in accepted]
+            labels = [f"{p.name} {p.surname} ({p.email})" for p in connected]
             sel = st.selectbox("Seleziona paziente", labels)
-            return accepted[labels.index(sel)]
+            return connected[labels.index(sel)]
         else:  # Patient
             pc = controllers.get("patient")
             if pc is None:
                 return None
-            linked = [
-                lr.specialist
-                for lr in pc._iter_link_requests()  # type: ignore[attr-defined]
-                if lr.state.value == "ACCEPTED"
-            ]
+            linked = [c.specialist for c in pc.connections()]
             return linked[0] if linked else None
 
     # -------------------------------------------------------------------
@@ -97,7 +88,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
             if text:
                 try:
                     mc.send(sender=user, receiver=peer, text=text)
-                    st.session_state.msg_text = ""  # clear
+                    st.session_state.pop("msg_text", None)  # clear
                     st.rerun()
                 except RecursionError:
                     st.error(

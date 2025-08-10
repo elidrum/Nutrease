@@ -16,7 +16,7 @@ import logging
 from datetime import date, datetime, time
 from typing import List
 
-from nutrease.models.communication import LinkRequest, LinkRequestState
+from nutrease.models.communication import Connection, LinkRequest, LinkRequestState, Message
 from nutrease.models.diary import DailyDiary
 from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
 from nutrease.models.user import Patient, Specialist
@@ -38,6 +38,7 @@ __all__ = ["PatientController"]
 
 # In-memory shared storage ---------------------------------------------------
 _LINK_REQUESTS: List[LinkRequest] = []  # naive placeholder until DB layer
+_CONNECTIONS: List[Connection] = []  # accepted links persisted separately
 
 def _load_link_requests_from_db() -> None:
     """Populate in-memory link requests from the JSON DB (best effort)."""
@@ -83,6 +84,56 @@ def _load_link_requests_from_db() -> None:
 _load_link_requests_from_db()
 
 
+def _load_connections_from_db() -> None:
+    """Populate in-memory connections from the JSON DB (best effort)."""
+    db = Database.default()
+    try:
+        rows = db.all(Connection)
+    except Exception:  # pragma: no cover - defensive
+        logger.debug("Caricamento Connection non riuscito", exc_info=True)
+        return
+    for row in rows:
+        try:
+            p_rows = db.search(Patient, email=row["patient"])
+            s_rows = db.search(Specialist, email=row["specialist"])
+            if not p_rows or not s_rows:
+                continue
+            p_data = p_rows[0]
+            s_data = s_rows[0]
+            patient = Patient(
+                **{k: v for k, v in p_data.items() if not k.startswith("__")}
+            )
+            specialist = Specialist(
+                **{k: v for k, v in s_data.items() if not k.startswith("__")}
+            )
+            messages: List[Message] = []
+            for m in row.get("messages", []):
+                sender = patient if m.get("sender") == patient.email else specialist
+                receiver = specialist if sender is patient else patient
+                sent_at = datetime.fromisoformat(m.get("sent_at"))
+                messages.append(
+                    Message(
+                        sender=sender,
+                        receiver=receiver,
+                        text=m.get("text", ""),
+                        sent_at=sent_at,
+                    )
+                )
+            created_at = datetime.fromisoformat(row.get("created_at"))
+            conn = Connection(
+                patient=patient,
+                specialist=specialist,
+                created_at=created_at,
+                messages=messages,
+            )
+            _CONNECTIONS.append(conn)
+        except Exception:  # pragma: no cover - skip malformed rows
+            logger.debug("Connection non valida nel DB", exc_info=True)
+
+
+_load_connections_from_db()
+
+
 class PatientController:  # noqa: D101 – documented above
     _next_rec_id: int = 1  # id autoincrement “globale” all’istanza
 
@@ -96,11 +147,15 @@ class PatientController:  # noqa: D101 – documented above
         db: Database | None = None,
         notification_service: NotificationService | None = None,
         link_store: List[LinkRequest] | None = None,
+        connection_store: List[Connection] | None = None,
     ) -> None:
         self.patient = patient
         self._db = db if db is not None else Database.default()
         self._notif = notification_service
         self._link_store = link_store if link_store is not None else _LINK_REQUESTS
+        self._connection_store = (
+            connection_store if connection_store is not None else _CONNECTIONS
+        )
 
         if self._notif:
             self._notif.register_patient(patient)
@@ -112,6 +167,11 @@ class PatientController:  # noqa: D101 – documented above
         """Ritorna un generatore di LinkRequest relative a questo paziente."""
         yield from (lr for lr in self._link_store if lr.patient == self.patient)
 
+    def connections(self) -> List[Connection]:  # noqa: D401 – imperative
+        """Return all active ``Connection`` for this patient."""
+        return [c for c in self._connection_store if c.patient == self.patient]
+
+        
         
     # ---------- ADD MEAL --------------------------------------------------
     def add_meal(  # noqa: D401 – imperative
@@ -355,6 +415,17 @@ class PatientController:  # noqa: D101 – documented above
         if existing:
             raise ValueError("Richiesta già inviata e in attesa di risposta.")
 
+        existing_conn = next(
+            (
+                c
+                for c in self._connection_store
+                if c.patient == self.patient and c.specialist == specialist
+            ),
+            None,
+        )
+        if existing_conn:
+            raise ValueError("Specialista già collegato.")
+
         req = LinkRequest(
             patient=self.patient,
             specialist=specialist,
@@ -364,6 +435,7 @@ class PatientController:  # noqa: D101 – documented above
         self._link_store.append(req)
         try:
             req.id = self._db.save(req)
+            self._db.save(req)  # ensure id persisted in JSON
         except Exception:  # pragma: no cover - best effort
             logger.debug("Persistenza LinkRequest non riuscita", exc_info=True)
         logger.info(
@@ -388,17 +460,29 @@ class PatientController:  # noqa: D101 – documented above
             (
                 lr
                 for lr in self._link_store
-                if lr.patient == self.patient
-                and lr.specialist == specialist
-                and lr.state == LinkRequestState.ACCEPTED
+                if lr.patient == self.patient and lr.specialist == specialist
             ),
             None,
         )
-        if not lr:
+        if lr:
+            self._link_store.remove(lr)
+            try:
+                self._db.delete(lr)
+            except Exception:  # pragma: no cover - best effort
+                logger.debug("Rimozione LinkRequest non riuscita", exc_info=True)
+
+        conn = next(
+            (
+                c
+                for c in self._connection_store
+                if c.patient == self.patient and c.specialist == specialist
+            ),
+            None,
+        )
+        if not conn:
             raise ValueError("Specialista non collegato")
-        self._link_store.remove(lr)
+        self._connection_store.remove(conn)
         try:
-            self._db.delete(lr)
+            self._db.delete(Connection, patient=self.patient.email, specialist=specialist.email)
         except Exception:  # pragma: no cover - best effort
-            logger.debug("Rimozione LinkRequest non riuscita", exc_info=True)
-  
+            logger.debug("Rimozione Connection non riuscita", exc_info=True)

@@ -74,8 +74,6 @@ class Database:
 
         if hasattr(obj, "as_dict"):
             raw = obj.as_dict()
-        elif is_dataclass(obj):
-            raw = asdict(obj)
         else:
             raw = obj.__dict__.copy()
         data = _sanitise(raw)
@@ -95,8 +93,10 @@ class Database:
                 if existing:
                     tbl.update(data, q.id == data["id"])
                     return existing.doc_id
-            # fallback: insert new doc
-            return tbl.insert(data)
+            doc_id = tbl.insert(data)
+            if "id" in data:
+                tbl.update({"id": doc_id}, doc_ids=[doc_id])
+            return doc_id
 
     # -------- read helpers ----------
     def all(self, model: Type[T]) -> List[Dict[str, Any]]:

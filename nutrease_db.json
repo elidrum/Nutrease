@@ -135,55 +135,18 @@
       "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
       "category": "DIETICIAN",
       "__type__": "Specialist"
+    },
+    "3": {
+      "email": "marcoelisei@gmail.com",
+      "name": "Marco",
+      "surname": "Elisei",
+      "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
+      "category": "DIETICIAN",
+      "bio": "xlhafgakuwbrf",
+      "__type__": "Specialist"
     }
   },
   "LinkRequest": {
-    "1": {
-      "patient": {
-        "email": "elidrum04@gmail.com",
-        "name": "Elia",
-        "surname": "",
-        "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
-        "alarms": []
-      },
-      "specialist": {
-        "email": "sergioridolfi2@gmail.com",
-        "name": "Sergio",
-        "surname": "Ridolfi",
-        "password": "6aee45787f116f28ff205b415621da1ce65185f91c627a7489eccc9e09db3010",
-        "category": "NUTRITIONIST",
-        "bio": ""
-      },
-      "id": 0,
-      "state": "PENDING",
-      "comment": "",
-      "requested_at": "2025-08-10T17:36:36.951397",
-      "responded_at": null,
-      "__type__": "LinkRequest"
-    },
-    "2": {
-      "patient": {
-        "email": "elidrum04@gmail.com",
-        "name": "Elia",
-        "surname": "",
-        "password": "3ba431998885558f0464ba052b938bb3fc98b251adc1f20dc446c748369fb93d",
-        "alarms": []
-      },
-      "specialist": {
-        "email": "marcoelisei@gmail.com",
-        "name": "Marco",
-        "surname": "Elisei",
-        "password": "741332ddc7783aaf417adb9a29c4ac7375446c9b8797b59c57304fb916f17d43",
-        "category": "DIETICIAN",
-        "bio": ""
-      },
-      "id": 0,
-      "state": "PENDING",
-      "comment": "",
-      "requested_at": "2025-08-10T17:36:36.951397",
-      "responded_at": null,
-      "__type__": "LinkRequest"
-    },
     "3": {
       "patient": {
         "email": "elidrum04@gmail.com",
@@ -206,6 +169,39 @@
       "requested_at": "2025-08-10T17:36:36.951397",
       "responded_at": "2025-08-10T17:39:04.745756",
       "__type__": "LinkRequest"
+    }
+  },
+  "_default": {},
+  "Connection": {
+    "1": {
+      "patient": "elidrum04@gmail.com",
+      "specialist": "marcoelisei@gmail.com",
+      "created_at": "2025-08-10T18:35:46.982312",
+      "messages": [],
+      "__type__": "Connection"
+    }
+  },
+  "Message": {
+    "1": {
+      "sender": "marcoelisei@gmail.com",
+      "receiver": "elidrum04@gmail.com",
+      "text": "iluwhfiybwrf",
+      "sent_at": "2025-08-10T18:36:16.330844",
+      "__type__": "Message"
+    },
+    "2": {
+      "sender": "marcoelisei@gmail.com",
+      "receiver": "elidrum04@gmail.com",
+      "text": "iluwhfiybwrf",
+      "sent_at": "2025-08-10T18:36:19.050067",
+      "__type__": "Message"
+    },
+    "3": {
+      "sender": "marcoelisei@gmail.com",
+      "receiver": "elidrum04@gmail.com",
+      "text": "ciao",
+      "sent_at": "2025-08-10T18:36:33.026691",
+      "__type__": "Message"
     }
   }
 }
