@@ -41,7 +41,8 @@ def _validate_password(pwd: str) -> None:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(config={"validate_assignment": True, "repr": True})
+
+@dataclass(config={"validate_assignment": True, "repr": True}, eq=False)
 class User(ABC):
     """Attributi comuni ai vari ruoli utente."""
 
@@ -60,13 +61,24 @@ class User(ABC):
         # Valida e normalizza l'e-mail
         self.email = self._email_adapter.validate_python(self.email)
 
+    # ------------------------------------------------------------------
+    # Equality & hashing based solely on e-mail to avoid recursion through
+    # nested structures like diaries that refer back to the ``Patient``.
+    # ------------------------------------------------------------------
+    def __eq__(self, other: object) -> bool:  # type: ignore[override]
+        if not isinstance(other, User):
+            return NotImplemented
+        return self.email == other.email
+
+    def __hash__(self) -> int:  # type: ignore[override]
+        return hash(self.email)
 
 # ---------------------------------------------------------------------------
 # Concrete subclasses
 # ---------------------------------------------------------------------------
 
 
-@dataclass
+@dataclass(eq=False)
 class Patient(User):
     """Utente che registra pasti / sintomi e si collega agli specialisti."""
 
@@ -97,7 +109,7 @@ class Patient(User):
             "alarms": [asdict(a) for a in self.alarms],
         }
 
-@dataclass
+@dataclass(eq=False)
 class Specialist(User):
     """Professionista che analizza i dati del paziente."""
 
@@ -105,4 +117,3 @@ class Specialist(User):
 
     def get_category(self) -> SpecialistCategory:  # noqa: D401
         return self.category
-    

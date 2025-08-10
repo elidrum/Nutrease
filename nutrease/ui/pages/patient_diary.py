@@ -193,6 +193,8 @@ def main() -> None:  # noqa: D401
         st.session_state.meal_unit = [u.value for u in Unit][0]
     if st.session_state.pop("symptom_added", False):
         st.success("Sintomo aggiunto")
+        st.session_state.symptom_desc = ""
+        st.session_state.symptom_sev = [s.value for s in Severity][0]
 
     if rec_type == "Pasto":
         food_name = st.text_input("Alimento", key="meal_food")
@@ -228,8 +230,6 @@ def main() -> None:  # noqa: D401
                     Severity.from_str(severity_str),
                     record_time,
                 )
-                st.session_state.symptom_desc = ""
-                st.session_state.symptom_sev = [s.value for s in Severity][0]
                 st.session_state.symptom_added = True
                 st.rerun()
             else:

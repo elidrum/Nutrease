@@ -5,6 +5,7 @@ from types import ModuleType
 from typing import Dict
 
 import streamlit as st
+from streamlit.runtime.scriptrunner import StopExecution
 
 st.set_page_config(page_title="Nutrease", layout="wide", page_icon="🥑")
 
@@ -22,12 +23,12 @@ def _lazy_import(module_path: str) -> ModuleType:
 
 
 def _render_page(module_path: str) -> None:
-    page = _lazy_import(module_path)
-    # Convention: Streamlit pages have file-level code, no callable required.
-    # Just importing renders; but allow optional `main()` for completeness.
-    if callable(getattr(page, "main", None)):
-        page.main()  # type: ignore[arg-type]
-
+    try:
+        page = _lazy_import(module_path)
+        if callable(getattr(page, "main", None)):
+            page.main()  # type: ignore[arg-type]
+    except StopExecution:
+        return
 
 # ----------------------------------------------------------------------------
 # Determine user / role from session_state
