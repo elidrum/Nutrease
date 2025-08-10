@@ -135,11 +135,26 @@ class AlimentazioneDataset:  # noqa: D101 – documented in module docstring
     # Internal helpers
     # ------------------------------------------------------------------
     def _match_food(self, food_name: str) -> str:
-        """Return normalised key matching *food_name* with fuzzy fallback."""
+        """Return normalised key matching *food_name*.
+
+        The match is attempted with the following strategy:
+
+        1. Exact key in the dataset.
+        2. Substring match (``pasta`` → ``pasta al pomodoro``).
+        3. Fuzzy fallback via :func:`difflib.get_close_matches`.
+        """
+
         key = food_name.lower()
         if key in self._nutrients:
             return key
-        matches = get_close_matches(key, self._nutrients.keys(), n=1, cutoff=0.6)
+
+        substring_matches = [k for k in self._nutrients if key in k]
+        if substring_matches:
+            # Prefer the shortest match to handle generic terms
+            return min(substring_matches, key=len)
+
+        matches = get_close_matches(key, self._nutrients.keys(), n=1, cutoff=0.5)
         if matches:
             return matches[0]
+
         raise KeyError(f"Alimento '{food_name}' non presente nel dataset.")

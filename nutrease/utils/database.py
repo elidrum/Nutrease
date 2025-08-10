@@ -12,7 +12,6 @@ from typing import Any, Dict, List, Type, TypeVar, overload
 from tinydb import Query, TinyDB
 from nutrease.models.user import User
 
-
 T = TypeVar("T")
 
 
@@ -145,3 +144,26 @@ class Database:
 
     def __repr__(self) -> str:
         return f"<Database path='{self.path.name}'>"
+
+    # -------- pickle support ----------
+    def __getstate__(self) -> Dict[str, Any]:  # noqa: D401 - internal helper
+        """Return a minimal serialisable state for :mod:`pickle`.
+
+        Streamlit's ``st.session_state`` requires its values to be picklable.  A
+        :class:`~tinydb.TinyDB` instance holds an open file handle and a
+        :class:`threading.Lock`, which cannot be serialised directly.  When the
+        database is part of objects stored in the session state (e.g. controller
+        instances), attempting to pickle them raised ``StreamlitAPIException``.
+
+        We only persist the database *path*; the TinyDB handle and the lock are
+        recreated on unpickling.
+        """
+
+        return {"path": str(self.path)}
+
+    def __setstate__(self, state: Dict[str, Any]) -> None:  # noqa: D401
+        """Restore state produced by :meth:`__getstate__`."""
+
+        self.path = Path(state["path"]).expanduser()
+        self._db = TinyDB(self.path, indent=2)
+        self._lock = Lock()
