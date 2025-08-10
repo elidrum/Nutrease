@@ -20,6 +20,8 @@ from dataclasses import field
 from datetime import datetime
 from typing import List, TYPE_CHECKING
 
+from nutrease.utils.tz import local_now
+
 from pydantic.dataclasses import dataclass
 
 from .enums import Nutrient, RecordType, Severity, Unit
@@ -52,7 +54,7 @@ class Record(ABC):
     """Base astratta per ogni voce del diario."""
 
     id: int = 0
-    created_at: datetime = field(default_factory=datetime.now)
+    created_at: datetime = field(default_factory=local_now)
     note: str | None = None
 
     # impostato nei sottotipi con object.__setattr__ in __post_init__

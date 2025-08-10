@@ -10,7 +10,7 @@ Funzionalità:
 * Riepilogo nutrienti giornalieri
 """
 
-from datetime import date, datetime, time
+from datetime import date, time
 from typing import List, Sequence  # noqa: F401 (usati in forward refs)
 
 import streamlit as st
@@ -21,7 +21,7 @@ from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.utils.database import (  # noqa: F401 – placeholder per futuri use-cases
     Database,
 )
-
+from nutrease.utils.tz import local_now
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
@@ -178,7 +178,7 @@ def main() -> None:  # noqa: D401
 
     # ⏰ time-picker persistente: mantiene l’orario scelto dopo il rerun
     if "new_rec_time" not in st.session_state:
-        st.session_state.new_rec_time = datetime.now().time()
+        st.session_state.new_rec_time = local_now().time()
 
     record_time: time = st.time_input(
         "Orario",

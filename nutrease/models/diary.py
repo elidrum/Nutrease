@@ -7,17 +7,16 @@ from __future__ import annotations
 * ``AlarmConfig`` – simple daily alarm with ``next_activation()`` helper.
 """
 
-from datetime import date, datetime, time, timedelta
-from typing import List, TYPE_CHECKING
+import datetime as dt
 from dataclasses import field
+from typing import List
 
 from pydantic.dataclasses import dataclass
 
+from nutrease.utils.tz import LOCAL_TZ, local_now
+
 from .enums import Nutrient
 from .record import MealRecord, Record
-
-if TYPE_CHECKING:  # pragma: no cover – forward refs only
-    from .user import Patient
 
 __all__ = ["Day", "DailyDiary", "AlarmConfig"]
 
@@ -26,11 +25,12 @@ __all__ = ["Day", "DailyDiary", "AlarmConfig"]
 # Core – Day
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class Day:
     """A calendar day wrapper (easier future extensions)."""
 
-    date: date
+    date: dt.date
 
     def __str__(self) -> str:  # noqa: D401 – imperative
         return self.date.isoformat()
@@ -39,6 +39,7 @@ class Day:
 # ---------------------------------------------------------------------------
 # AlarmConfig
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class AlarmConfig:
@@ -56,7 +57,9 @@ class AlarmConfig:
     # Public helpers
     # .....................................................................
 
-    def next_activation(self, *, now: datetime | None = None) -> datetime | None:  # noqa: D401 – imperative
+    def next_activation(
+        self, *, now: dt.datetime | None = None
+    ) -> dt.datetime | None:  # noqa: D401 – imperative
         """Return the next datetime when the alarm should trigger.
 
         Parameters
@@ -73,12 +76,16 @@ class AlarmConfig:
         if not self.enabled or not self.days:
             return None
 
-        now = now or datetime.now()
+        now = now or local_now()
+        if now.tzinfo is None:
+            now = now.replace(tzinfo=LOCAL_TZ)
         for offset in range(8):  # massimo una settimana di lookahead
-            candidate_date = now.date() + timedelta(days=offset)
+            candidate_date = now.date() + dt.timedelta(days=offset)
             if candidate_date.weekday() not in self.days:
                 continue
-            candidate_dt = datetime.combine(candidate_date, time(self.hour, self.minute))
+            candidate_dt = dt.datetime.combine(
+                candidate_date, dt.time(self.hour, self.minute), tzinfo=LOCAL_TZ
+            )
             if candidate_dt > now:
                 return candidate_dt
         return None
@@ -87,6 +94,7 @@ class AlarmConfig:
 # ---------------------------------------------------------------------------
 # DailyDiary
 # ---------------------------------------------------------------------------
+
 
 @dataclass(config={"validate_assignment": True})
 class DailyDiary:
@@ -118,7 +126,9 @@ class DailyDiary:
         except ValueError as err:
             raise KeyError("Record non trovato nel diario.") from err
 
-    def modify_record(self, old: Record, new: Record) -> None:  # noqa: D401 – imperative
+    def modify_record(
+        self, old: Record, new: Record
+    ) -> None:  # noqa: D401 – imperative
         """Replace *old* with *new* preserving position (raises if *old* absent)."""
         idx = self.records.index(old)  # raises ValueError if absent
         if new.created_at.date() != self.day.date:
@@ -141,7 +151,8 @@ class DailyDiary:
 
 
 # Resolve forward references for dataclasses defined across modules ---------
-from pydantic.dataclasses import rebuild_dataclass
-from .user import Patient
+from pydantic.dataclasses import rebuild_dataclass  # noqa: E402
+
+from .user import Patient  # noqa: E402
 
 rebuild_dataclass(Patient)
