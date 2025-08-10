@@ -14,7 +14,7 @@ from typing import List
 
 import streamlit as st
 
-from nutrease.models.communication import LinkRequest, LinkRequestState
+from nutrease.models.communication import LinkRequest
 from nutrease.models.enums import Nutrient, RecordType
 from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.models.user import Patient
@@ -65,17 +65,15 @@ def main() -> None:  # noqa: D401 – imperative name by design
     # ------------------- colonna destra – pazienti ----------------------
     with col_pat:
         st.subheader("Pazienti collegati")
-        accepted = [
-            lr for lr in sc.link_requests() if lr.state == LinkRequestState.ACCEPTED
-        ]
+        connections = sc.connections()
 
-        if not accepted:
+        if not connections:
             st.info("Nessun paziente collegato.")
             st.stop()
 
         patient_options = {
-            f"{lr.patient.name} {lr.patient.surname} ({lr.patient.email})": lr.patient
-            for lr in accepted
+            f"{c.patient.name} {c.patient.surname} ({c.patient.email})": c.patient
+            for c in connections
         }
         sel_label = st.selectbox("Seleziona paziente", list(patient_options.keys()))
         selected_patient: Patient = patient_options[sel_label]
