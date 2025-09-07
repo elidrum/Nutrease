@@ -96,6 +96,6 @@ class LinkRequestState(StrEnumMixin):
     """Lifecycle states of a patient–specialist link request."""
 
     PENDING = "PENDING"
-    ACCEPTED = "ACCEPTED"
+    CONNECTED = "CONNECTED"
     REJECTED = "REJECTED"
     NONE = "NONE"

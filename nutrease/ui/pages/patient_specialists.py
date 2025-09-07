@@ -33,7 +33,7 @@ def main() -> None:  # noqa: D401 – imperative
             Specialist(**{k: v for k, v in r.items() if not k.startswith("__")})
         )
 
-    # --------------------- elenco completo ------------------------------
+       # --------------------- elenco completo ------------------------------
     with tabs[0]:
         for spec in specialists:
             with st.expander(
@@ -41,11 +41,11 @@ def main() -> None:  # noqa: D401 – imperative
                 expanded=False,
             ):
                 st.markdown(spec.bio or "_Nessuna informazione disponibile._")
-                conn = next(
-                    (c for c in pc.connections() if c.specialist.email == spec.email),
+                link = next(
+                    (lr for lr in pc.connections() if lr.specialist.email == spec.email),
                     None,
                 )
-                if conn:
+                if link:
                     st.success("Collegato")
                 else:
                     existing = next(
@@ -74,7 +74,7 @@ def main() -> None:  # noqa: D401 – imperative
 
     # --------------------- specialisti collegati ------------------------
     with tabs[1]:
-        linked = [c.specialist for c in pc.connections()]
+        linked = [lr.specialist for lr in pc.connections()]
         if not linked:
             st.info("Nessuno specialista collegato.")
         for spec in linked:

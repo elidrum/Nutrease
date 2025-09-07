@@ -10,15 +10,17 @@ Definisce:
 * ``FoodPortion``       – alimento + quantità + unità.
   Conversione in grammi tramite dataset.
 
-`FoodPortion.to_grams()` sfrutta il servizio
+``FoodPortion`` ora implementa l'interfaccia ``AlimentazioneDataset``
+offrendo i metodi ``get_grams_per_unit`` e ``lookup`` (operazioni di sola
+lettura) delegati al servizio
 ``nutrease.services.dataset_service.AlimentazioneDataset`` ottenuto lazily
 tramite ``_dataset()``.
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import field
 from datetime import datetime
-from typing import List, TYPE_CHECKING
+from typing import List, TYPE_CHECKING, Mapping
 
 from nutrease.utils.tz import local_now
 
@@ -27,7 +29,19 @@ from pydantic.dataclasses import dataclass
 from .enums import Nutrient, RecordType, Severity, Unit
 
 if TYPE_CHECKING:  # pragma: no cover – forward refs only
-    from nutrease.services.dataset_service import AlimentazioneDataset
+    from nutrease.services.dataset_service import AlimentazioneDataset as DatasetService
+
+
+class AlimentazioneDataset(ABC):
+    """Interfaccia per operazioni di lookup sul dataset alimentare."""
+
+    @abstractmethod
+    def get_grams_per_unit(self) -> float:
+        """Quantità di grammi contenuta in un'unità dell'alimento."""
+
+    @abstractmethod
+    def lookup(self, name: str) -> Mapping[str, float]:
+        """Restituisce i nutrienti per grammo associati a *name*."""
 
 
 # ---------------------------------------------------------------------------
@@ -35,12 +49,14 @@ if TYPE_CHECKING:  # pragma: no cover – forward refs only
 # ---------------------------------------------------------------------------
 
 
-def _dataset() -> "AlimentazioneDataset":  # noqa: D401
+def _dataset() -> "DatasetService":  # noqa: D401
     """Ritorna (e cache) il dataset alimenti."""
-    from nutrease.services.dataset_service import AlimentazioneDataset  # local import
+    from nutrease.services.dataset_service import (
+        AlimentazioneDataset as DatasetService,
+    )  # local import
 
     if not hasattr(_dataset, "_instance"):
-        _dataset._instance = AlimentazioneDataset.default()
+        _dataset._instance = DatasetService.default()
     return _dataset._instance  # type: ignore[attr-defined]
 
 
@@ -81,16 +97,28 @@ class Record(ABC):
 
 
 @dataclass(kw_only=True)
-class FoodPortion:
+class FoodPortion(AlimentazioneDataset):
     """Quantità di un alimento espressa in una certa unità."""
 
     food_name: str
     quantity: float
     unit: Unit
 
+    # ------------------------------------------------------------------
+    # Implementazione dell'interfaccia AlimentazioneDataset
+    # ------------------------------------------------------------------
+    def get_grams_per_unit(self) -> float:  # noqa: D401
+        """Restituisce i grammi contenuti in un'unità dell'alimento."""
+        return _dataset().get_grams_per_unit(self.food_name, self.unit)
+
+    def lookup(self, name: str) -> Mapping[str, float]:  # noqa: D401
+        """Ricerca nutrienti per un alimento nel dataset."""
+        return _dataset().lookup(name)
+
+    # ------------------------------------------------------------------
     def to_grams(self) -> float:  # noqa: D401
         """Converte la porzione in grammi usando il dataset."""
-        grams = _dataset().get_grams_per_unit(self.food_name, self.unit)
+        grams = self.get_grams_per_unit()
         return grams * self.quantity
 
     def as_dict(self) -> dict:  # noqa: D401

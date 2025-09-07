@@ -19,7 +19,6 @@ from typing import Dict
 
 import streamlit as st
 
-from nutrease.controllers.messaging_controller import MessagingController
 from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.enums import SpecialistCategory
@@ -57,7 +56,7 @@ def _init_controllers(user: Patient | Specialist) -> None:
 
     # Evita di ricreare i controller se già presenti (es. rerun superfluo)
     if "controllers" not in st.session_state:
-        controllers: Dict[str, object] = {"messaging": MessagingController(db=db)}
+        controllers: Dict[str, object] = {}
         if isinstance(user, Patient):
             controllers["patient"] = PatientController(
                 user, db=db, notification_service=notif
@@ -108,13 +107,15 @@ def main() -> None:  # noqa: D401
     with main_tabs[1]:
         sub_tabs = st.tabs(["Paziente", "Specialista"])
 
-        # -------------------- Paziente ---------------------------------
+         # -------------------- Paziente ---------------------------------
         with sub_tabs[0]:
             st.subheader("Registrazione Paziente")
             p_name = st.text_input("Nome", key="p_name")
             p_surname = st.text_input("Cognome", key="p_surname")
             p_email = _clean_email(st.text_input("E-mail", key="p_email"))
-            p_pwd1 = st.text_input("Password (≥8 alfanumerici)", type="password", key="p_pwd1")
+            p_pwd1 = st.text_input(
+                "Password (≥8 alfanumerici)", type="password", key="p_pwd1"
+            )
             p_pwd2 = st.text_input("Conferma Password", type="password", key="p_pwd2")
 
             if st.button("Registrati come Paziente", use_container_width=True):
@@ -145,7 +146,9 @@ def main() -> None:  # noqa: D401
             s_category = st.selectbox(
                 "Categoria", [c.value for c in SpecialistCategory], key="s_cat"
             )
-            s_pwd1 = st.text_input("Password (≥8 alfanumerici)", type="password", key="s_pwd1")
+            s_pwd1 = st.text_input(
+                "Password (≥8 alfanumerici)", type="password", key="s_pwd1"
+            )
             s_pwd2 = st.text_input("Conferma Password", type="password", key="s_pwd2")
 
             if st.button("Registrati come Specialista", use_container_width=True):

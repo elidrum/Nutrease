@@ -2,21 +2,18 @@ from __future__ import annotations
 
 """nutrease.ui.pages.messaging – Pagina **Chat Paziente-Specialista**.
 
-* Solo lo **Specialista** può inviare nuovi messaggi.
-* Il **Paziente** vede la conversazione in sola lettura.
-* Usa :class:`MessagingController` già presente in ``st.session_state.controllers``.
+* Paziente e specialista possono inviare messaggi.
+* La conversazione è salvata dentro la relativa :class:`LinkRequest`.
 """
 
-from datetime import datetime
 from typing import List
 
 import streamlit as st
-from datetime import datetime
-from nutrease.controllers.messaging_controller import MessagingController
+
+from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.communication import Message
-from nutrease.models.user import Patient, Specialist
-
+from nutrease.models.user import Specialist
 
 # MAIN ENTRY
 # ---------------------------------------------------------------------------
@@ -24,46 +21,52 @@ from nutrease.models.user import Patient, Specialist
 
 def main() -> None:  # noqa: D401 – imperative name by design
     """Renderizza la pagina di chat."""
-    # Recupera controller e utente
     controllers = st.session_state.get("controllers", {})
-    mc: MessagingController | None = controllers.get("messaging")  # type: ignore[assignment]
     user = st.session_state.get("current_user")
 
-    if mc is None or user is None:
+    if user is None:
         st.error("Effettua prima il login.")
         st.stop()
 
     st.title("💬 Chat Paziente-Specialista")
 
-    # ------------------ helper interno ----------------------------------
-    def _get_peer() -> Specialist | Patient | None:
-        """Restituisce la controparte collegata all'utente corrente."""
-        if isinstance(user, Specialist):
-            # Specialista: seleziona un paziente collegato
-            sc: SpecialistController | None = controllers.get("specialist")  # type: ignore[assignment]
-            if sc is None:
-                return None
-            connected = [c.patient for c in sc.connections()]
-            if not connected:
-                return None
-            labels = [f"{p.name} {p.surname} ({p.email})" for p in connected]
-            sel = st.selectbox("Seleziona paziente", labels)
-            return connected[labels.index(sel)]
-        else:  # Patient
-            pc = controllers.get("patient")
-            if pc is None:
-                return None
-            linked = [c.specialist for c in pc.connections()]
-            return linked[0] if linked else None
-
-    # -------------------------------------------------------------------
-    peer = _get_peer()
-    if peer is None:
-        st.info("Nessuna connessione disponibile.")
-        st.stop()
+    if isinstance(user, Specialist):
+        sc: SpecialistController | None = controllers.get("specialist")  # type: ignore[assignment]
+        if sc is None:
+            st.error("Controller non disponibile.")
+            st.stop()
+        conns = sc.connections()
+        if not conns:
+            st.info("Nessuna connessione disponibile.")
+            st.stop()
+        labels = [
+            f"{lr.patient.name} {lr.patient.surname} ({lr.patient.email})"
+            for lr in conns
+        ]
+        sel = st.selectbox("Seleziona paziente", labels)
+        link = conns[labels.index(sel)]
+    else:
+        pc: PatientController | None = controllers.get("patient")  # type: ignore[assignment]
+        if pc is None:
+            st.error("Controller non disponibile.")
+            st.stop()
+        conns = pc.connections()
+        if not conns:
+            st.info("Nessuna connessione disponibile.")
+            st.stop()
+        labels = [
+            f"{lr.specialist.name} {lr.specialist.surname} ({lr.specialist.email})"
+            for lr in conns
+        ]
+        sel = (
+            st.selectbox("Seleziona specialista", labels)
+            if len(conns) > 1
+            else labels[0]
+        )
+        link = conns[labels.index(sel)] if len(conns) > 1 else conns[0]
 
     # ------------------ conversazione ----------------------------------
-    conv: List[Message] = mc.conversation(user, peer)
+    conv: List[Message] = sorted(link.messages, key=lambda m: m.sent_at)
 
     st.subheader("Conversazione")
     chat_holder = st.container(height=400)
@@ -80,23 +83,23 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     unsafe_allow_html=True,
                 )
 
-    # ------------------ invio (solo specialista) -----------------------
-    if isinstance(user, Specialist):
-        st.text_area("Nuovo messaggio", key="msg_text")
-        if st.button("Invia", use_container_width=True):
-            text = st.session_state.msg_text.strip()
-            if text:
-                try:
-                    mc.send(sender=user, receiver=peer, text=text)
-                    st.session_state.pop("msg_text", None)  # clear
-                    st.rerun()
-                except RecursionError:
-                    st.error(
-                        "Errore interno durante l'invio del messaggio. "
-                        "Riprova più tardi."
-                    )
-    else:
-        st.info("Solo lo specialista può inviare messaggi. Attendi una risposta.")
+    # ------------------ invio ------------------------------------------
+    st.text_area("Nuovo messaggio", key="msg_text")
+    if st.button("Invia", use_container_width=True):
+        text = st.session_state.msg_text.strip()
+        if text:
+            try:
+                if isinstance(user, Specialist):
+                    sc.send_message(link.patient, text)
+                else:
+                    pc.send_message(link.specialist, text)
+                st.session_state.pop("msg_text", None)
+                st.rerun()
+            except Exception:  # pragma: no cover - best effort
+                st.error(
+                    "Errore interno durante l'invio del messaggio. "
+                    "Riprova più tardi."
+                )
 
 
 # ---------------------------------------------------------------------------

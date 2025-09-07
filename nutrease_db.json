@@ -117,6 +117,21 @@
         }
       ],
       "__type__": "MealRecord"
+    },
+    "3": {
+      "id": 3,
+      "created_at": "2025-09-07T23:43:31.732755+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "pc@test.com",
+      "portions": [
+        {
+          "food_name": "Mela",
+          "quantity": 2.0,
+          "unit": "ITEM"
+        }
+      ],
+      "__type__": "MealRecord"
     }
   },
   "Specialist": {
@@ -164,51 +179,13 @@
         "bio": ""
       },
       "id": 2,
-      "state": "ACCEPTED",
+      "state": "CONNECTED",
       "comment": "",
       "requested_at": "2025-08-10T17:36:36.951397",
       "responded_at": "2025-08-10T17:39:04.745756",
+      "messages": [],
       "__type__": "LinkRequest"
     }
   },
-  "_default": {},
-  "Connection": {
-    "1": {
-      "patient": "elidrum04@gmail.com",
-      "specialist": "marcoelisei@gmail.com",
-      "created_at": "2025-08-10T18:35:46.982312",
-      "messages": [],
-      "__type__": "Connection"
-    }
-  },
-  "Message": {
-    "1": {
-      "sender": "marcoelisei@gmail.com",
-      "receiver": "elidrum04@gmail.com",
-      "text": "iluwhfiybwrf",
-      "sent_at": "2025-08-10T18:36:16.330844",
-      "__type__": "Message"
-    },
-    "2": {
-      "sender": "marcoelisei@gmail.com",
-      "receiver": "elidrum04@gmail.com",
-      "text": "iluwhfiybwrf",
-      "sent_at": "2025-08-10T18:36:19.050067",
-      "__type__": "Message"
-    },
-    "3": {
-      "sender": "marcoelisei@gmail.com",
-      "receiver": "elidrum04@gmail.com",
-      "text": "ciao",
-      "sent_at": "2025-08-10T18:36:33.026691",
-      "__type__": "Message"
-    },
-    "4": {
-      "sender": "marcoelisei@gmail.com",
-      "receiver": "elidrum04@gmail.com",
-      "text": "prova",
-      "sent_at": "2025-08-10T18:57:37.482263",
-      "__type__": "Message"
-    }
-  }
+  "_default": {}
 }
