@@ -98,12 +98,13 @@ class _DBUserRepo:  # noqa: D101 – interno
         from datetime import datetime
 
         from nutrease.models.diary import DailyDiary, Day
-        from nutrease.models.enums import Severity, Unit
+        from nutrease.models.enums import Severity, Unit, Nutrient
 
         from nutrease.models.record import (  # isort: skip
             FoodPortion,
             MealRecord,
             SymptomRecord,
+            NutrientIntake,
         )
 
         rows = self._db.search(MealRecord, patient_email=patient.email)
@@ -112,14 +113,23 @@ class _DBUserRepo:  # noqa: D101 – interno
         for row in rows:
             created_at = datetime.fromisoformat(row["created_at"])
             if row["__type__"] == "MealRecord":
-                portions = [
-                    FoodPortion(
-                        food_name=p["food_name"],
-                        quantity=p["quantity"],
-                        unit=Unit(p["unit"]),
+                portions = []
+                for p in row.get("portions", []):
+                    nutrients = [
+                        NutrientIntake(
+                            nutrient=Nutrient(np["nutrient"]),
+                            grams=np["grams"],
+                        )
+                        for np in p.get("nutrients", [])
+                    ]
+                    portions.append(
+                        FoodPortion(
+                            food_name=p["food_name"],
+                            quantity=p["quantity"],
+                            unit=Unit(p["unit"]),
+                            nutrients=nutrients,
+                        )
                     )
-                    for p in row.get("portions", [])
-                ]
                 rec = MealRecord(
                     id=row["id"],
                     created_at=created_at,
@@ -139,7 +149,6 @@ class _DBUserRepo:  # noqa: D101 – interno
         for d, recs in records_by_day.items():
             diary = DailyDiary(day=Day(date=d), patient=patient, records=recs)
             patient.diaries.append(diary)
-
 
 # ---------------------------------------------------------------------------
 # Repo in-memory (fallback)

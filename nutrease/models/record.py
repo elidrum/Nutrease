@@ -97,12 +97,39 @@ class Record(ABC):
 
 
 @dataclass(kw_only=True)
+class NutrientIntake:
+    """Quantitativo di un singolo nutriente per una porzione."""
+
+    nutrient: Nutrient
+    grams: float
+
+    def as_dict(self) -> dict:  # noqa: D401
+        return {"nutrient": self.nutrient.value, "grams": self.grams}
+
+
+@dataclass(kw_only=True)
 class FoodPortion(AlimentazioneDataset):
     """Quantità di un alimento espressa in una certa unità."""
 
     food_name: str
     quantity: float
     unit: Unit
+    nutrients: List[NutrientIntake] = field(default_factory=list)
+
+    def __post_init__(self) -> None:  # noqa: D401
+        if not self.nutrients:
+            try:
+                lookup = _dataset().lookup(self.food_name)
+            except KeyError:
+                lookup = {}
+            grams = self.to_grams()
+            self.nutrients = [
+                NutrientIntake(
+                    nutrient=n, grams=grams * lookup.get(n.name.lower(), 0.0)
+                )
+                for n in Nutrient
+                if lookup.get(n.name.lower(), 0.0) > 0
+            ]
 
     # ------------------------------------------------------------------
     # Implementazione dell'interfaccia AlimentazioneDataset
@@ -127,6 +154,7 @@ class FoodPortion(AlimentazioneDataset):
             "food_name": self.food_name,
             "quantity": self.quantity,
             "unit": self.unit.value,
+            "nutrients": [n.as_dict() for n in self.nutrients],
         }
 
 # ---------------------------------------------------------------------------
@@ -147,23 +175,17 @@ class MealRecord(Record):
     # ---------------------------------------------------------------------
     def get_nutrient_total(self, nutrient: Nutrient) -> float:
         """Totale grammi di *nutrient* in questo pasto."""
-        total = 0.0
-        for p in self.portions:
-            try:
-                nutrient_per_gram = (
-                    _dataset().lookup(p.food_name).get(nutrient.name.lower(), 0.0)
-                )
-                total += nutrient_per_gram * p.to_grams()
-            except KeyError:
-                # Alimento non presente nel dataset → assume 0 g di nutrienti
-                continue
-        return total
+        return sum(
+            ni.grams
+            for portion in self.portions
+            for ni in portion.nutrients
+            if ni.nutrient == nutrient
+        )
 
     def as_dict(self) -> dict:  # noqa: D401
         data = super().as_dict()
         data["portions"] = [p.as_dict() for p in self.portions]
         return data
-
 
 
 # ---------------------------------------------------------------------------

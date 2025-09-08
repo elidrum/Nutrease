@@ -169,7 +169,7 @@ def main() -> None:  # noqa: D401
                 if st.button("Elimina", key=f"del_{rec.id}"):
                     pc.remove_record(sel_day, rec.id)
                     st.rerun()
-    # ---------------- Form aggiunta record -------------------------------
+# ---------------- Form aggiunta record -------------------------------
     st.subheader("Aggiungi nuovo record")
 
     # ⏰ time-picker persistente: mantiene l’orario scelto dopo il rerun
@@ -182,36 +182,68 @@ def main() -> None:  # noqa: D401
     )
 
     rec_type = st.radio("Tipo di record", ["Pasto", "Sintomo"], horizontal=True)
+    unit_options = [u.value for u in Unit]
     if st.session_state.pop("meal_added", False):
         st.success("Pasto aggiunto")
-        st.session_state.meal_food = ""
-        st.session_state.meal_qty = 0.0
-        st.session_state.meal_unit = [u.value for u in Unit][0]
+        st.session_state.meal_items = [
+            {"food": "", "qty": 0.0, "unit": unit_options[0]}
+        ]
+    if "meal_items" not in st.session_state:
+        st.session_state.meal_items = [
+            {"food": "", "qty": 0.0, "unit": unit_options[0]}
+        ]
     if st.session_state.pop("symptom_added", False):
         st.success("Sintomo aggiunto")
         st.session_state.symptom_desc = ""
         st.session_state.symptom_sev = [s.value for s in Severity][0]
 
     if rec_type == "Pasto":
-        food_name = st.text_input("Alimento", key="meal_food")
-        qty = st.number_input("Quantità", min_value=0.0, step=0.1, key="meal_qty")
-        unit_str = st.selectbox("Unità", [u.value for u in Unit], key="meal_unit")
+        for idx, item in enumerate(st.session_state.meal_items):
+            cols = st.columns(3)
+            item["food"] = cols[0].text_input(
+                "Alimento", key=f"meal_food_{idx}", value=item["food"]
+            )
+            item["qty"] = cols[1].number_input(
+                "Quantità", min_value=0.0, step=0.1, key=f"meal_qty_{idx}", value=item["qty"]
+            )
+            item["unit"] = cols[2].selectbox(
+                "Unità",
+                unit_options,
+                index=unit_options.index(item["unit"]),
+                key=f"meal_unit_{idx}",
+            )
+
+        if st.button("Aggiungi alimento", key="add_food"):
+            st.session_state.meal_items.append(
+                {"food": "", "qty": 0.0, "unit": unit_options[0]}
+            )
+            st.rerun()
+
         if st.button("Aggiungi Pasto", use_container_width=True):
-            if food_name and qty > 0:
+            foods = [
+                it["food"]
+                for it in st.session_state.meal_items
+                if it["food"] and it["qty"] > 0
+            ]
+            qtys = [
+                it["qty"]
+                for it in st.session_state.meal_items
+                if it["food"] and it["qty"] > 0
+            ]
+            units = [
+                Unit.from_str(it["unit"])
+                for it in st.session_state.meal_items
+                if it["food"] and it["qty"] > 0
+            ]
+            if foods:
                 try:
-                    pc.add_meal(
-                        sel_day,
-                        record_time,
-                        [food_name],
-                        [qty],
-                        [Unit.from_str(unit_str)],
-                    )
+                    pc.add_meal(sel_day, record_time, foods, qtys, units)
                     st.session_state.meal_added = True
                     st.rerun()
                 except ValueError as exc:
                     st.error(str(exc))
             else:
-                st.warning("Compila nome alimento e quantità > 0.")
+                st.warning("Compila almeno un alimento e quantità > 0.")
 
     else:
         symptom = st.text_input("Sintomo", key="symptom_desc")
