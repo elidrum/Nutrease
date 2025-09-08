@@ -85,7 +85,10 @@ class _DBUserRepo:  # noqa: D101 – interno
             is_patient = False
         if not rows:
             return None
-        data = rows[0]
+                # If multiple entries exist for the same e-mail (e.g. after profile
+        # updates without prior deletion), TinyDB returns them in insertion
+        # order.  Use the most recently saved row to reflect the latest data.
+        data = rows[-1]
         filtered = {k: v for k, v in data.items() if not k.startswith("__")}
         cls: Type[User] = Patient if is_patient else Specialist
         if is_patient:

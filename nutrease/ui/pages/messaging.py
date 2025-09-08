@@ -62,12 +62,8 @@ def main() -> None:  # noqa: D401 – imperative name by design
             f"{lr.specialist.name} {lr.specialist.surname} ({lr.specialist.email})"
             for lr in conns
         ]
-        sel = (
-            st.selectbox("Seleziona specialista", labels)
-            if len(conns) > 1
-            else labels[0]
-        )
-        link = conns[labels.index(sel)] if len(conns) > 1 else conns[0]
+        sel = st.selectbox("Seleziona specialista", labels)
+        link = conns[labels.index(sel)]
 
     # ------------------ conversazione ----------------------------------
     conv: List[Message] = sorted(link.messages, key=lambda m: m.sent_at)
@@ -101,13 +97,14 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     sc.send_message(link.patient, text)
                 else:
                     pc.send_message(link.specialist, text)
-                st.session_state.msg_text = ""
-                st.rerun()
             except Exception:  # pragma: no cover - best effort
                 st.error(
                     "Errore interno durante l'invio del messaggio. "
                     "Riprova più tardi."
                 )
+            else:
+                st.session_state.msg_text = ""
+                st.rerun()
 
 
 # ---------------------------------------------------------------------------

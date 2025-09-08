@@ -267,12 +267,13 @@ class PatientController:  # noqa: D101 – documented above
         diary = self.get_diary(day)
         if diary is None:
             raise KeyError("Diario non trovato")
-        old = (
-            next(
+        old = next(
+            (
                 r
                 for r in diary.records
                 if r.id == record_id and r.record_type == RecordType.MEAL
             ),
+            None,
         )
         if old is None:
             raise KeyError("Record non trovato")
