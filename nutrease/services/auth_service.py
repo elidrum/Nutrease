@@ -17,8 +17,10 @@ from typing import Dict, Literal, Protocol, Type
 
 from pydantic import EmailStr, TypeAdapter
 
+from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.enums import SpecialistCategory
-from nutrease.models.user import Patient, Specialist, User
+from nutrease.models.record import MealRecord, SymptomRecord
+from nutrease.models.user import Patient, Specialist, User, _validate_password
 from nutrease.utils.database import Database
 
 # ---------------------------------------------------------------------------
@@ -69,9 +71,8 @@ class _DBUserRepo:  # noqa: D101 – interno
         user.email = _email_adapter.validate_python(self._key(str(user.email)))
         # Se esiste già un utente con la stessa e-mail, solleva errore
         # senza modificare il database.
-        if (
-            self._db.search(Patient, email=user.email)
-            or self._db.search(Specialist, email=user.email)
+        if self._db.search(Patient, email=user.email) or self._db.search(
+            Specialist, email=user.email
         ):
             raise ValueError("E-mail già registrata.")
         self._db.save(user)
@@ -98,7 +99,8 @@ class _DBUserRepo:  # noqa: D101 – interno
         from datetime import datetime
 
         from nutrease.models.diary import DailyDiary, Day
-        from nutrease.models.enums import Severity, Unit, Nutrient
+        from nutrease.models.enums import Nutrient, Severity, Unit
+
 
         from nutrease.models.record import (  # isort: skip
             FoodPortion,
@@ -169,7 +171,6 @@ class _InMemoryUserRepo:  # noqa: D101
         return self._store.get(email.lower())
 
 
-
 # ---------------------------------------------------------------------------
 # AuthService
 # ---------------------------------------------------------------------------
@@ -178,11 +179,15 @@ class _InMemoryUserRepo:  # noqa: D101
 class AuthService:
     """Gestisce signup / login; default persistente su TinyDB."""
 
-    def __init__(self, *, db: Database | None = None, repo: UserRepository | None = None):
+    def __init__(
+        self, *, db: Database | None = None, repo: UserRepository | None = None
+    ):
         if repo:  # test injection esplicita
             self._repo = repo
+            self._db = db or getattr(repo, "_db", None)
         else:
-            self._repo = _DBUserRepo(db or Database.default())
+            self._db = db or Database.default()
+            self._repo = _DBUserRepo(self._db)
 
     # ---------------------- signup --------------------------------------
     def signup(
@@ -231,6 +236,21 @@ class AuthService:
             raise PermissionError("Credenziali non valide.")
         return user
 
+    # ---------------------- change password ----------------------------
+    def change_password(
+        self, email: str, old_password: str, new_password: str
+    ) -> None:  # noqa: D401
+        email = _email_adapter.validate_python(email)
+        user = self._repo.get(email)
+        if user is None or user.password != _hash(old_password):
+            raise PermissionError("Credenziali non valide.")
+        _validate_password(new_password)
+        user.password = _hash(new_password)
+        db = getattr(self, "_db", None)
+        if db is not None:
+            db.delete(type(user), email=email)
+            db.save(user)
+
     # ---------------------- password reset (mock) -----------------------
     def password_reset(self, email: str) -> str:  # noqa: D401
         email = _email_adapter.validate_python(email)
@@ -243,3 +263,38 @@ class AuthService:
             f"Per reimpostare la password usa il token: {token}"
         )
         return token
+
+    # ---------------------- delete account ----------------------------
+    def delete_account(self, email: str) -> None:  # noqa: D401
+        email = _email_adapter.validate_python(email)
+        user = self._repo.get(email)
+        if user is None:
+            raise KeyError("Utente non trovato.")
+        db = getattr(self, "_db", None)
+        if db is not None:
+            db.delete(type(user), email=email)
+            db.delete(Message, sender=email)
+            db.delete(Message, receiver=email)
+            db.delete(MealRecord, patient_email=email)
+            db.delete(SymptomRecord, patient_email=email)
+            for row in db.all(LinkRequest):
+                patient = row.get("patient")
+                specialist = row.get("specialist")
+                p_email = patient.get("email") if isinstance(patient, dict) else None
+                s_email = (
+                    specialist.get("email") if isinstance(specialist, dict) else None
+                )
+                if p_email == email or s_email == email:
+                    db.delete(LinkRequest, id=row.get("id", 0))
+        if hasattr(self._repo, "_store"):
+            self._repo._store.pop(email.lower(), None)
+        try:
+            from nutrease.controllers.patient_controller import _LINK_REQUESTS
+
+            _LINK_REQUESTS[:] = [
+                lr
+                for lr in _LINK_REQUESTS
+                if lr.patient.email != email and lr.specialist.email != email
+            ]
+        except Exception:  # pragma: no cover - best effort
+            pass

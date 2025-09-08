@@ -25,11 +25,11 @@ Mozzarella,Grams,100.0,2.5,0.0,0.0
 Mozzarella,Item,100.0,2.5,0.0,0.0
 Feta,Grams,100.0,1.5,0.0,0.0
 Feta,Item,100.0,1.5,0.0,0.0
-Yogurt bianco intero,Cup,240.0,8.64,0.0,0.0
-Yogurt bianco intero,Glass,200.0,7.2,0.0,0.0
-Yogurt bianco intero,Grams,100.0,3.6,0.0,0.0
-Yogurt bianco intero,Item,125.0,4.5,0.0,0.0
-Yogurt bianco intero,Liters,1000.0,36.0,0.0,0.0
+Yogurt bianco,Cup,240.0,8.64,0.0,0.0
+Yogurt bianco,Glass,200.0,7.2,0.0,0.0
+Yogurt bianco,Grams,100.0,3.6,0.0,0.0
+Yogurt bianco,Item,125.0,4.5,0.0,0.0
+Yogurt bianco,Liters,1000.0,36.0,0.0,0.0
 Gelato artigianale,Grams,100.0,4.5,0.0,1.0
 Gelato artigianale,Item,100.0,4.5,0.0,1.0
 Plumcake,Grams,100.0,1.0,0.0,10.0
@@ -365,9 +365,7 @@ Succo di prugna,Liters,1000.0,0.0,35.0,0.0
 Albicocche secche,Grams,100.0,0.0,7.5,0.0
 Albicocche secche,Item,100.0,0.0,7.5,0.0
 Mele essiccate,Cup,240.0,0.0,12.0,0.0
-Mele essiccate,Glass,200.0,0.0,10.0,0.0
 Mele essiccate,Grams,100.0,0.0,5.0,0.0
-Mele essiccate,Liters,1000.0,0.0,50.0,0.0
 Caramelle sugar-free con sorbitolo,Grams,100.0,0.0,155.556,0.0
 Caramelle sugar-free con sorbitolo,Item,30.0,0.0,46.667,0.0
 Gomme da masticare sugar-free,Grams,100.0,0.0,60.0,0.0
