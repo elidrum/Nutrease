@@ -107,6 +107,7 @@ class Patient(User):
             "surname": self.surname,
             "password": self.password,
             "alarms": [asdict(a) for a in self.alarms],
+            "profile_note": self.profile_note,
         }
 
 @dataclass(eq=False)

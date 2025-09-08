@@ -6,6 +6,7 @@ from typing import Dict
 
 import streamlit as st
 from streamlit.runtime.scriptrunner import StopException
+from nutrease.ui.sidebar import render_notifications
 
 st.set_page_config(page_title="Nutrease", layout="wide", page_icon="🥑")
 
@@ -70,6 +71,12 @@ else:
 
     _render_page(items[choice])
 
+    if role == "patient":
+        controllers = st.session_state.get("controllers", {})
+        pc = controllers.get("patient")
+        if pc is not None:
+            render_notifications(pc)
+
     st.sidebar.markdown("---")
     if st.sidebar.button("Logout", type="primary", key="logout_btn"):
         st.session_state.logout_confirm = True  # type: ignore[attr-defined]
@@ -93,5 +100,3 @@ else:
         """,
         unsafe_allow_html=True,
     )
-
-#prova
