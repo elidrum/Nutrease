@@ -31,7 +31,9 @@ def main() -> None:  # noqa: D401 – imperative name by design
     st.title("💬 Chat Paziente-Specialista")
 
     if isinstance(user, Specialist):
-        sc: SpecialistController | None = controllers.get("specialist")  # type: ignore[assignment]
+        sc: SpecialistController | None = controllers.get(
+            "specialist"
+        )  # type: ignore[assignment]
         if sc is None:
             st.error("Controller non disponibile.")
             st.stop()
@@ -46,7 +48,9 @@ def main() -> None:  # noqa: D401 – imperative name by design
         sel = st.selectbox("Seleziona paziente", labels)
         link = conns[labels.index(sel)]
     else:
-        pc: PatientController | None = controllers.get("patient")  # type: ignore[assignment]
+        pc: PatientController | None = controllers.get(
+            "patient"
+        )  # type: ignore[assignment]
         if pc is None:
             st.error("Controller non disponibile.")
             st.stop()
@@ -76,7 +80,11 @@ def main() -> None:  # noqa: D401 – imperative name by design
         else:
             for msg in conv:
                 align = "💬" if msg.sender == user else "📨"
-                sender_tag = "<b>Io</b>" if msg.sender == user else msg.sender.email
+                sender_tag = (
+                    "<b>Io</b>"
+                    if msg.sender == user
+                    else f"{msg.sender.name} {msg.sender.surname}"
+                )
                 ts = msg.sent_at.strftime("%d/%m %H:%M")
                 st.markdown(
                     f"{align} {sender_tag} – {ts}<br>{msg.text}",
@@ -84,16 +92,16 @@ def main() -> None:  # noqa: D401 – imperative name by design
                 )
 
     # ------------------ invio ------------------------------------------
-    st.text_area("Nuovo messaggio", key="msg_text")
+    msg_text = st.text_area("Nuovo messaggio", key="msg_text")
     if st.button("Invia", use_container_width=True):
-        text = st.session_state.msg_text.strip()
+        text = msg_text.strip()
         if text:
             try:
                 if isinstance(user, Specialist):
                     sc.send_message(link.patient, text)
                 else:
                     pc.send_message(link.specialist, text)
-                st.session_state.pop("msg_text", None)
+                st.session_state.msg_text = ""
                 st.rerun()
             except Exception:  # pragma: no cover - best effort
                 st.error(
