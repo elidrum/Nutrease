@@ -40,13 +40,13 @@ except ModuleNotFoundError:
                     p_rows = db.search(Patient, email=p_data)
                     if not p_rows:
                         continue
-                    p_data = p_rows[0]
+                    p_data = p_rows[-1]
                 s_data = row["specialist"]
                 if isinstance(s_data, str):
                     s_rows = db.search(Specialist, email=s_data)
                     if not s_rows:
                         continue
-                    s_data = s_rows[0]
+                    s_data = s_rows[-1]
                 patient = Patient(
                     **{k: v for k, v in p_data.items() if not k.startswith("__")}
                 )

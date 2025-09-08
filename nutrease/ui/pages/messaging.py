@@ -24,6 +24,12 @@ def main() -> None:  # noqa: D401 – imperative name by design
     controllers = st.session_state.get("controllers", {})
     user = st.session_state.get("current_user")
 
+    # Clear the message input if a previous send requested it. This must
+    # happen *before* widgets with the same key are instantiated, otherwise
+    # Streamlit raises an error when trying to modify the session state.
+    if st.session_state.pop("clear_msg_text", False):
+        st.session_state["msg_text"] = ""
+
     if user is None:
         st.error("Effettua prima il login.")
         st.stop()
@@ -103,7 +109,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     "Riprova più tardi."
                 )
             else:
-                st.session_state.msg_text = ""
+                st.session_state["clear_msg_text"] = True
                 st.rerun()
 
 

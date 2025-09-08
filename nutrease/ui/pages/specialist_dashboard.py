@@ -18,8 +18,6 @@ from nutrease.models.communication import LinkRequest
 from nutrease.models.enums import Nutrient, RecordType
 from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.models.user import Patient
-from nutrease.utils.database import Database
-
 
 # ---------------------------------------------------------------------------
 # MAIN ENTRY
@@ -49,7 +47,10 @@ def main() -> None:  # noqa: D401 – imperative name by design
             for lr in pending:
                 with st.container(border=True):
                     st.markdown(
-                        f"**{lr.patient.email}** – _{lr.comment or 'no comment'}_&nbsp;&nbsp;",
+                        (
+                            f"**{lr.patient.email}** – "
+                            f"_{lr.comment or 'no comment'}_&nbsp;&nbsp;"
+                        ),
                         unsafe_allow_html=True,
                     )
                     acc_col, rej_col = st.columns(2)
@@ -78,7 +79,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
         sel_label = st.selectbox("Seleziona paziente", list(patient_options.keys()))
         selected_patient: Patient = patient_options[sel_label]
 
-       # --- azioni su paziente -----------------------------------------
+        # --- azioni su paziente -----------------------------------------
         view_col, unlink_col = st.columns(2)
         if view_col.button("Visualizza paziente", key="view_patient_btn"):
             st.session_state["view_patient"] = sel_label
@@ -96,17 +97,13 @@ def main() -> None:  # noqa: D401 – imperative name by design
                 st.markdown(f"**Cognome:** {selected_patient.surname}")
                 st.markdown(f"**Email:** {selected_patient.email}")
                 st.text_area(
-                    "Note personali",
+                    "Note personali del paziente",
                     value=selected_patient.profile_note,
-                    key="pat_note",
+                    key=f"pat_note_{selected_patient.email}",
+                    disabled=True,
                 )
-                if st.button("Salva scheda", key="save_note"):
-                    selected_patient.profile_note = st.session_state.pat_note
-                    db = Database.default()
-                    db.save(selected_patient)
-                    st.success("Scheda paziente aggiornata")
-                                      
-# ---------------- intervallo date ------------------------------
+
+        # ---------------- intervallo date ------------------------------
         st.divider()
         st.subheader("Diario paziente")
         col_from, col_to = st.columns(2)
@@ -125,7 +122,9 @@ def main() -> None:  # noqa: D401 – imperative name by design
             st.error("La data iniziale deve precedere la data finale.")
             st.stop()
 
-        n_sel = None if nutrient_filter == "Tutti" else Nutrient.from_str(nutrient_filter)
+        n_sel = (
+            None if nutrient_filter == "Tutti" else Nutrient.from_str(nutrient_filter)
+        )
 
         for offset in range((end_day - start_day).days + 1):
             day = start_day + timedelta(days=offset)
@@ -142,7 +141,10 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     with st.expander(f"🍽️ Pasto – {rec.created_at:%H:%M}"):
                         for p in meal.portions:
                             st.markdown(
-                                f"- {p.quantity} {p.unit.value.title()} di **{p.food_name}**"
+                                (
+                                    f"- {p.quantity} {p.unit.value.title()} "
+                                    f"di **{p.food_name}**"
+                                )
                             )
                         if n_sel is None:
                             cols = st.columns(len(Nutrient))
@@ -161,6 +163,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
                         st.write(sym.symptom)
                         st.write(f"Intensità: {sym.severity.value}")
+
 
 # ---------------------------------------------------------------------------
 # Debug standalone (facoltativo)
