@@ -12,9 +12,11 @@ Implemented behaviours
   conversation log and returns it when the link is active.
 """
 
-from dataclasses import asdict
+from dataclasses import asdict, field
 from datetime import datetime
 from typing import List
+
+from nutrease.utils.tz import local_now
 
 from pydantic.dataclasses import dataclass
 
@@ -36,7 +38,7 @@ class Message:
     sender: User
     receiver: User
     text: str
-    sent_at: datetime = datetime.now()
+    sent_at: datetime = field(default_factory=local_now)
 
     def __repr__(self) -> str:  # noqa: D401 – imperative
         direction = f"{self.sender.email} → {self.receiver.email}"
@@ -57,7 +59,7 @@ class LinkRequest:
     id: int = 0
     state: LinkRequestState = LinkRequestState.PENDING
     comment: str = ""
-    requested_at: datetime = datetime.now()
+    requested_at: datetime = field(default_factory=local_now)
     responded_at: datetime | None = None
     messages: List[Message] | None = None
 
@@ -94,13 +96,13 @@ class LinkRequest:
         if self.state != LinkRequestState.PENDING:
             raise RuntimeError("La richiesta è già stata processata.")
         self.state = LinkRequestState.CONNECTED
-        self.responded_at = datetime.now()
+        self.responded_at = local_now()
 
     def reject(self) -> None:  # noqa: D401 – imperative
         if self.state != LinkRequestState.PENDING:
             raise RuntimeError("La richiesta è già stata processata.")
         self.state = LinkRequestState.REJECTED
-        self.responded_at = datetime.now()
+        self.responded_at = local_now()
 
     # .....................................................................
     # Messaging
@@ -113,6 +115,6 @@ class LinkRequest:
         if sender not in {self.patient, self.specialist}:
             raise PermissionError("Mittente non autorizzato in questa connessione.")
         receiver: User = self.specialist if sender is self.patient else self.patient
-        msg = Message(sender=sender, receiver=receiver, text=text, sent_at=datetime.now())
+        msg = Message(sender=sender, receiver=receiver, text=text, sent_at=local_now())
         self.messages.append(msg)
         return msg

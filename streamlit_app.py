@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import importlib
 from types import ModuleType
 from typing import Dict
@@ -37,7 +35,7 @@ def _render_page(module_path: str) -> None:
 user = st.session_state.get("current_user")
 role = None
 if user:
-    from nutrease.models.user import Patient # local import
+    from nutrease.models.user import Patient  # local import
 
     role = "patient" if isinstance(user, Patient) else "specialist"
 
@@ -68,15 +66,6 @@ else:
         }
 
     choice = st.sidebar.radio("Menu", list(items.keys()))
-
-    _render_page(items[choice])
-
-    if role == "patient":
-        controllers = st.session_state.get("controllers", {})
-        pc = controllers.get("patient")
-        if pc is not None:
-            render_notifications(pc)
-
     st.sidebar.markdown("---")
     if st.sidebar.button("Logout", type="primary", key="logout_btn"):
         st.session_state.logout_confirm = True  # type: ignore[attr-defined]
@@ -85,9 +74,18 @@ else:
         col_yes, col_no = st.sidebar.columns(2)
         if col_yes.button("Si", key="logout_yes"):
             st.session_state.clear()
-            st.rerun()
+            _render_page("nutrease.ui.pages.login")
+            st.stop()
         if col_no.button("No", key="logout_no"):
             del st.session_state["logout_confirm"]
+
+    if role == "patient":
+        controllers = st.session_state.get("controllers", {})
+        pc = controllers.get("patient")
+        if pc is not None:
+            render_notifications(pc)
+
+    _render_page(items[choice])
 
     st.sidebar.markdown(
         """
