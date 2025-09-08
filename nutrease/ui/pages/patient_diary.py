@@ -34,7 +34,7 @@ def main() -> None:  # noqa: D401
         st.error("Devi prima effettuare il login come paziente.")
         st.stop()
 
-    # ---------------- Selettore giorno -----------------------------------
+       # ---------------- Selettore giorno -----------------------------------
     st.title("📒 Diario alimentare")
     sel_day: date = st.date_input("Giorno", value=date.today())
     diary = pc.get_diary(sel_day) or DailyDiary(
@@ -56,7 +56,7 @@ def main() -> None:  # noqa: D401
                             f"- {p.quantity} {p.unit.value.title()} "
                             f"di **{p.food_name}**"
                         )
-                    if st.button("Modifica", key=f"edit_{rec.id}"):
+                    if st.button("Modifica", key=f"edit_btn_{rec.id}"):
                         st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()
                     if st.session_state.get(f"edit_{rec.id}"):
@@ -98,7 +98,7 @@ def main() -> None:  # noqa: D401
                         f"Sintomo: **{sym.symptom}**  \n"
                         f"Intensità: **{sym.severity.value}**",
                     )
-                    if st.button("Modifica", key=f"edit_{rec.id}"):
+                    if st.button("Modifica", key=f"edit_btn_{rec.id}"):
                         st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()
                     if st.session_state.get(f"edit_{rec.id}"):

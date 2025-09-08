@@ -80,7 +80,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
 
        # --- azioni su paziente -----------------------------------------
         view_col, unlink_col = st.columns(2)
-        if view_col.button("Visualizza paziente", key="view_patient"):
+        if view_col.button("Visualizza paziente", key="view_patient_btn"):
             st.session_state["view_patient"] = sel_label
         if unlink_col.button("Scollega paziente", key="unlink"):
             try:
