@@ -7,7 +7,6 @@ Funzionalità:
 * Lista record (pasti / sintomi) con pulsante «Elimina»
 * Form «Aggiungi pasto» / «Aggiungi sintomo»
 * Configurazione promemoria diario
-* Riepilogo nutrienti giornalieri
 """
 
 from datetime import date, time
@@ -16,7 +15,7 @@ from typing import List, Sequence  # noqa: F401 (usati in forward refs)
 import streamlit as st
 
 from nutrease.models.diary import DailyDiary, Day
-from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
+from nutrease.models.enums import RecordType, Severity, Unit
 from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.utils.database import (  # noqa: F401 – placeholder per futuri use-cases
     Database,
@@ -101,9 +100,6 @@ def main() -> None:  # noqa: D401
                             f"- {p.quantity} {p.unit.value.title()} "
                             f"di **{p.food_name}**"
                         )
-                    cols = st.columns(len(Nutrient))
-                    for col, n in zip(cols, Nutrient):
-                        col.metric(n.value.title(), f"{meal.get_nutrient_total(n):.1f}")
                     if st.button("Modifica", key=f"edit_{rec.id}"):
                         st.session_state[f"edit_{rec.id}"] = True
                         st.rerun()

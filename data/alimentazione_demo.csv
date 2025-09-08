@@ -1,8 +1,8 @@
 food_name,unit,grams,lactose,sorbitol,gluten
-Pane di grano duro,Grams,100.0,0.0,0.0,9.0
-Pane di grano duro,Item,100.0,0.0,0.0,9.0
-Pasta di semola di grano duro,Grams,100.0,0.0,0.0,9.375
-Pasta di semola di grano duro,Item,80.0,0.0,0.0,7.5
+Pane,Grams,100.0,0.0,0.0,9.0
+Pane,Item,100.0,0.0,0.0,9.0
+Pasta,Grams,100.0,0.0,0.0,9.375
+Pasta,Item,80.0,0.0,0.0,7.5
 Pizza Margherita,Grams,100.0,1.25,0.0,5.417
 Pizza Margherita,Slice,120.0,1.5,0.0,6.5
 Focaccia,Grams,100.0,0.0,0.0,8.5
@@ -19,11 +19,10 @@ Gnocchi di patate,Cup,240.0,0.0,0.0,6.4
 Gnocchi di patate,Glass,200.0,0.0,0.0,5.333
 Gnocchi di patate,Grams,100.0,0.0,0.0,2.667
 Gnocchi di patate,Item,150.0,0.0,0.0,4.0
-Gnocchi di patate,Liters,1000.0,0.0,0.0,26.667
 Parmigiana di melanzane,Grams,100.0,1.25,0.0,2.0
 Parmigiana di melanzane,Item,200.0,2.5,0.0,4.0
-Mozzarella vaccina,Grams,100.0,2.5,0.0,0.0
-Mozzarella vaccina,Item,100.0,2.5,0.0,0.0
+Mozzarella,Grams,100.0,2.5,0.0,0.0
+Mozzarella,Item,100.0,2.5,0.0,0.0
 Feta,Grams,100.0,1.5,0.0,0.0
 Feta,Item,100.0,1.5,0.0,0.0
 Yogurt bianco intero,Cup,240.0,8.64,0.0,0.0
