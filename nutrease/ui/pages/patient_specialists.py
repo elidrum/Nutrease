@@ -5,9 +5,10 @@ from __future__ import annotations
 import streamlit as st
 
 from nutrease.controllers.patient_controller import PatientController
-from nutrease.models.communication import LinkRequestState
+from nutrease.models.enums import LinkRequestState
 from nutrease.models.user import Specialist
 from nutrease.utils.database import Database
+
 
 
 def main() -> None:  # noqa: D401 – imperative

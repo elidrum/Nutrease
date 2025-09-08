@@ -6,9 +6,9 @@ import logging
 from datetime import date, datetime
 from typing import List
 
-from nutrease.models.communication import LinkRequest, LinkRequestState, Message
+from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.diary import DailyDiary, Day
-from nutrease.models.enums import Nutrient, Severity, Unit
+from nutrease.models.enums import LinkRequestState, Nutrient, Severity, Unit
 from nutrease.models.record import FoodPortion, MealRecord, Record, SymptomRecord
 from nutrease.models.user import Patient, Specialist
 from nutrease.utils.database import Database

@@ -16,9 +16,9 @@ import logging
 from datetime import date, datetime, time
 from typing import List
 
-from nutrease.models.communication import LinkRequest, LinkRequestState, Message
+from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.diary import DailyDiary
-from nutrease.models.enums import Nutrient, RecordType, Severity, Unit
+from nutrease.models.enums import LinkRequestState, Nutrient, RecordType, Severity, Unit
 from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
@@ -30,7 +30,6 @@ from nutrease.models.record import (  # isort: skip
     Record,
     SymptomRecord,
 )
-
 logger = logging.getLogger(__name__)
 
 __all__ = ["PatientController"]
