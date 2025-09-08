@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import List
 
 import streamlit as st
-
+from streamlit.runtime.scriptrunner import RerunException
 from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.communication import Message
@@ -103,6 +103,9 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     sc.send_message(link.patient, text)
                 else:
                     pc.send_message(link.specialist, text)
+            except RerunException:
+                # Propagate rerun request so Streamlit can handle it
+                raise
             except Exception:  # pragma: no cover - best effort
                 st.error(
                     "Errore interno durante l'invio del messaggio. "

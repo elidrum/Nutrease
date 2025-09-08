@@ -144,9 +144,17 @@ class FoodPortion(AlimentazioneDataset):
 
     # ------------------------------------------------------------------
     def to_grams(self) -> float:  # noqa: D401
-        """Converte la porzione in grammi usando il dataset."""
-        grams = self.get_grams_per_unit()
-        return grams * self.quantity
+        """Converte la porzione in grammi usando il dataset.
+
+        Se l'alimento o l'unità non sono presenti nel dataset, assume che la
+        quantità sia già espressa in grammi e restituisce ``self.quantity``
+        senza sollevare eccezioni.
+        """
+        try:
+            grams = self.get_grams_per_unit()
+            return grams * self.quantity
+        except KeyError:
+            return self.quantity
 
     def as_dict(self) -> dict:  # noqa: D401
         """Serializza in dict JSON-friendly."""
