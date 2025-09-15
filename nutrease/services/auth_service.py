@@ -123,10 +123,69 @@ class _DBUserRepo:  # noqa: D101 – interno
                 except ValueError:
                     pass
         if is_patient:
+            filtered["alarms"] = self._normalise_alarms(filtered.get("alarms", []))
             patient: Patient = cls(**filtered)  # type: ignore[call-arg]
             self._populate_diaries(patient)
             return patient
         return cls(**filtered)
+    
+    
+    def _normalise_alarms(self, raw_alarms: Any) -> list:
+        """Convert persisted alarm payloads into :class:`AlarmConfig` objects."""
+
+        from nutrease.models.diary import AlarmConfig  # local import
+
+        normalised: list[AlarmConfig] = []
+        if not isinstance(raw_alarms, list):
+            return normalised
+
+        for raw in raw_alarms:
+            if isinstance(raw, AlarmConfig):
+                normalised.append(raw)
+                continue
+            if not isinstance(raw, dict):
+                continue
+
+            hour = raw.get("hour", 8)
+            minute = raw.get("minute", 0)
+            days = raw.get("days", list(range(7)))
+            enabled = raw.get("enabled", True)
+
+            try:
+                hour_int = int(hour)
+            except (TypeError, ValueError):
+                hour_int = 8
+            try:
+                minute_int = int(minute)
+            except (TypeError, ValueError):
+                minute_int = 0
+
+            if isinstance(days, list):
+                days_int: list[int] = []
+                for d in days:
+                    try:
+                        days_int.append(int(d))
+                    except (TypeError, ValueError):
+                        continue
+            else:
+                days_int = list(range(7))
+
+            if isinstance(enabled, str):
+                enabled_bool = enabled.strip().lower() not in {"false", "0", "no"}
+            else:
+                enabled_bool = bool(enabled)
+
+            normalised.append(
+                AlarmConfig(
+                    hour=hour_int,
+                    minute=minute_int,
+                    days=days_int,
+                    enabled=enabled_bool,
+                )
+            )
+
+        return normalised
+
 
 
     def _populate_diaries(self, patient: Patient) -> None:
