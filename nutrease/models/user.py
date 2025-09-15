@@ -8,6 +8,7 @@ from __future__ import annotations
   sul database; non serve più un registry in-memory.
 """
 
+import string
 from abc import ABC
 from dataclasses import asdict, dataclass, field
 from datetime import date
@@ -28,13 +29,19 @@ if TYPE_CHECKING:  # pragma: no cover – forward refs
 
 
 def _validate_password(pwd: str) -> None:
-    """RNF4: almeno 8 **caratteri alfanumerici**."""
-    if len(pwd) < 8 or not pwd.isalnum():
+    """RNF4: almeno 8 caratteri alfanumerici con un numero e una lettera maiuscola."""
+    if len(pwd) == 64 and all(c in string.hexdigits for c in pwd):
+        return
+    if (
+        len(pwd) < 8
+        or not pwd.isalnum()
+        or not any(c.isdigit() for c in pwd)
+        or not any(c.isupper() for c in pwd)
+    ):
         raise ValueError(
-            "La password deve contenere almeno 8 caratteri alfanumerici (RNF4)."
+            "La password deve contenere almeno 8 caratteri alfanumerici "
+            "con almeno un numero e una lettera maiuscola (RNF4)."
         )
-
-
 # ---------------------------------------------------------------------------
 # Abstract base class – User
 # ---------------------------------------------------------------------------

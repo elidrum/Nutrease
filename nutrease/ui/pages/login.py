@@ -107,14 +107,19 @@ def main() -> None:  # noqa: D401
     with main_tabs[1]:
         sub_tabs = st.tabs(["Paziente", "Specialista"])
 
-         # -------------------- Paziente ---------------------------------
+        # -------------------- Paziente ---------------------------------
         with sub_tabs[0]:
             st.subheader("Registrazione Paziente")
             p_name = st.text_input("Nome", key="p_name")
             p_surname = st.text_input("Cognome", key="p_surname")
             p_email = _clean_email(st.text_input("E-mail", key="p_email"))
             p_pwd1 = st.text_input(
-                "Password (≥8 alfanumerici)", type="password", key="p_pwd1"
+                (
+                    "Password (≥8 alfanumerici, "
+                    "almeno 1 numero e 1 lettera maiuscola)"
+                ),
+                type="password",
+                key="p_pwd1",
             )
             p_pwd2 = st.text_input("Conferma Password", type="password", key="p_pwd2")
 
@@ -147,7 +152,12 @@ def main() -> None:  # noqa: D401
                 "Categoria", [c.value for c in SpecialistCategory], key="s_cat"
             )
             s_pwd1 = st.text_input(
-                "Password (≥8 alfanumerici)", type="password", key="s_pwd1"
+                (
+                    "Password (≥8 alfanumerici, "
+                    "almeno 1 numero e 1 lettera maiuscola)"
+                ),
+                type="password",
+                key="s_pwd1",
             )
             s_pwd2 = st.text_input("Conferma Password", type="password", key="s_pwd2")
 
