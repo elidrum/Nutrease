@@ -42,7 +42,7 @@ def _render_page(module_path: str) -> None:
 user = st.session_state.get("current_user")
 role = None
 if user:
-    from nutrease.models.user import Patient, Specialist  # local import
+    from nutrease.models.user import Patient  # local import
 
     role = "patient" if isinstance(user, Patient) else "specialist"
 

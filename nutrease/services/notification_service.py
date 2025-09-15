@@ -17,7 +17,6 @@ import time
 from datetime import datetime
 from typing import Callable, List
 
-from nutrease.models.diary import AlarmConfig
 from nutrease.models.user import Patient
 
 logger = logging.getLogger(__name__)

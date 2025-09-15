@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import List, Sequence
+from typing import List
 
 from nutrease.models.communication import Message
 from nutrease.models.user import User
@@ -33,9 +33,9 @@ class MessagingController:
             sent_at=datetime.now(),
         )
         if self._db:
-            self._db.save(msg)                    # persiste
+            self._db.save(msg) # persiste
         else:
-            self._store.append(msg)               # fallback
+            self._store.append(msg) # fallback
         return msg
 
     def conversation(self, u1: User, u2: User) -> List[Message]:
@@ -55,16 +55,14 @@ class MessagingController:
                     sender=u1 if d["sender"] == u1.email else u2,
                     receiver=u2 if d["receiver"] == u2.email else u1,
                     text=d["text"],
-                    sent_at=datetime.fromisoformat(d["sent_at"])
-                    if isinstance(d["sent_at"], str)
-                    else d["sent_at"],
+                     sent_at=(
+                        datetime.fromisoformat(d["sent_at"])
+                        if isinstance(d["sent_at"], str)
+                        else d["sent_at"]
+                    ),
                 )
                 for d in raw
             ]
         else:
-            conv = [
-                m
-                for m in self._store
-                if {m.sender, m.receiver} == {u1, u2}
-            ]
+            conv = [m for m in self._store if {m.sender, m.receiver} == {u1, u2}]
         return sorted(conv, key=lambda m: m.sent_at)
