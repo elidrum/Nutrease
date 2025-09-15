@@ -1,0 +1,340 @@
+{
+  "Specialist": {
+    "1": {
+      "email": "sergioridolfi@gmail.com",
+      "name": "Sergio",
+      "surname": "Ridolfi",
+      "password": "Sergioridolfi3",
+      "category": "NUTRITIONIST",
+      "bio": "",
+      "__type__": "Specialist"
+    },
+    "2": {
+      "email": "marcoelisei@gmail.com",
+      "name": "Marco",
+      "surname": "Elisei",
+      "password": "Marcoelisei3",
+      "category": "DIETICIAN",
+      "bio": "",
+      "__type__": "Specialist"
+    }
+  },
+  "Patient": {
+    "1": {
+      "email": "eliasampaolesi@gmail.com",
+      "name": "Elia",
+      "surname": "Sampaolesi",
+      "password": "EliaSampaolesi3",
+      "alarms": [
+        {
+          "hour": 21,
+          "minute": 0,
+          "enabled": true,
+          "days": [
+            0,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6
+          ]
+        }
+      ],
+      "profile_note": "",
+      "__type__": "Patient"
+    },
+    "2": {
+      "email": "nicolopiccini@gmail.com",
+      "name": "Nicolò",
+      "surname": "Piccini",
+      "password": "Nicolopiccini3",
+      "alarms": [],
+      "profile_note": "",
+      "__type__": "Patient"
+    }
+  },
+  "MealRecord": {
+    "1": {
+      "id": 1,
+      "created_at": "2024-05-01T12:00:00+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "eliasampaolesi@gmail.com",
+      "portions": [
+        {
+          "food_name": "Pasta",
+          "quantity": 100,
+          "unit": "GRAMS",
+          "nutrients": [
+            {
+              "nutrient": "GLUTEN",
+              "grams": 937.5
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "2": {
+      "id": 2,
+      "created_at": "2024-05-01T20:00:00+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "eliasampaolesi@gmail.com",
+      "portions": [
+        {
+          "food_name": "Mela",
+          "quantity": 1,
+          "unit": "ITEM",
+          "nutrients": [
+            {
+              "nutrient": "SORBITOL",
+              "grams": 0.8
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "3": {
+      "id": 3,
+      "created_at": "2024-05-02T13:00:00+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "eliasampaolesi@gmail.com",
+      "portions": [
+        {
+          "food_name": "Riso",
+          "quantity": 150,
+          "unit": "GRAMS",
+          "nutrients": [
+            {
+              "nutrient": "LACTOSE",
+              "grams": 75.0
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "4": {
+      "id": 4,
+      "created_at": "2024-05-02T09:00:00+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "nicolopiccini@gmail.com",
+      "portions": [
+        {
+          "food_name": "Banana",
+          "quantity": 1,
+          "unit": "ITEM",
+          "nutrients": [
+            {
+              "nutrient": "LACTOSE",
+              "grams": 0.01
+            },
+            {
+              "nutrient": "GLUTEN",
+              "grams": 0.07
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    }
+  },
+  "SymptomRecord": {
+    "1": {
+      "id": 1,
+      "created_at": "2024-05-02T10:00:00+02:00",
+      "note": null,
+      "record_type": "SYMPTOM",
+      "patient_email": "nicolopiccini@gmail.com",
+      "symptom": "Nausea",
+      "severity": "MILD",
+      "__type__": "SymptomRecord"
+    },
+    "2": {
+      "id": 2,
+      "created_at": "2024-05-02T18:00:00+02:00",
+      "note": null,
+      "record_type": "SYMPTOM",
+      "patient_email": "nicolopiccini@gmail.com",
+      "symptom": "Stanchezza",
+      "severity": "MODERATE",
+      "__type__": "SymptomRecord"
+    }
+  },
+  "LinkRequest": {
+    "1": {
+      "patient": {
+        "email": "eliasampaolesi@gmail.com",
+        "name": "Elia",
+        "surname": "Sampaolesi",
+        "password": "EliaSampaolesi3",
+        "alarms": [
+          {
+            "hour": 21,
+            "minute": 0,
+            "enabled": true,
+            "days": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        ],
+        "profile_note": ""
+      },
+      "specialist": {
+        "email": "sergioridolfi@gmail.com",
+        "name": "Sergio",
+        "surname": "Ridolfi",
+        "password": "Sergioridolfi3",
+        "category": "NUTRITIONIST",
+        "bio": ""
+      },
+      "id": 1,
+      "state": "CONNECTED",
+      "comment": "",
+      "requested_at": "2025-09-15T16:35:35.128447+02:00",
+      "responded_at": null,
+      "messages": [
+        {
+          "sender": "eliasampaolesi@gmail.com",
+          "receiver": "sergioridolfi@gmail.com",
+          "text": "Buongiorno Sergio",
+          "sent_at": "2025-09-15T16:35:35.128471+02:00"
+        },
+        {
+          "sender": "sergioridolfi@gmail.com",
+          "receiver": "eliasampaolesi@gmail.com",
+          "text": "Ciao Elia, come va?",
+          "sent_at": "2025-09-15T16:35:35.128477+02:00"
+        }
+      ],
+      "__type__": "LinkRequest"
+    },
+    "2": {
+      "patient": {
+        "email": "eliasampaolesi@gmail.com",
+        "name": "Elia",
+        "surname": "Sampaolesi",
+        "password": "EliaSampaolesi3",
+        "alarms": [
+          {
+            "hour": 21,
+            "minute": 0,
+            "enabled": true,
+            "days": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+            ]
+          }
+        ],
+        "profile_note": ""
+      },
+      "specialist": {
+        "email": "marcoelisei@gmail.com",
+        "name": "Marco",
+        "surname": "Elisei",
+        "password": "Marcoelisei3",
+        "category": "DIETICIAN",
+        "bio": ""
+      },
+      "id": 2,
+      "state": "CONNECTED",
+      "comment": "",
+      "requested_at": "2025-09-15T16:35:35.134365+02:00",
+      "responded_at": null,
+      "messages": [
+        {
+          "sender": "eliasampaolesi@gmail.com",
+          "receiver": "marcoelisei@gmail.com",
+          "text": "Salve Marco",
+          "sent_at": "2025-09-15T16:35:35.134380+02:00"
+        },
+        {
+          "sender": "marcoelisei@gmail.com",
+          "receiver": "eliasampaolesi@gmail.com",
+          "text": "Buonasera Elia",
+          "sent_at": "2025-09-15T16:35:35.134383+02:00"
+        }
+      ],
+      "__type__": "LinkRequest"
+    },
+    "3": {
+      "patient": {
+        "email": "nicolopiccini@gmail.com",
+        "name": "Nicolò",
+        "surname": "Piccini",
+        "password": "Nicolopiccini3",
+        "alarms": [],
+        "profile_note": ""
+      },
+      "specialist": {
+        "email": "sergioridolfi@gmail.com",
+        "name": "Sergio",
+        "surname": "Ridolfi",
+        "password": "Sergioridolfi3",
+        "category": "NUTRITIONIST",
+        "bio": ""
+      },
+      "id": 3,
+      "state": "CONNECTED",
+      "comment": "",
+      "requested_at": "2025-09-15T16:35:35.139494+02:00",
+      "responded_at": null,
+      "messages": [
+        {
+          "sender": "nicolopiccini@gmail.com",
+          "receiver": "sergioridolfi@gmail.com",
+          "text": "Buongiorno dottore",
+          "sent_at": "2025-09-15T16:35:35.139508+02:00"
+        },
+        {
+          "sender": "sergioridolfi@gmail.com",
+          "receiver": "nicolopiccini@gmail.com",
+          "text": "Buongiorno Nicolò, tutto bene?",
+          "sent_at": "2025-09-15T16:35:35.139512+02:00"
+        }
+      ],
+      "__type__": "LinkRequest"
+    },
+    "4": {
+      "patient": {
+        "email": "nicolopiccini@gmail.com",
+        "name": "Nicolò",
+        "surname": "Piccini",
+        "password": "Nicolopiccini3",
+        "alarms": [],
+        "profile_note": ""
+      },
+      "specialist": {
+        "email": "marcoelisei@gmail.com",
+        "name": "Marco",
+        "surname": "Elisei",
+        "password": "Marcoelisei3",
+        "category": "DIETICIAN",
+        "bio": ""
+      },
+      "id": 4,
+      "state": "CONNECTED",
+      "comment": "",
+      "requested_at": "2025-09-15T16:35:35.143306+02:00",
+      "responded_at": null,
+      "messages": [],
+      "__type__": "LinkRequest"
+    }
+  }
+}

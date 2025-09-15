@@ -35,10 +35,15 @@ Streamlit will display the URL where the interface is available (usually http://
 
 💾 Persistence
 
-Application data are stored locally in 'nutrease_db.json'.  The file is
-ignored by version control so records remain available across app restarts and
-repository updates.  Remove the file or use the application's delete commands
-to reset the stored data.
+Application data are stored in a TinyDB JSON file. The path is configurable
+through the `NUTREASE_DB_PATH` environment variable (defaults to
+`nutrease_db.json`). When using the provided development container, this variable
+is preset to `.db/nutrease_db.json`, which is backed by a Docker volume for
+durable storage. For other deployments, point `NUTREASE_DB_PATH` to any
+persistent location (e.g. a mounted volume or external database service).
+
+A sample `nutrease_db.json` is included in the repository as a starting point;
+copy it to your persistent path if you need initial data.
 
 🧪 Testing & Code Quality
 pytest                 # run the test suite
@@ -60,4 +65,3 @@ Nutrease/
 Distributed under the Apache 2.0 license—see LICENSE for details.
 
 ✨ Happy tracking with Nutrease!
-

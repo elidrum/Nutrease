@@ -2,6 +2,7 @@ from __future__ import annotations
 
 """Very lightweight persistence layer over TinyDB (JSON)."""
 
+import os
 from dataclasses import asdict, is_dataclass
 from datetime import date, datetime
 from enum import Enum
@@ -10,6 +11,7 @@ from threading import Lock
 from typing import Any, Dict, List, Type, TypeVar, overload
 
 from tinydb import Query, TinyDB
+
 from nutrease.models.user import User
 
 T = TypeVar("T")
@@ -19,7 +21,9 @@ class Database:
     _default: "Database | None" = None
 
     # ------------------------- init / singleton -------------------------
-    def __init__(self, path: str | Path = "nutrease_db.json") -> None:
+    def __init__(self, path: str | Path | None = None) -> None:
+        if path is None:
+            path = os.environ.get("NUTREASE_DB_PATH", "nutrease_db.json")
         self._path = Path(path).expanduser()
         # Pretty-print JSON with indentation
         # so data isn't stored on a single line
@@ -31,6 +35,7 @@ class Database:
         if cls._default is None:
             cls._default = cls()
         return cls._default
+
     # ------------------------- internals --------------------------------
     def _table(self, model_or_name: str | Type[Any]):
         if isinstance(model_or_name, str):
