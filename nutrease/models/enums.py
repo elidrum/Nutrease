@@ -49,9 +49,8 @@ class StrEnumMixin(str, Enum):
 
 class Unit(StrEnumMixin):
     """Unit of measure for a food quantity."""
-
-    GLASS = "GLASS"
     GRAMS = "GRAMS"
+    GLASS = "GLASS"
     ITEM = "ITEM"
     CLOVE = "CLOVE"
     LITERS = "LITERS"
