@@ -26,6 +26,7 @@ from nutrease.models.user import Patient, Specialist
 from nutrease.services.auth_service import AuthService
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
+from nutrease.ui.i18n import format_specialist_category
 
 EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
@@ -142,14 +143,27 @@ def main() -> None:  # noqa: D401
                     except Exception as exc:
                         st.error(str(exc))
 
-        # -------------------- Specialista ------------------------------
+         # -------------------- Specialista ------------------------------
         with sub_tabs[1]:
             st.subheader("Registrazione Specialista")
             s_name = st.text_input("Nome", key="s_name")
             s_surname = st.text_input("Cognome", key="s_surname")
             s_email = _clean_email(st.text_input("E-mail", key="s_email"))
+            category_options = list(SpecialistCategory)
+            if "s_cat" not in st.session_state:
+                st.session_state.s_cat = category_options[0]
+            elif isinstance(st.session_state.s_cat, str):
+                try:
+                    st.session_state.s_cat = SpecialistCategory.from_str(
+                        st.session_state.s_cat
+                    )
+                except ValueError:
+                    st.session_state.s_cat = category_options[0]
             s_category = st.selectbox(
-                "Categoria", [c.value for c in SpecialistCategory], key="s_cat"
+                "Categoria",
+                category_options,
+                key="s_cat",
+                format_func=format_specialist_category,
             )
             s_pwd1 = st.text_input(
                 (
@@ -174,7 +188,7 @@ def main() -> None:  # noqa: D401
                             role="SPECIALIST",
                             name=s_name,
                             surname=s_surname,
-                            category=SpecialistCategory.from_str(s_category),
+                            category=s_category,
                         )
                         st.success("Registrazione riuscita! Eseguo login…")
                         _init_controllers(user)  # type: ignore[arg-type]

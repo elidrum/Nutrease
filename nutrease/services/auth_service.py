@@ -128,8 +128,7 @@ class _DBUserRepo:  # noqa: D101 – interno
             self._populate_diaries(patient)
             return patient
         return cls(**filtered)
-    
-    
+
     def _normalise_alarms(self, raw_alarms: Any) -> list:
         """Convert persisted alarm payloads into :class:`AlarmConfig` objects."""
 
@@ -185,8 +184,6 @@ class _DBUserRepo:  # noqa: D101 – interno
             )
 
         return normalised
-
-
 
     def _populate_diaries(self, patient: Patient) -> None:
         from collections import defaultdict

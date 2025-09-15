@@ -8,6 +8,7 @@ from nutrease.controllers.patient_controller import PatientController
 from nutrease.models.enums import LinkRequestState, SpecialistCategory
 from nutrease.models.user import Specialist
 from nutrease.utils.database import Database
+from nutrease.ui.i18n import format_specialist_category
 
 
 
@@ -40,11 +41,11 @@ def main() -> None:  # noqa: D401 – imperative
         specialists.append(Specialist(**data))
 
 
-       # --------------------- elenco completo ------------------------------
+    # --------------------- elenco completo ------------------------------
     with tabs[0]:
         for spec in specialists:
             with st.expander(
-                f"{spec.name} {spec.surname} – {spec.category.value}",
+                f"{spec.name} {spec.surname} – {format_specialist_category(spec.category)}",
                 expanded=False,
             ):
                 st.markdown(spec.bio or "_Nessuna informazione disponibile._")
@@ -86,7 +87,7 @@ def main() -> None:  # noqa: D401 – imperative
             st.info("Nessuno specialista collegato.")
         for spec in linked:
             with st.expander(
-                f"{spec.name} {spec.surname} – {spec.category.value}",
+                f"{spec.name} {spec.surname} – {format_specialist_category(spec.category)}",
                 expanded=False,
             ):
                 st.markdown(spec.bio or "_Nessuna informazione disponibile._")

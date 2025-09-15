@@ -21,6 +21,7 @@ from nutrease.utils.database import (  # noqa: F401 – placeholder per futuri u
     Database,
 )
 from nutrease.utils.tz import local_now
+from nutrease.ui.i18n import format_severity, format_unit
 # ---------------------------------------------------------------------------
 # MAIN
 # ---------------------------------------------------------------------------
@@ -53,7 +54,7 @@ def main() -> None:  # noqa: D401
                     meal: MealRecord = rec  # type: ignore[assignment]
                     for p in meal.portions:
                         st.markdown(
-                            f"- {p.quantity} {p.unit.value.title()} "
+                            f"- {p.quantity} {format_unit(p.unit)} "
                             f"di **{p.food_name}**"
                         )
                     if st.button("Modifica", key=f"edit_btn_{rec.id}"):
@@ -78,13 +79,12 @@ def main() -> None:  # noqa: D401
                                 )
                             )
                             units.append(
-                                Unit.from_str(
-                                    st.selectbox(
-                                        "Unità",
-                                        [u.value for u in Unit],
-                                        index=list(Unit).index(p.unit),
-                                        key=f"eu_{rec.id}_{i}",
-                                    )
+                                st.selectbox(
+                                    "Unità",
+                                    list(Unit),
+                                    index=list(Unit).index(p.unit),
+                                    key=f"eu_{rec.id}_{i}",
+                                    format_func=format_unit,
                                 )
                             )
                         if st.button("Salva", key=f"save_{rec.id}"):
@@ -96,7 +96,7 @@ def main() -> None:  # noqa: D401
                     sym: SymptomRecord = rec  # type: ignore[assignment]
                     st.markdown(
                         f"Sintomo: **{sym.symptom}**  \n"
-                        f"Intensità: **{sym.severity.value}**",
+                        f"Intensità: **{format_severity(sym.severity)}**",
                     )
                     if st.button("Modifica", key=f"edit_btn_{rec.id}"):
                         st.session_state[f"edit_{rec.id}"] = True
@@ -107,16 +107,17 @@ def main() -> None:  # noqa: D401
                         )
                         sev_val = st.selectbox(
                             "Intensità",
-                            [s.value for s in Severity],
+                            list(Severity),
                             index=list(Severity).index(sym.severity),
                             key=f"sev_{rec.id}",
+                            format_func=format_severity,
                         )
                         if st.button("Salva", key=f"save_{rec.id}"):
                             pc.modify_symptom(
                                 sel_day,
                                 rec.id,
                                 sym_val,
-                                Severity.from_str(sev_val),
+                                sev_val,
                                 rec.created_at.time(),
                             )
                             st.session_state.pop(f"edit_{rec.id}")
@@ -138,7 +139,8 @@ def main() -> None:  # noqa: D401
     )
 
     rec_type = st.radio("Tipo di record", ["Pasto", "Sintomo"], horizontal=True)
-    unit_options = [u.value for u in Unit]
+    unit_options = list(Unit)
+    severity_options = list(Severity)
     if st.session_state.pop("meal_added", False):
         st.success("Pasto aggiunto")
         st.session_state.meal_items = [
@@ -148,10 +150,18 @@ def main() -> None:  # noqa: D401
         st.session_state.meal_items = [
             {"food": "", "qty": 0.0, "unit": unit_options[0]}
         ]
+    else:
+        for item in st.session_state.meal_items:
+            if isinstance(item.get("unit"), str):
+                item["unit"] = Unit.from_str(item["unit"])
     if st.session_state.pop("symptom_added", False):
         st.success("Sintomo aggiunto")
         st.session_state.symptom_desc = ""
-        st.session_state.symptom_sev = [s.value for s in Severity][0]
+        st.session_state.symptom_sev = severity_options[0]
+    if "symptom_sev" not in st.session_state:
+        st.session_state.symptom_sev = severity_options[0]
+    elif isinstance(st.session_state.symptom_sev, str):
+        st.session_state.symptom_sev = Severity.from_str(st.session_state.symptom_sev)
 
     if rec_type == "Pasto":
         for idx, item in enumerate(st.session_state.meal_items):
@@ -162,11 +172,15 @@ def main() -> None:  # noqa: D401
             item["qty"] = cols[1].number_input(
                 "Quantità", min_value=0.0, step=0.1, key=f"meal_qty_{idx}", value=item["qty"]
             )
+            current_unit = item.get("unit", unit_options[0])
+            if isinstance(current_unit, str):
+                current_unit = Unit.from_str(current_unit)
             item["unit"] = cols[2].selectbox(
                 "Unità",
                 unit_options,
-                index=unit_options.index(item["unit"]),
+                index=unit_options.index(current_unit),
                 key=f"meal_unit_{idx}",
+                format_func=format_unit,
             )
 
         if st.button("Aggiungi alimento", key="add_food"):
@@ -176,21 +190,17 @@ def main() -> None:  # noqa: D401
             st.rerun()
 
         if st.button("Aggiungi Pasto", use_container_width=True):
-            foods = [
-                it["food"]
-                for it in st.session_state.meal_items
-                if it["food"] and it["qty"] > 0
+            valid_items = [
+                it for it in st.session_state.meal_items if it["food"] and it["qty"] > 0
             ]
-            qtys = [
-                it["qty"]
-                for it in st.session_state.meal_items
-                if it["food"] and it["qty"] > 0
-            ]
-            units = [
-                Unit.from_str(it["unit"])
-                for it in st.session_state.meal_items
-                if it["food"] and it["qty"] > 0
-            ]
+            foods = [it["food"] for it in valid_items]
+            qtys = [it["qty"] for it in valid_items]
+            units: List[Unit] = []
+            for it in valid_items:
+                unit_val = it["unit"]
+                if isinstance(unit_val, str):
+                    unit_val = Unit.from_str(unit_val)
+                units.append(unit_val)
             if foods:
                 try:
                     pc.add_meal(sel_day, record_time, foods, qtys, units)
@@ -203,15 +213,15 @@ def main() -> None:  # noqa: D401
 
     else:
         symptom = st.text_input("Sintomo", key="symptom_desc")
-        severity_str = st.selectbox(
-            "Intensità", [s.value for s in Severity], key="symptom_sev"
+        severity = st.selectbox(
+            "Intensità", severity_options, key="symptom_sev", format_func=format_severity
         )
         if st.button("Aggiungi Sintomo", use_container_width=True):
             if symptom:
                 pc.add_symptom(
                     sel_day,
                     symptom,
-                    Severity.from_str(severity_str),
+                    severity,
                     record_time,
                 )
                 st.session_state.symptom_added = True

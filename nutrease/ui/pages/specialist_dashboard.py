@@ -18,6 +18,7 @@ from nutrease.models.communication import LinkRequest
 from nutrease.models.enums import Nutrient, RecordType
 from nutrease.models.record import MealRecord, SymptomRecord
 from nutrease.models.user import Patient
+from nutrease.ui.i18n import format_nutrient, format_severity, format_unit
 
 # ---------------------------------------------------------------------------
 # MAIN ENTRY
@@ -37,7 +38,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
     # ------ layout: richieste (sx) | pazienti & diario (dx) -------------
     col_req, col_pat = st.columns(2)
 
-    # ------------------- colonna sinistra – richieste -------------------
+  # ------------------- colonna sinistra – richieste -------------------
     with col_req:
         st.subheader("Richieste in attesa")
         pending: List[LinkRequest] = sc.pending_requests()
@@ -49,7 +50,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     st.markdown(
                         (
                             f"**{lr.patient.email}** – "
-                            f"_{lr.comment or 'no comment'}_&nbsp;&nbsp;"
+                            f"_{lr.comment or 'nessun commento'}_&nbsp;&nbsp;"
                         ),
                         unsafe_allow_html=True,
                     )
@@ -103,7 +104,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                     disabled=True,
                 )
 
-        # ---------------- intervallo date ------------------------------
+ # ---------------- intervallo date ------------------------------
         st.divider()
         st.subheader("Diario paziente")
         col_from, col_to = st.columns(2)
@@ -112,19 +113,19 @@ def main() -> None:  # noqa: D401 – imperative name by design
         with col_to:
             end_day: date = st.date_input("A", value=date.today(), key="end_day")
 
+        nutrient_options: list[Nutrient | None] = [None] + list(Nutrient)
         nutrient_filter = st.selectbox(
             "Filtra nutriente (per pasto)",
-            ["Tutti"] + [n.value for n in Nutrient],
+            nutrient_options,
             key="nut_filter",
+            format_func=lambda opt: "Tutti" if opt is None else format_nutrient(opt),
         )
 
         if start_day > end_day:
             st.error("La data iniziale deve precedere la data finale.")
             st.stop()
 
-        n_sel = (
-            None if nutrient_filter == "Tutti" else Nutrient.from_str(nutrient_filter)
-        )
+        n_sel = nutrient_filter
 
         for offset in range((end_day - start_day).days + 1):
             day = start_day + timedelta(days=offset)
@@ -142,7 +143,7 @@ def main() -> None:  # noqa: D401 – imperative name by design
                         for p in meal.portions:
                             st.markdown(
                                 (
-                                    f"- {p.quantity} {p.unit.value.title()} "
+                                    f"- {p.quantity} {format_unit(p.unit)} "
                                     f"di **{p.food_name}**"
                                 )
                             )
@@ -150,19 +151,19 @@ def main() -> None:  # noqa: D401 – imperative name by design
                             cols = st.columns(len(Nutrient))
                             for col, n in zip(cols, Nutrient):
                                 col.metric(
-                                    n.value.title(),
+                                    format_nutrient(n),
                                     f"{meal.get_nutrient_total(n):.1f}",
                                 )
                         else:
                             st.metric(
-                                n_sel.value.title(),
+                                format_nutrient(n_sel),
                                 f"{meal.get_nutrient_total(n_sel):.1f}",
                             )
                 else:
                     sym: SymptomRecord = rec  # type: ignore[assignment]
                     with st.expander(f"🤒 Sintomo – {rec.created_at:%H:%M}"):
                         st.write(sym.symptom)
-                        st.write(f"Intensità: {sym.severity.value}")
+                        st.write(f"Intensità: {format_severity(sym.severity)}")
 
 
 # ---------------------------------------------------------------------------
