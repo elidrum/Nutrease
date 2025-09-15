@@ -5,7 +5,7 @@ from __future__ import annotations
 import streamlit as st
 
 from nutrease.controllers.patient_controller import PatientController
-from nutrease.models.enums import LinkRequestState
+from nutrease.models.enums import LinkRequestState, SpecialistCategory
 from nutrease.models.user import Specialist
 from nutrease.utils.database import Database
 
@@ -30,9 +30,15 @@ def main() -> None:  # noqa: D401 – imperative
         if email in seen:
             continue
         seen.add(email)
-        specialists.append(
-            Specialist(**{k: v for k, v in r.items() if not k.startswith("__")})
-        )
+        data = {k: v for k, v in r.items() if not k.startswith("__")}
+        category = data.get("category")
+        if isinstance(category, str):
+            try:
+                data["category"] = SpecialistCategory.from_str(category)
+            except ValueError:
+                pass
+        specialists.append(Specialist(**data))
+
 
        # --------------------- elenco completo ------------------------------
     with tabs[0]:

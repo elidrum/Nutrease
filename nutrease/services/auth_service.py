@@ -13,8 +13,8 @@ Caratteristiche
 from datetime import datetime
 from hashlib import sha256
 from secrets import token_urlsafe
-from typing import Dict, Literal, Protocol, Type
-
+from typing import Any, Dict, Literal, Protocol, Type
+import string
 from pydantic import EmailStr, TypeAdapter
 
 from nutrease.models.communication import LinkRequest, Message
@@ -62,6 +62,27 @@ class _DBUserRepo:  # noqa: D101 – interno
     # ------------- helpers ----------------------------------------------
     def _key(self, email: str) -> str:
         return email.lower()
+    
+    def _ensure_hashed_password(self, row: Any, model: Type[User]) -> None:
+        """Normalizza password legacy in chiaro persistite nel DB JSON."""
+
+        password = row.get("password") if isinstance(row, dict) else None
+        if not isinstance(password, str):
+            return
+        if len(password) == 64 and all(c in string.hexdigits for c in password):
+            return
+        hashed = _hash(password)
+        row["password"] = hashed
+        doc_id = getattr(row, "doc_id", None)
+        if doc_id is None:
+            return
+        try:
+            self._db._table(model).update({"password": hashed}, doc_ids=[doc_id])
+        except Exception:
+            # Best effort: se TinyDB non consente l'update (p.es. DB read-only)
+            # continuiamo comunque restituendo la password hashata.
+            pass
+
 
     def add(self, user: User) -> None:
         # ``EmailStr`` in Pydantic v2 non è più invocabile direttamente.
@@ -89,13 +110,24 @@ class _DBUserRepo:  # noqa: D101 – interno
         # updates without prior deletion), TinyDB returns them in insertion
         # order.  Use the most recently saved row to reflect the latest data.
         data = rows[-1]
-        filtered = {k: v for k, v in data.items() if not k.startswith("__")}
         cls: Type[User] = Patient if is_patient else Specialist
+        self._ensure_hashed_password(data, cls)
+        filtered: Dict[str, Any] = {
+            k: v for k, v in data.items() if not k.startswith("__")
+        }
+        if not is_patient:
+            category = filtered.get("category")
+            if isinstance(category, str):
+                try:
+                    filtered["category"] = SpecialistCategory.from_str(category)
+                except ValueError:
+                    pass
         if is_patient:
             patient: Patient = cls(**filtered)  # type: ignore[call-arg]
             self._populate_diaries(patient)
             return patient
         return cls(**filtered)
+
 
     def _populate_diaries(self, patient: Patient) -> None:
         from collections import defaultdict

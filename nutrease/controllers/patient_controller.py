@@ -18,7 +18,14 @@ from typing import List
 
 from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.diary import DailyDiary
-from nutrease.models.enums import LinkRequestState, Nutrient, RecordType, Severity, Unit
+from nutrease.models.enums import (
+    LinkRequestState,
+    Nutrient,
+    RecordType,
+    Severity,
+    SpecialistCategory,
+    Unit,
+)
 from nutrease.models.user import Patient, Specialist
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
@@ -60,12 +67,18 @@ def _load_link_requests_from_db() -> None:
                 if not s_rows:
                     continue
                 s_data = s_rows[-1]
-            patient = Patient(
-                **{k: v for k, v in p_data.items() if not k.startswith("__")}
-            )
-            specialist = Specialist(
-                **{k: v for k, v in s_data.items() if not k.startswith("__")}
-            )
+            patient_data = {k: v for k, v in p_data.items() if not k.startswith("__")}
+            specialist_data = {
+                k: v for k, v in s_data.items() if not k.startswith("__")
+            }
+            category = specialist_data.get("category")
+            if isinstance(category, str):
+                try:
+                    specialist_data["category"] = SpecialistCategory.from_str(category)
+                except ValueError:
+                    pass
+            patient = Patient(**patient_data)
+            specialist = Specialist(**specialist_data)
             state = LinkRequestState(row.get("state", LinkRequestState.PENDING))
             requested_at = (
                 datetime.fromisoformat(row.get("requested_at"))

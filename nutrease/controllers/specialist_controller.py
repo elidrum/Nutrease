@@ -8,7 +8,13 @@ from typing import List
 
 from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.diary import DailyDiary, Day
-from nutrease.models.enums import LinkRequestState, Nutrient, Severity, Unit
+from nutrease.models.enums import (
+    LinkRequestState,
+    Nutrient,
+    Severity,
+    SpecialistCategory,
+    Unit,
+)
 from nutrease.models.record import FoodPortion, MealRecord, Record, SymptomRecord
 from nutrease.models.user import Patient, Specialist
 from nutrease.utils.database import Database
@@ -47,12 +53,18 @@ except ModuleNotFoundError:
                     if not s_rows:
                         continue
                     s_data = s_rows[-1]
-                patient = Patient(
-                    **{k: v for k, v in p_data.items() if not k.startswith("__")}
-                )
-                specialist = Specialist(
-                    **{k: v for k, v in s_data.items() if not k.startswith("__")}
-                )
+                patient_data = {k: v for k, v in p_data.items() if not k.startswith("__")}
+                specialist_data = {
+                    k: v for k, v in s_data.items() if not k.startswith("__")
+                }
+                category = specialist_data.get("category")
+                if isinstance(category, str):
+                    try:
+                        specialist_data["category"] = SpecialistCategory.from_str(category)
+                    except ValueError:
+                        pass
+                patient = Patient(**patient_data)
+                specialist = Specialist(**specialist_data)
                 state = LinkRequestState(row.get("state", LinkRequestState.PENDING))
                 requested_at = (
                     datetime.fromisoformat(row.get("requested_at"))
