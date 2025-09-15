@@ -8,18 +8,18 @@ from __future__ import annotations
 """
 
 import datetime as dt
-from dataclasses import field
-from typing import List
-
-from pydantic.dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, List
 
 from nutrease.utils.tz import LOCAL_TZ, local_now
+
+if TYPE_CHECKING:  # pragma: no cover - forward refs
+    from .user import Patient
 
 from .enums import Nutrient
 from .record import MealRecord, Record
 
 __all__ = ["Day", "DailyDiary", "AlarmConfig"]
-
 
 # ---------------------------------------------------------------------------
 # Core – Day
@@ -96,7 +96,7 @@ class AlarmConfig:
 # ---------------------------------------------------------------------------
 
 
-@dataclass(config={"validate_assignment": True})
+@dataclass
 class DailyDiary:
     """Diary of records for a single *Day* and *Patient*."""
 
@@ -148,11 +148,3 @@ class DailyDiary:
             if isinstance(rec, MealRecord):
                 total += rec.get_nutrient_total(nutrient)
         return total
-
-
-# Resolve forward references for dataclasses defined across modules ---------
-from pydantic.dataclasses import rebuild_dataclass  # noqa: E402
-
-from .user import Patient  # noqa: E402
-
-rebuild_dataclass(Patient)

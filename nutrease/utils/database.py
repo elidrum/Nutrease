@@ -20,10 +20,10 @@ class Database:
 
     # ------------------------- init / singleton -------------------------
     def __init__(self, path: str | Path = "nutrease_db.json") -> None:
-        self.path = Path(path).expanduser()
+        self._path = Path(path).expanduser()
         # Pretty-print JSON with indentation
         # so data isn't stored on a single line
-        self._db = TinyDB(self.path, indent=2)
+        self._db = TinyDB(self._path, indent=2)
         self._lock = Lock()
 
     @classmethod
@@ -31,7 +31,6 @@ class Database:
         if cls._default is None:
             cls._default = cls()
         return cls._default
-
     # ------------------------- internals --------------------------------
     def _table(self, model_or_name: str | Type[Any]):
         if isinstance(model_or_name, str):
@@ -142,8 +141,13 @@ class Database:
         with self._lock:
             self._db.truncate()
 
+    @property
+    def path(self) -> Path:  # noqa: D401
+        """Return the filesystem path backing this database."""
+        return self._path
+
     def __repr__(self) -> str:
-        return f"<Database path='{self.path.name}'>"
+        return f"<Database path='{self._path.name}'>"
 
     # -------- pickle support ----------
     def __getstate__(self) -> Dict[str, Any]:  # noqa: D401 - internal helper
@@ -159,11 +163,11 @@ class Database:
         recreated on unpickling.
         """
 
-        return {"path": str(self.path)}
+        return {"path": str(self._path)}
 
     def __setstate__(self, state: Dict[str, Any]) -> None:  # noqa: D401
         """Restore state produced by :meth:`__getstate__`."""
 
-        self.path = Path(state["path"]).expanduser()
-        self._db = TinyDB(self.path, indent=2)
+        self._path = Path(state["path"]).expanduser()
+        self._db = TinyDB(self._path, indent=2)
         self._lock = Lock()

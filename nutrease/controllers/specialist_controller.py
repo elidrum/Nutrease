@@ -104,10 +104,15 @@ class SpecialistController:  # noqa: D101 – documented above
         db: Database | None = None,
         link_store: List[LinkRequest] | None = None,
     ) -> None:
-        self.specialist = specialist
+        self._specialist = specialist
         self._db = db if db is not None else Database.default()
 
         self._link_store = link_store if link_store is not None else _GLOBAL_LR
+
+    @property
+    def specialist(self) -> Specialist:  # noqa: D401
+        """Return the specialist associated with this controller."""
+        return self._specialist
 
     # .....................................................................
     # Link‑request workflow

@@ -123,13 +123,18 @@ class PatientController:  # noqa: D101 – documented above
         notification_service: NotificationService | None = None,
         link_store: List[LinkRequest] | None = None,
     ) -> None:
-        self.patient = patient
+        self._patient = patient
         self._db = db if db is not None else Database.default()
         self._notif = notification_service
         self._link_store = link_store if link_store is not None else _LINK_REQUESTS
 
         if self._notif:
             self._notif.register_patient(patient)
+
+    @property
+    def patient(self) -> Patient:  # noqa: D401
+        """Return the patient associated with this controller."""
+        return self._patient
 
     # ---------------------------------------------------------------------
     # Diary – API “high-level” usate dalla UI

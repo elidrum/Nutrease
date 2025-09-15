@@ -18,13 +18,11 @@ tramite ``_dataset()``.
 """
 
 from abc import ABC, abstractmethod
-from dataclasses import field
+from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, TYPE_CHECKING, Mapping
+from typing import TYPE_CHECKING, List, Mapping
 
 from nutrease.utils.tz import local_now
-
-from pydantic.dataclasses import dataclass
 
 from .enums import Nutrient, RecordType, Severity, Unit
 
@@ -64,9 +62,8 @@ def _dataset() -> "DatasetService":  # noqa: D401
 # Record base
 # ---------------------------------------------------------------------------
 
-
-@dataclass(config={"validate_assignment": True, "repr": True}, kw_only=True)
-class Record(ABC):
+@dataclass(kw_only=True)
+class Record:
     """Base astratta per ogni voce del diario."""
 
     id: int = 0
@@ -74,7 +71,8 @@ class Record(ABC):
     note: str | None = None
 
     # impostato nei sottotipi con object.__setattr__ in __post_init__
-    record_type: RecordType | None = field(init=False, default=None)
+    record_type: RecordType | None = None
+
 
     # ---------------------------------------------------------------------
     def as_dict(self) -> dict:  # noqa: D401
