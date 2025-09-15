@@ -184,13 +184,20 @@ class LinkRequest:
                 if hasattr(self.patient, "as_dict")
                 else asdict(self.patient)
             ),
-            "specialist": asdict(self.specialist),
+            "specialist": (
+                self.specialist.as_dict()
+                if hasattr(self.specialist, "as_dict")
+                else asdict(self.specialist)
+            ),
             "id": self.id,
             "state": self.state,
             "comment": self.comment,
             "requested_at": self.requested_at,
             "responded_at": self.responded_at,
-            "messages": [asdict(m) for m in self.messages],
+            "messages": [
+                m.as_dict() if hasattr(m, "as_dict") else asdict(m)
+                for m in self.messages
+            ],
         }
 
     # .....................................................................
