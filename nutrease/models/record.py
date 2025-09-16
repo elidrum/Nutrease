@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-"""Meal & Symptom record models (UML UC 8-12).
+""" Modelli di registrazione di pasti e sintomi
 
 Definisce:
 

@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-"""Patient-side application controller (UML UC 8-12).
+"""Controller dell’applicazione lato paziente
 
 Orchestra le operazioni di diario, allarmi e richieste di collegamento verso
 uno specialista, delegando la logica di dominio ai *model* e ai *service*.
 
-Novità 2025-08:
-* Wrapper di alto livello **add_meal**, **add_symptom**, **remove_record**,
-  **nutrient_total** con firma coerente alla nuova UI Streamlit.
-* Campo autoincrementale ``_next_rec_id`` per assegnare ``Record.id``.
-* ``configure_alarm()`` ora accetta anche lo stato *enabled*.
 """
 
 import logging

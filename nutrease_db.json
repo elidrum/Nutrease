@@ -46,7 +46,7 @@
     },
     "2": {
       "email": "nicolopiccini@gmail.com",
-      "name": "Nicolò",
+      "name": "Nicol\u00f2",
       "surname": "Piccini",
       "password": "Nicolopiccini3",
       "alarms": [],
@@ -57,19 +57,19 @@
   "MealRecord": {
     "1": {
       "id": 1,
-      "created_at": "2025-09-15T12:00:00+02:00",
+      "created_at": "2025-09-16T08:00:00+02:00",
       "note": null,
       "record_type": "MEAL",
-      "patient_email": "eliasampaolesi@gmail.com",
+      "patient_email": "pc@test.com",
       "portions": [
         {
-          "food_name": "Pasta",
-          "quantity": 100,
-          "unit": "GRAMS",
+          "food_name": "Mela",
+          "quantity": 1,
+          "unit": "ITEM",
           "nutrients": [
             {
-              "nutrient": "GLUTEN",
-              "grams": 937.5
+              "nutrient": "SORBITOL",
+              "grams": 0.8
             }
           ]
         }
@@ -137,6 +137,69 @@
             {
               "nutrient": "GLUTEN",
               "grams": 0.07
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "5": {
+      "id": 5,
+      "created_at": "2025-09-16T23:04:12.296889+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "pc@test.com",
+      "portions": [
+        {
+          "food_name": "Mela",
+          "quantity": 2,
+          "unit": "ITEM",
+          "nutrients": [
+            {
+              "nutrient": "SORBITOL",
+              "grams": 1.6
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "6": {
+      "id": 6,
+      "created_at": "2025-09-16T23:08:20.295601+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "pc@test.com",
+      "portions": [
+        {
+          "food_name": "Mela",
+          "quantity": 2,
+          "unit": "ITEM",
+          "nutrients": [
+            {
+              "nutrient": "SORBITOL",
+              "grams": 1.6
+            }
+          ]
+        }
+      ],
+      "__type__": "MealRecord"
+    },
+    "7": {
+      "id": 7,
+      "created_at": "2025-09-16T23:10:44.161668+02:00",
+      "note": null,
+      "record_type": "MEAL",
+      "patient_email": "pc@test.com",
+      "portions": [
+        {
+          "food_name": "Mela",
+          "quantity": 2,
+          "unit": "ITEM",
+          "nutrients": [
+            {
+              "nutrient": "SORBITOL",
+              "grams": 1.6
             }
           ]
         }
@@ -276,7 +339,7 @@
     "3": {
       "patient": {
         "email": "nicolopiccini@gmail.com",
-        "name": "Nicolò",
+        "name": "Nicol\u00f2",
         "surname": "Piccini",
         "password": "Nicolopiccini3",
         "alarms": [],
@@ -305,7 +368,7 @@
         {
           "sender": "sergioridolfi@gmail.com",
           "receiver": "nicolopiccini@gmail.com",
-          "text": "Buongiorno Nicolò, tutto bene?",
+          "text": "Buongiorno Nicol\u00f2, tutto bene?",
           "sent_at": "2025-09-15T16:35:35.139512+02:00"
         }
       ],
@@ -314,7 +377,7 @@
     "4": {
       "patient": {
         "email": "nicolopiccini@gmail.com",
-        "name": "Nicolò",
+        "name": "Nicol\u00f2",
         "surname": "Piccini",
         "password": "Nicolopiccini3",
         "alarms": [],
@@ -336,5 +399,6 @@
       "messages": [],
       "__type__": "LinkRequest"
     }
-  }
+  },
+  "_default": {}
 }

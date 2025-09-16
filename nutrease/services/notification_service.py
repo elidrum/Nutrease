@@ -1,14 +1,16 @@
 from __future__ import annotations
 
-"""Very light notification scheduler based on :class:`AlarmConfig`.
+"""
+Scheduler di notifiche molto leggero basato su :class:`AlarmConfig`.
 
-This implementation uses :pymod:`threading` to avoid blocking the main UI
-thread. In a production Streamlit setup we might switch to *asyncio* tasks or
-an external background worker.
+Questa implementazione usa :pymod:`threading` per evitare di bloccare il thread
+principale della UI. In un setup Streamlit di produzione potremmo passare a
+task *asyncio* o a un worker esterno in background.
 
-The service currently **logs to console** (\U0001F514), but each notification
-is returned via the *callback* hook so that UI layers (e.g. Streamlit) can
-convert it to ``st.toast`` or any other visual.
+Attualmente il servizio **scrive i log in console** (\U0001F514), ma ogni
+notifica viene restituita tramite l’hook *callback* così che i livelli della UI
+(ad es. Streamlit) possano convertirla in ``st.toast`` o in qualunque altro
+elemento visivo.
 """
 
 import logging

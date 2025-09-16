@@ -10,7 +10,6 @@ from nutrease.utils.database import Database
 
 class MessagingController:
     """Gestisce la chat tra paziente e specialista.
-
     Se viene passato un `Database`, i messaggi sono salvati su TinyDB;
     altrimenti restano in memoria (comodo per i test).
     """

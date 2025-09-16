@@ -1,3 +1,13 @@
+"""
+* Punto di ingresso completo dell’app Streamlit.
+* Mostra un menù laterale dinamico basato sul ruolo (paziente o specialista).
+* Reindirizza alla pagina *Login* se l’utente non è autenticato.
+* Importa le pagine on‑demand per ridurre costi di import.
+* Visualizza un logo locale e le notifiche paziente nella sidebar.
+* Gestisce il logout con conferma e pulizia di `st.session_state`.
+* Wrappa il rendering delle pagine per intercettare eventuali `StopException`.
+"""
+
 import importlib
 from types import ModuleType
 from typing import Dict
@@ -8,12 +18,9 @@ from nutrease.ui.sidebar import render_notifications
 
 st.set_page_config(page_title="Nutrease", layout="wide", page_icon="🥑")
 
-# ----------------------------------------------------------------------------
+
 # Helpers
-# ----------------------------------------------------------------------------
-
 _PAGE_CACHE: Dict[str, ModuleType] = {}
-
 
 def _lazy_import(module_path: str) -> ModuleType:
     if module_path not in _PAGE_CACHE:
@@ -29,9 +36,8 @@ def _render_page(module_path: str) -> None:
     except StopException:
         return
 
-# ----------------------------------------------------------------------------
-# Determine user / role from session_state
-# ----------------------------------------------------------------------------
+# Determina l'utente / ruolo da session_state
+
 user = st.session_state.get("current_user")
 role = None
 if user:
@@ -39,14 +45,12 @@ if user:
 
     role = "patient" if isinstance(user, Patient) else "specialist"
 
-# ----------------------------------------------------------------------------
-# Sidebar – navigation menu
-# ----------------------------------------------------------------------------
+# Barra laterale – menu di navigazione
 
 st.sidebar.image("assets/logo.png", width=200)
 
 if role is None:
-    # Only login available
+    # Solo il login è disponibile
     choice = st.sidebar.radio("Menu", ["Login"])
     if choice == "Login":
         _render_page("nutrease.ui.pages.login")
@@ -58,7 +62,7 @@ else:
             "Chat": "nutrease.ui.pages.messaging",
             "Profilo": "nutrease.ui.pages.profile",
         }
-    else:  # specialist
+    else:  # specialisti
         items = {
             "Dashboard": "nutrease.ui.pages.specialist_dashboard",
             "Chat": "nutrease.ui.pages.messaging",

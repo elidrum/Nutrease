@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-"""Domain enums used throughout the Nutrease application.
-
-Each enum inherits from :class:`StrEnumMixin`, which offers a convenient
-:py:meth:`from_str` helper for case‑insensitive parsing from user or file
-input.
+"""
+Enum di dominio usati in tutta l'applicazione Nutrease.
+Ogni enum eredita da :class:`StrEnumMixin`, che offre un comodo
+helper :py:meth:`from_str` per l'analisi case-insensitive di input
+provenienti da utenti o file.
 """
 
 from enum import Enum

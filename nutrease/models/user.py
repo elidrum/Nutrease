@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-"""User domain models (abstract & concrete).
+"""Modelli di dominio utente (astratti e concreti).
 
-* Gestisce la **validazione password** (RNF4).
+* Gestisce la **validazione password** 
 * L’unicità dell’e-mail (RNF6) è demandata a
   :class:`nutrease.services.auth_service.AuthService`, che effettua il check
   sul database; non serve più un registry in-memory.

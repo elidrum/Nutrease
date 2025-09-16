@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-"""Diary‑related domain objects (UML §§ UC8‑12).
+"""
+Oggetti di dominio relativi al diario.
 
-* ``Day`` – wrapper around :class:`datetime.date` to allow future metadata.
-* ``DailyDiary`` – collection of :class:`nutrease.models.record.Record` for a day.
-* ``AlarmConfig`` – simple daily alarm with ``next_activation()`` helper.
+* ``Day`` – wrapper attorno a :class:`datetime.date` per consentire metadati futuri.
+* ``DailyDiary`` – raccolta di :class:`nutrease.models.record.Record` per un giorno.
+* ``AlarmConfig`` – semplice allarme giornaliero con helper ``next_activation()``.
 """
 
 import datetime as dt

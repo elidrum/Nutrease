@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-"""Shared sidebar components for the patient UI."""
+"""
+Componenti condivisi della barra laterale per l'interfaccia utente del paziente.
+"""
 
 from datetime import time
 

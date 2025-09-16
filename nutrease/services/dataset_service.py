@@ -1,20 +1,24 @@
 from __future__ import annotations
 
-"""Nutrient & unit conversion dataset service (RNF7).
+"""
+Servizio di dataset per nutrienti e conversione delle unità.
 
-`AlimentazioneDataset` lazily loads a CSV file *once* and keeps an in‑memory
-(cache) mapping so successive look‑ups are O(1) and filesystem‑free.
+`AlimentazioneDataset` carica in modo lazy un file CSV *una sola volta* e
+mantiene una mappatura in memoria (cache) così che le ricerche successive siano
+O(1) e non accedano più al filesystem.
 
-Expected CSV schema (case‑insensitive columns)::
+Schema CSV previsto (colonne case-insensitive)::
 
     food_name,unit,grams,lactose,sorbitol,gluten
 
-* Multiple rows per ``food_name`` are allowed, one per **unit**.
-* Nutrient columns *must* match :class:`nutrease.models.enums.Nutrient` names.
-* Extra columns are ignored.
+* Sono permesse più righe per ogni ``food_name``, una per ogni **unit**.
+* Le colonne dei nutrienti *devono* corrispondere ai nomi in
+  :class:`nutrease.models.enums.Nutrient`.
+* Le colonne extra vengono ignorate.
 
-The default singleton path is read from env‐var ``NUTREASE_DATASET_PATH`` or
-falls back to ``data/alimentazione_demo.csv`` (created by *scripts.bootstrap*).
+Il percorso singleton predefinito viene letto dalla variabile d’ambiente
+``NUTREASE_DATASET_PATH`` oppure, in mancanza, da
+``data/alimentazione_demo.csv`` (creato da *scripts.bootstrap*).
 """
 
 import os

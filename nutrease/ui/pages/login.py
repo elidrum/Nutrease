@@ -8,8 +8,8 @@ solo al primo import).
 
 Flusso:
 
-1.  **Login** → `AuthService.login()` → `_init_controllers()` → `st.rerun()`
-2.  **Signup** → `AuthService.signup()` → idem sopra
+1.  **Login** -> `AuthService.login()` -> `_init_controllers()` -> `st.rerun()`
+2.  **Signup** -> `AuthService.signup()` -> idem sopra
 3.  Dopo il login il router mostrerà “Diario” (paziente) o “Dashboard”
    (specialista) finché l’utente non clicca «Logout».
 """

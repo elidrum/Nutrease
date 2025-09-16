@@ -2,6 +2,11 @@ from datetime import date, datetime, time
 
 import pytest
 
+"""Test end-to-end dei controller di Nutrease: verificano registrazione dei pasti,
+persistenza dei diari, gestione delle richieste di collegamento e messaggistica
+tra pazienti e specialisti."""
+
+
 from nutrease.controllers.messaging_controller import MessagingController
 from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController

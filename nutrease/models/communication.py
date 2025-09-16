@@ -1,15 +1,16 @@
 from __future__ import annotations
 
-"""Patient–Specialist communication & linking domain objects.
+"""
+Comunicazione Paziente–Specialista e collegamento degli oggetti di dominio.
 
-UML reference: *Communication* package – models Message and LinkRequest.
+Riferimento UML: pacchetto *Communication* – modella Message e LinkRequest.
 
-Implemented behaviours
-----------------------
-* ``LinkRequest.accept()`` → changes state to **CONNECTED**.
-* ``LinkRequest.reject()`` → changes state to **REJECTED**.
-* ``LinkRequest.send_message()`` → creates a :class:`Message`, appends to the
-  conversation log and returns it when the link is active.
+Comportamenti implementati
+--------------------------
+* ``LinkRequest.accept()`` -> cambia lo stato in **CONNECTED**.
+* ``LinkRequest.reject()`` -> cambia lo stato in **REJECTED**.
+* ``LinkRequest.send_message()`` -> crea un :class:`Message`, lo aggiunge al
+  registro della conversazione e lo restituisce quando il collegamento è attivo.
 """
 
 from dataclasses import asdict, dataclass
@@ -24,14 +25,9 @@ from .user import Patient, Specialist, User
 __all__ = ["Message", "LinkRequest"]
 
 
-# ---------------------------------------------------------------------------
-# Message
-# ---------------------------------------------------------------------------
-
-
 @dataclass(init=False)
 class Message:
-    """A single chat message between two users."""
+    """Singolo messaggio tra due utenti"""
 
     _sender: User
     _receiver: User
@@ -84,10 +80,6 @@ class Message:
             "sent_at": self.sent_at,
         }
 
-
-# ---------------------------------------------------------------------------
-# LinkRequest
-# ---------------------------------------------------------------------------
 
 
 @dataclass(init=False)

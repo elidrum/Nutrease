@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-"""Specialist‑side application controller (manage patients & link requests)."""
+"""
+Controller dell’applicazione lato specialista (gestisce pazienti e richieste di collegamento).
+"""
 
 import logging
 from datetime import date, datetime
