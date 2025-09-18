@@ -296,10 +296,21 @@ class AuthService:
         if self._repo.get(email):
             raise ValueError("E-mail già registrata.")
 
+        _validate_password(password)
+
+        name = name.strip()
+        surname = surname.strip()
+        if not name:
+            raise ValueError("Il nome è obbligatorio.")
+        if not surname:
+            raise ValueError("Il cognome è obbligatorio.")
+
+        hashed_password = _hash(password)
+
         if role.upper() == "PATIENT":
             user = Patient(
                 email=email,
-                password=_hash(password),
+                password=hashed_password,
                 name=name,
                 surname=surname,
             )  # type: ignore[arg-type]
@@ -308,7 +319,7 @@ class AuthService:
                 raise ValueError("category richiesto per SPECIALIST.")
             user = Specialist(
                 email=email,
-                password=_hash(password),
+                password=hashed_password,
                 name=name,
                 surname=surname,
                 category=category,

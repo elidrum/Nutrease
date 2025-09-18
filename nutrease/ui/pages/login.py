@@ -22,7 +22,7 @@ import streamlit as st
 from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.enums import SpecialistCategory
-from nutrease.models.user import Patient, Specialist
+from nutrease.models.user import Patient, Specialist, _validate_password
 from nutrease.services.auth_service import AuthService
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
@@ -111,8 +111,8 @@ def main() -> None:  # noqa: D401
         # -------------------- Paziente ---------------------------------
         with sub_tabs[0]:
             st.subheader("Registrazione Paziente")
-            p_name = st.text_input("Nome", key="p_name")
-            p_surname = st.text_input("Cognome", key="p_surname")
+            p_name_input = st.text_input("Nome", key="p_name")
+            p_surname_input = st.text_input("Cognome", key="p_surname")
             p_email = _clean_email(st.text_input("E-mail", key="p_email"))
             p_pwd1 = st.text_input(
                 (
@@ -125,29 +125,40 @@ def main() -> None:  # noqa: D401
             p_pwd2 = st.text_input("Conferma Password", type="password", key="p_pwd2")
 
             if st.button("Registrati come Paziente", use_container_width=True):
-                if not EMAIL_RE.match(p_email):
+                p_name = p_name_input.strip()
+                p_surname = p_surname_input.strip()
+                if not p_name:
+                    st.error("Inserisci il nome.")
+                elif not p_surname:
+                    st.error("Inserisci il cognome.")
+                elif not EMAIL_RE.match(p_email):
                     st.error("E-mail non valida.")
                 elif p_pwd1 != p_pwd2:
                     st.error("Le password non coincidono.")
                 else:
                     try:
-                        user = _get_auth().signup(
-                            p_email,
-                            p_pwd1,
-                            role="PATIENT",
-                            name=p_name,
-                            surname=p_surname,
-                        )
-                        st.success("Registrazione riuscita! Eseguo login…")
-                        _init_controllers(user)  # type: ignore[arg-type]
-                    except Exception as exc:
+                        _validate_password(p_pwd1)
+                    except ValueError as exc:
                         st.error(str(exc))
+                    else:
+                        try:
+                            user = _get_auth().signup(
+                                p_email,
+                                p_pwd1,
+                                role="PATIENT",
+                                name=p_name,
+                                surname=p_surname,
+                            )
+                            st.success("Registrazione riuscita! Eseguo login…")
+                            _init_controllers(user)  # type: ignore[arg-type]
+                        except Exception as exc:
+                            st.error(str(exc))
 
          # -------------------- Specialista ------------------------------
         with sub_tabs[1]:
             st.subheader("Registrazione Specialista")
-            s_name = st.text_input("Nome", key="s_name")
-            s_surname = st.text_input("Cognome", key="s_surname")
+            s_name_input = st.text_input("Nome", key="s_name")
+            s_surname_input = st.text_input("Cognome", key="s_surname")
             s_email = _clean_email(st.text_input("E-mail", key="s_email"))
             category_options = list(SpecialistCategory)
             if "s_cat" not in st.session_state:
@@ -176,24 +187,35 @@ def main() -> None:  # noqa: D401
             s_pwd2 = st.text_input("Conferma Password", type="password", key="s_pwd2")
 
             if st.button("Registrati come Specialista", use_container_width=True):
-                if not EMAIL_RE.match(s_email):
+                s_name = s_name_input.strip()
+                s_surname = s_surname_input.strip()
+                if not s_name:
+                    st.error("Inserisci il nome.")
+                elif not s_surname:
+                    st.error("Inserisci il cognome.")
+                elif not EMAIL_RE.match(s_email):
                     st.error("E-mail non valida.")
                 elif s_pwd1 != s_pwd2:
                     st.error("Le password non coincidono.")
                 else:
                     try:
-                        user = _get_auth().signup(
-                            s_email,
-                            s_pwd1,
-                            role="SPECIALIST",
-                            name=s_name,
-                            surname=s_surname,
-                            category=s_category,
-                        )
-                        st.success("Registrazione riuscita! Eseguo login…")
-                        _init_controllers(user)  # type: ignore[arg-type]
-                    except Exception as exc:
+                        _validate_password(s_pwd1)
+                    except ValueError as exc:
                         st.error(str(exc))
+                    else:
+                        try:
+                            user = _get_auth().signup(
+                                s_email,
+                                s_pwd1,
+                                role="SPECIALIST",
+                                name=s_name,
+                                surname=s_surname,
+                                category=s_category,
+                            )
+                            st.success("Registrazione riuscita! Eseguo login…")
+                            _init_controllers(user)  # type: ignore[arg-type]
+                        except Exception as exc:
+                            st.error(str(exc))
 
     # ------------------------------------------------------------------ #
     # Footer – già loggato                                               #

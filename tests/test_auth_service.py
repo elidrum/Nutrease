@@ -40,7 +40,6 @@ def test_signup_duplicate_email(tmp_path):
             category=SpecialistCategory.DIETICIAN,
         )
 
-
 def test_login_wrong_password(tmp_path):
     db = Database(tmp_path / "db.json")
     auth = AuthService(db=db)
@@ -52,3 +51,49 @@ def test_login_wrong_password(tmp_path):
     )
     with pytest.raises(PermissionError):
         auth.login("p2@example.com", "WrongPass1")
+
+
+def test_signup_rejects_weak_password(tmp_path):
+    db = Database(tmp_path / "db.json")
+    auth = AuthService(db=db)
+    with pytest.raises(ValueError):
+        auth.signup(
+            email="weak@example.com",
+            password="password",  # manca maiuscola e numero
+            name="Weak",
+            surname="User",
+        )
+
+
+@pytest.mark.parametrize(
+    "name,surname",
+    [
+        ("", "Valid"),
+        ("   ", "Valid"),
+        ("Valid", ""),
+        ("Valid", "   "),
+    ],
+)
+def test_signup_requires_name_and_surname(tmp_path, name, surname):
+    db = Database(tmp_path / "db.json")
+    auth = AuthService(db=db)
+    with pytest.raises(ValueError):
+        auth.signup(
+            email="missing@example.com",
+            password="Password1",
+            name=name,
+            surname=surname,
+        )
+
+
+def test_signup_strips_name_and_surname(tmp_path):
+    db = Database(tmp_path / "db.json")
+    auth = AuthService(db=db)
+    user = auth.signup(
+        email="trim@example.com",
+        password="Password1",
+        name="  Mario  ",
+        surname="  Rossi  ",
+    )
+    assert user.name == "Mario"
+    assert user.surname == "Rossi"
