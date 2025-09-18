@@ -26,19 +26,24 @@ def main() -> None:  # noqa: D401
         extra = st.text_area("Informazioni professionali", user.bio)
 
     if st.button("Salva", use_container_width=True):
-        user.name = name
-        user.surname = surname
-        if extra is not None:
-            if isinstance(user, Patient):
-                user.profile_note = extra
-            else:
-                user.bio = extra
-        db = Database.default()
         try:
-            db.save(user)
-            st.success("Profilo aggiornato")
-        except Exception as exc:
+            user.name = name
+            user.surname = surname
+        except ValueError as exc:
             st.error(str(exc))
+        else:
+            if extra is not None:
+                if isinstance(user, Patient):
+                    user.profile_note = extra
+                else:
+                    user.bio = extra
+            db = Database.default()
+            try:
+                db.save(user)
+                st.success("Profilo aggiornato")
+            except Exception as exc:
+                st.error(str(exc))
+
 
     st.markdown("---")
     st.subheader("Cambia password")

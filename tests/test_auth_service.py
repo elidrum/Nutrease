@@ -70,10 +70,13 @@ def test_signup_rejects_weak_password(tmp_path):
     [
         ("", "Valid"),
         ("   ", "Valid"),
+        ("\u200b", "Valid"),
         ("Valid", ""),
         ("Valid", "   "),
+        ("Valid", "\u200b"),
     ],
 )
+
 def test_signup_requires_name_and_surname(tmp_path, name, surname):
     db = Database(tmp_path / "db.json")
     auth = AuthService(db=db)

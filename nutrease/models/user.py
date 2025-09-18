@@ -9,6 +9,7 @@ from __future__ import annotations
 """
 
 import string
+import unicodedata
 from abc import ABC
 from dataclasses import asdict, dataclass, field
 from datetime import date
@@ -28,9 +29,9 @@ if TYPE_CHECKING:  # pragma: no cover – forward refs
 # ---------------------------------------------------------------------------
 
 
-def _validate_password(pwd: str) -> None:
+def _validate_password(pwd: str, *, allow_hashed: bool = False) -> None:
     """Almeno 8 caratteri alfanumerici con un numero e una lettera maiuscola."""
-    if len(pwd) == 64 and all(c in string.hexdigits for c in pwd):
+    if allow_hashed and len(pwd) == 64 and all(c in string.hexdigits for c in pwd):
         return
     if (
         len(pwd) < 8
@@ -42,6 +43,15 @@ def _validate_password(pwd: str) -> None:
             "La password deve contenere almeno 8 caratteri alfanumerici "
             "con almeno un numero e una lettera maiuscola."
         )
+
+
+def normalise_display_name(raw: str) -> str:
+    """Rimuove caratteri invisibili e spazi iniziali/finali da *raw*."""
+
+    cleaned = "".join(
+        ch for ch in raw if unicodedata.category(ch) != "Cf"
+    )
+    return cleaned.strip()
 # ---------------------------------------------------------------------------
 # Abstract base class – User
 # ---------------------------------------------------------------------------
@@ -61,11 +71,10 @@ class User(ABC):
     _email_adapter = TypeAdapter(EmailStr)
 
     def __init__(self, *, email: str, name: str, surname: str, password: str) -> None:
-        _validate_password(password)
         self._email = self._email_adapter.validate_python(email)
-        self._name = name
-        self._surname = surname
-        self._password = password
+        self.password = password
+        self.name = name
+        self.surname = surname
 
     @property
     def email(self) -> str:  # noqa: D401
@@ -81,7 +90,10 @@ class User(ABC):
 
     @name.setter
     def name(self, value: str) -> None:
-        self._name = value
+        cleaned = normalise_display_name(value)
+        if not cleaned:
+            raise ValueError("Il nome è obbligatorio.")
+        self._name = cleaned
 
     @property
     def surname(self) -> str:  # noqa: D401
@@ -89,7 +101,10 @@ class User(ABC):
 
     @surname.setter
     def surname(self, value: str) -> None:
-        self._surname = value
+        cleaned = normalise_display_name(value)
+        if not cleaned:
+            raise ValueError("Il cognome è obbligatorio.")
+        self._surname = cleaned
 
     @property
     def password(self) -> str:  # noqa: D401
@@ -97,9 +112,8 @@ class User(ABC):
 
     @password.setter
     def password(self, value: str) -> None:
-        _validate_password(value)
+        _validate_password(value, allow_hashed=True)
         self._password = value
-
 
 # Uguaglianza e hashing basati esclusivamente sull'e-mail per evitare ricorsioni
 # attraverso strutture annidate come i diari che fanno riferimento al ``Patient``.

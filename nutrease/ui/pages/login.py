@@ -22,7 +22,12 @@ import streamlit as st
 from nutrease.controllers.patient_controller import PatientController
 from nutrease.controllers.specialist_controller import SpecialistController
 from nutrease.models.enums import SpecialistCategory
-from nutrease.models.user import Patient, Specialist, _validate_password
+from nutrease.models.user import (
+    Patient,
+    Specialist,
+    _validate_password,
+    normalise_display_name,
+)
 from nutrease.services.auth_service import AuthService
 from nutrease.services.notification_service import NotificationService
 from nutrease.utils.database import Database
@@ -125,8 +130,8 @@ def main() -> None:  # noqa: D401
             p_pwd2 = st.text_input("Conferma Password", type="password", key="p_pwd2")
 
             if st.button("Registrati come Paziente", use_container_width=True):
-                p_name = p_name_input.strip()
-                p_surname = p_surname_input.strip()
+                p_name = normalise_display_name(p_name_input)
+                p_surname = normalise_display_name(p_surname_input)
                 if not p_name:
                     st.error("Inserisci il nome.")
                 elif not p_surname:
@@ -187,8 +192,8 @@ def main() -> None:  # noqa: D401
             s_pwd2 = st.text_input("Conferma Password", type="password", key="s_pwd2")
 
             if st.button("Registrati come Specialista", use_container_width=True):
-                s_name = s_name_input.strip()
-                s_surname = s_surname_input.strip()
+                s_name = normalise_display_name(s_name_input)
+                s_surname = normalise_display_name(s_surname_input)
                 if not s_name:
                     st.error("Inserisci il nome.")
                 elif not s_surname:

@@ -20,7 +20,13 @@ from pydantic import EmailStr, TypeAdapter
 from nutrease.models.communication import LinkRequest, Message
 from nutrease.models.enums import SpecialistCategory
 from nutrease.models.record import MealRecord, SymptomRecord
-from nutrease.models.user import Patient, Specialist, User, _validate_password
+from nutrease.models.user import (
+    Patient,
+    Specialist,
+    User,
+    _validate_password,
+    normalise_display_name,
+)
 from nutrease.utils.database import Database
 
 # ---------------------------------------------------------------------------
@@ -298,8 +304,8 @@ class AuthService:
 
         _validate_password(password)
 
-        name = name.strip()
-        surname = surname.strip()
+        name = normalise_display_name(name)
+        surname = normalise_display_name(surname)
         if not name:
             raise ValueError("Il nome è obbligatorio.")
         if not surname:
