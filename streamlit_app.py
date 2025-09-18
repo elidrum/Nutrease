@@ -78,8 +78,7 @@ else:
         col_yes, col_no = st.sidebar.columns(2)
         if col_yes.button("Si", key="logout_yes"):
             st.session_state.clear()
-            _render_page("nutrease.ui.pages.login")
-            st.stop()
+            st.rerun()
         if col_no.button("No", key="logout_no"):
             del st.session_state["logout_confirm"]
 

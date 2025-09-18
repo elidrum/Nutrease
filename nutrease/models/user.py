@@ -29,7 +29,7 @@ if TYPE_CHECKING:  # pragma: no cover – forward refs
 
 
 def _validate_password(pwd: str) -> None:
-    """RNF4: almeno 8 caratteri alfanumerici con un numero e una lettera maiuscola."""
+    """Almeno 8 caratteri alfanumerici con un numero e una lettera maiuscola."""
     if len(pwd) == 64 and all(c in string.hexdigits for c in pwd):
         return
     if (
@@ -40,7 +40,7 @@ def _validate_password(pwd: str) -> None:
     ):
         raise ValueError(
             "La password deve contenere almeno 8 caratteri alfanumerici "
-            "con almeno un numero e una lettera maiuscola (RNF4)."
+            "con almeno un numero e una lettera maiuscola."
         )
 # ---------------------------------------------------------------------------
 # Abstract base class – User
@@ -100,10 +100,10 @@ class User(ABC):
         _validate_password(value)
         self._password = value
 
-    # ------------------------------------------------------------------
-    # Equality & hashing based solely on e-mail to avoid recursion through
-    # nested structures like diaries that refer back to the ``Patient``.
-    # ------------------------------------------------------------------
+
+# Uguaglianza e hashing basati esclusivamente sull'e-mail per evitare ricorsioni
+# attraverso strutture annidate come i diari che fanno riferimento al ``Patient``.
+
     def __eq__(self, other: object) -> bool:  # type: ignore[override]
         if not isinstance(other, User):
             return NotImplemented
