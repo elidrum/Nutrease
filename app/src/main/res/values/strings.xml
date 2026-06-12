@@ -1,0 +1,321 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Nutrease</string>
+
+    <!-- Common -->
+    <string name="common_back">Indietro</string>
+    <string name="common_cancel">Annulla</string>
+    <string name="common_confirm">Conferma</string>
+
+    <!-- Patient home -->
+    <string name="patient_home_find_specialist">Trova uno specialista</string>
+
+    <!-- Specialists discovery (RF13) -->
+    <string name="specialists_title">Specialisti</string>
+    <string name="specialists_search_label">Cerca per nome o specializzazione</string>
+    <string name="specialists_empty">Nessuno specialista trovato.\nProva con un altro termine di ricerca.</string>
+    <string name="specialists_request_link">Richiedi collegamento</string>
+    <string name="specialists_filter_specialization">Specializzazione</string>
+    <string name="specialists_filter_city">Città</string>
+    <string name="specialists_filter_all">Tutte</string>
+
+    <!-- Specialization labels -->
+    <string name="specialization_nutritionist">Nutrizionista</string>
+    <string name="specialization_dietitian">Dietista</string>
+    <string name="specialization_gastroenterologist">Gastroenterologo</string>
+
+    <!-- Register specialist (RF13 estensione) -->
+    <string name="register_specialist_specialization_label">Specializzazione</string>
+    <string name="register_specialist_specialization_required">Seleziona una specializzazione</string>
+    <string name="register_specialist_city_label">Città</string>
+
+    <!-- Send link request (RF14) -->
+    <string name="send_link_request_title">Richiedi collegamento</string>
+    <string name="send_link_request_message_label">Messaggio (facoltativo)</string>
+    <string name="send_link_request_message_helper">Max 500 caratteri</string>
+    <string name="send_link_request_send">Invia</string>
+    <string name="send_link_request_success">Richiesta inviata</string>
+
+    <!-- Specialist home (RF15 entry point) -->
+    <string name="specialist_home_link_requests">Richieste di collegamento</string>
+
+    <!-- Link requests inbox (RF15-RF17) -->
+    <string name="link_requests_title">Richieste di collegamento</string>
+    <string name="link_requests_empty">Nessuna richiesta in attesa.</string>
+    <string name="link_requests_accept">Accetta</string>
+    <string name="link_requests_reject">Rifiuta</string>
+    <string name="link_requests_accepted">Richiesta accettata</string>
+    <string name="link_requests_rejected">Richiesta rifiutata</string>
+    <string name="link_requests_reject_dialog_title">Rifiuta richiesta</string>
+    <string name="link_requests_reject_reason_label">Motivazione (obbligatoria)</string>
+    <string name="link_requests_reject_reason_helper">Max 500 caratteri</string>
+    <string name="link_requests_reject_confirm">Conferma rifiuto</string>
+
+    <!-- Linked patients list (RF18) -->
+    <string name="specialist_home_my_patients">I miei pazienti</string>
+    <string name="linked_patients_title">I miei pazienti</string>
+    <string name="linked_patients_empty">Nessun paziente collegato.</string>
+    <plurals name="linked_patients_age">
+        <item quantity="one">%1$d anno</item>
+        <item quantity="other">%1$d anni</item>
+    </plurals>
+
+    <!-- Patient diary read-only (RF18) -->
+    <string name="patient_diary_title">Diario del paziente</string>
+    <string name="patient_diary_title_with_name">Diario di %1$s</string>
+    <string name="patient_diary_empty">Nessun dato per il periodo selezionato.</string>
+    <string name="patient_diary_totals_period">Totali nel periodo</string>
+    <string name="patient_diary_severity_label">Severità: %1$s</string>
+
+    <!-- Date range presets (RF18) -->
+    <string name="date_range_today">Oggi</string>
+    <string name="date_range_last_7_days">Ultimi 7 giorni</string>
+    <string name="date_range_last_30_days">Ultimi 30 giorni</string>
+    <string name="date_range_custom">Personalizzato</string>
+    <string name="date_range_picker_title">Intervallo date</string>
+    <string name="date_range_picker_headline_placeholder">Seleziona il periodo</string>
+
+    <!-- Nutrient filter (RF18) -->
+    <string name="nutrient_filter_all">Tutti</string>
+    <string name="nutrient_filter_lactose">Lattosio</string>
+    <string name="nutrient_filter_sorbitol">Sorbitolo</string>
+    <string name="nutrient_filter_gluten">Glutine</string>
+    <string name="nutrient_filter_calories">Calorie</string>
+    <string name="nutrient_short_lactose">Lat</string>
+    <string name="nutrient_short_sorbitol">Sor</string>
+    <string name="nutrient_short_gluten">Glu</string>
+    <string name="nutrient_short_calories">Kcal</string>
+
+    <!-- Patient stats dashboard (RF21) -->
+    <string name="patient_stats_action">Statistiche</string>
+    <string name="patient_stats_title">Statistiche paziente</string>
+    <string name="patient_stats_title_with_name">Statistiche di %1$s</string>
+    <string name="patient_stats_empty">Nessun dato disponibile.</string>
+    <string name="patient_stats_bmi_title">Indice di massa corporea (BMI)</string>
+    <string name="patient_stats_bmi_unavailable_title">BMI non disponibile</string>
+    <string name="patient_stats_bmi_unavailable_body">Il calcolo richiede i dati antropometrici del paziente (peso e altezza), che non sono ancora gestiti in questa versione.</string>
+    <string name="bmi_category_underweight">Sottopeso</string>
+    <string name="bmi_category_normal">Normopeso</string>
+    <string name="bmi_category_overweight">Sovrappeso</string>
+    <string name="bmi_category_obese">Obesità</string>
+    <string name="patient_stats_trend_title">Andamento ultimi 30 giorni</string>
+    <string name="patient_stats_trend_summary">Media: %1$s · Massimo: %2$s il %3$s</string>
+    <string name="patient_stats_trend_average_only">Media: %1$s</string>
+    <string name="patient_stats_top_symptoms_title">Sintomi più frequenti</string>
+    <string name="patient_stats_top_symptoms_empty">Nessun sintomo registrato negli ultimi 30 giorni.</string>
+    <string name="patient_stats_symptom_count">%1$d</string>
+    <string name="patient_stats_symptomatic_days_title">Giorni con sintomi</string>
+    <plurals name="patient_stats_symptomatic_days_value">
+        <item quantity="one">%1$d%% (%2$d su %3$d giorno)</item>
+        <item quantity="other">%1$d%% (%2$d su %3$d giorni)</item>
+    </plurals>
+    <string name="nutrient_chart_empty">Nessun dato disponibile</string>
+
+    <!-- Reminders (RF22) -->
+    <string name="reminder_title">Promemoria diario</string>
+    <string name="reminder_intro">Configura uno o più promemoria per non dimenticare di compilare il diario alimentare: puoi crearne uno per ogni pasto.</string>
+    <string name="reminder_enable_title">Abilita promemoria</string>
+    <string name="reminder_days_title">Giorni della settimana</string>
+    <string name="reminder_time_title">Orario</string>
+    <string name="reminder_time_change">Cambia</string>
+    <string name="reminder_saved">Promemoria salvato</string>
+    <string name="reminder_notification_title">Diario alimentare</string>
+    <string name="reminder_empty">Non hai ancora promemoria.\nAggiungine uno o usa il set per i pasti.</string>
+    <string name="reminder_add">Aggiungi promemoria</string>
+    <string name="reminder_add_meals">Aggiungi un promemoria per ogni pasto</string>
+    <string name="reminder_new_title">Nuovo promemoria</string>
+    <string name="reminder_edit_title">Modifica promemoria</string>
+    <string name="reminder_message_label">Messaggio (opzionale)</string>
+    <string name="reminder_message_placeholder">Es. Registra il pranzo</string>
+    <string name="reminder_delete">Elimina promemoria</string>
+    <string name="reminder_every_day">Tutti i giorni</string>
+    <string name="reminder_inactive">Disattivato</string>
+
+    <!-- Chat (RF23 + RF24) -->
+    <string name="chat_title">Chat</string>
+    <string name="chat_list_empty">Non hai ancora nessuna chat.\nLe chat si attivano quando una richiesta di collegamento viene accettata.</string>
+    <string name="chat_input_hint">Scrivi un messaggio…</string>
+    <string name="chat_send_action">Invia messaggio</string>
+    <string name="chat_send_error">Impossibile inviare il messaggio</string>
+    <string name="chat_new_messages">Nuovi messaggi</string>
+    <string name="chat_relative_yesterday">Ieri</string>
+    <string name="patient_home_chat">Chat con lo specialista</string>
+    <string name="specialist_home_chat">Chat con i pazienti</string>
+
+    <!-- Day-of-week short labels -->
+    <string name="day_short_monday">Lun</string>
+    <string name="day_short_tuesday">Mar</string>
+    <string name="day_short_wednesday">Mer</string>
+    <string name="day_short_thursday">Gio</string>
+    <string name="day_short_friday">Ven</string>
+    <string name="day_short_saturday">Sab</string>
+    <string name="day_short_sunday">Dom</string>
+
+    <!-- ===== Sprint 7: migrazione stringhe schermate sprint 1-3 ===== -->
+
+    <!-- Common: azioni e label generiche -->
+    <string name="common_ok">OK</string>
+    <string name="common_save">Salva</string>
+    <string name="common_delete">Elimina</string>
+    <string name="common_edit">Modifica</string>
+    <string name="common_remove">Rimuovi</string>
+    <string name="common_send">Invia</string>
+    <string name="common_add">Aggiungi</string>
+    <string name="common_date">Data</string>
+    <string name="common_time">Ora</string>
+    <string name="common_email">Email</string>
+    <string name="common_password">Password</string>
+
+    <!-- Campi form condivisi (registrazione + profilo) -->
+    <string name="field_first_name">Nome</string>
+    <string name="field_last_name">Cognome</string>
+    <string name="field_tax_code">Codice Fiscale</string>
+    <string name="field_vat">Partita IVA</string>
+    <string name="field_phone">Telefono</string>
+    <string name="field_city">Città</string>
+    <string name="field_sex">Sesso</string>
+    <string name="field_birth_date">Data di nascita</string>
+
+    <!-- Password (registrazione + cambio password) -->
+    <string name="password_helper">Minimo 8 caratteri, 1 maiuscola, 1 cifra</string>
+    <string name="password_confirm">Conferma password</string>
+    <string name="password_mismatch">Le password non coincidono</string>
+
+    <!-- Etichette di dominio (riusate anche dalle schermate specialista) -->
+    <string name="meal_type_breakfast">Colazione</string>
+    <string name="meal_type_lunch">Pranzo</string>
+    <string name="meal_type_snack">Merenda</string>
+    <string name="meal_type_dinner">Cena</string>
+    <string name="symptom_type_bloating">Gonfiore</string>
+    <string name="symptom_type_cramps">Crampi</string>
+    <string name="symptom_type_diarrhea">Diarrea</string>
+    <string name="symptom_type_constipation">Stitichezza</string>
+    <string name="symptom_type_nausea">Nausea</string>
+    <string name="symptom_type_reflux">Reflusso</string>
+    <string name="symptom_type_other">Altro</string>
+    <string name="severity_none">Assente</string>
+    <string name="severity_mild">Lieve</string>
+    <string name="severity_moderate">Moderato</string>
+    <string name="severity_severe">Grave</string>
+    <string name="gender_male">Maschile</string>
+    <string name="gender_female">Femminile</string>
+    <string name="gender_other">Altro</string>
+
+    <!-- Login -->
+    <string name="login_tagline">Diario alimentare e sintomatologico</string>
+    <string name="login_show_password">Mostra password</string>
+    <string name="login_hide_password">Nascondi password</string>
+    <string name="login_submit">Accedi</string>
+    <string name="login_go_to_register">Non hai un account? Registrati</string>
+    <string name="login_forgot_password">Password dimenticata?</string>
+    <string name="login_reset_title">Reimposta password</string>
+    <string name="login_reset_prompt">Inserisci la tua email: ti invieremo un codice per reimpostare la password.</string>
+
+    <!-- Reset password con codice OTP -->
+    <string name="reset_password_title">Reimposta password</string>
+    <string name="reset_password_intro">Inserisci il codice a 6 cifre inviato a %1$s e scegli una nuova password.</string>
+    <string name="reset_password_code">Codice (6 cifre)</string>
+    <string name="reset_password_new">Nuova password</string>
+    <string name="reset_password_confirm">Conferma password</string>
+    <string name="reset_password_submit">Reimposta password</string>
+    <string name="reset_password_mismatch">Le password non coincidono</string>
+
+    <!-- Registrazione -->
+    <string name="register_title">Registrazione</string>
+    <string name="register_role_label">Sono un</string>
+    <string name="register_role_patient">Paziente</string>
+    <string name="register_role_specialist">Specialista</string>
+    <string name="register_gender_m">M</string>
+    <string name="register_gender_f">F</string>
+    <string name="register_gender_other">Altro</string>
+    <string name="register_birth_date_placeholder">GG/MM/AAAA</string>
+    <string name="register_birth_date_invalid">Data non valida</string>
+    <string name="register_submit">Registrati</string>
+    <string name="register_go_to_login">Ho già un account? Accedi</string>
+
+    <!-- Diario -->
+    <string name="diary_title">Diario</string>
+    <string name="diary_add_entry">Aggiungi voce</string>
+    <string name="diary_add_meal">Aggiungi pasto</string>
+    <string name="diary_add_symptom">Aggiungi sintomo</string>
+    <string name="diary_empty">Nessuna voce per questa giornata.\nTocca + per aggiungere un pasto o un sintomo.</string>
+    <string name="diary_pick_date">Scegli data</string>
+    <string name="diary_daily_totals">Totali giornata</string>
+    <string name="diary_delete_meal_title">Elimina pasto</string>
+    <string name="diary_delete_meal_message">Vuoi davvero eliminare questo pasto e tutti i suoi alimenti?</string>
+    <string name="diary_delete_symptom_title">Elimina sintomo</string>
+    <string name="diary_delete_symptom_message">Vuoi davvero eliminare questo sintomo?</string>
+    <!-- "kcal" è invariabile in italiano: il plurale non serve. -->
+    <string name="diary_totals_line" tools:ignore="PluralsCandidate">%1$d kcal · Lattosio %2$sg · Sorbitolo %3$sg · Glutine %4$sg</string>
+
+    <!-- Aggiungi/modifica pasto -->
+    <string name="add_meal_title_new">Nuovo pasto</string>
+    <string name="add_meal_title_edit">Modifica pasto</string>
+    <string name="add_meal_description">Descrizione (opzionale)</string>
+    <string name="add_meal_foods_section">Alimenti del pasto</string>
+    <string name="add_meal_search">Cerca alimento</string>
+    <string name="add_meal_no_results">Nessun alimento trovato</string>
+    <string name="add_meal_save">Salva pasto</string>
+    <string name="add_meal_update">Aggiorna pasto</string>
+    <string name="add_meal_unit_label">Unità di misura</string>
+    <string name="add_meal_quantity">Quantità</string>
+    <string name="add_meal_pick_date">Scegli la data</string>
+    <string name="add_meal_pick_time">Scegli l\'ora</string>
+    <string name="add_meal_type_section">Tipo di pasto</string>
+
+    <!-- Indicatore di scorrimento liste a chip -->
+    <string name="scroll_hint_left">Scorri a sinistra per altre opzioni</string>
+    <string name="scroll_hint_right">Scorri a destra per altre opzioni</string>
+
+    <!-- Aggiungi/modifica sintomo -->
+    <string name="add_symptom_title_new">Nuovo sintomo</string>
+    <string name="add_symptom_title_edit">Modifica sintomo</string>
+    <string name="add_symptom_type_section">Tipo di sintomo</string>
+    <string name="add_symptom_other_label">Specifica il sintomo</string>
+    <string name="add_symptom_severity_section">Severità</string>
+    <string name="add_symptom_save">Salva sintomo</string>
+    <string name="add_symptom_update">Aggiorna sintomo</string>
+
+    <!-- Profilo -->
+    <string name="profile_title">Il mio profilo</string>
+    <string name="profile_load_error">Impossibile caricare il profilo</string>
+    <string name="profile_role_patient">Paziente</string>
+    <string name="profile_role_specialist">Specialista</string>
+    <string name="profile_personal_data">Dati personali</string>
+    <string name="profile_residence">Residenza</string>
+    <string name="profile_security">Sicurezza</string>
+    <string name="profile_account">Account</string>
+    <string name="profile_street">Via</string>
+    <string name="profile_postal_code">CAP</string>
+    <string name="profile_info_specialization">Info / Specializzazione</string>
+    <string name="profile_save_changes">Salva modifiche</string>
+    <string name="profile_change_password">Cambia password</string>
+    <string name="profile_logout">Esci</string>
+    <string name="profile_delete_account">Elimina account</string>
+    <string name="profile_delete_message">Questa operazione è irreversibile. Tutti i tuoi dati verranno eliminati.</string>
+    <string name="profile_delete_confirm_password">Conferma con la password</string>
+    <string name="profile_current_password">Password attuale</string>
+    <string name="profile_new_password">Nuova password</string>
+
+    <!-- Home (paziente + specialista) -->
+    <string name="home_title">Home</string>
+    <string name="home_profile">Profilo</string>
+    <string name="home_logout">Esci</string>
+    <string name="home_greeting_named">Ciao, %1$s</string>
+    <string name="home_greeting">Ciao!</string>
+    <string name="patient_home_subtitle">Tieni traccia di pasti e sintomi ogni giorno.</string>
+    <string name="patient_home_diary_title">Diario alimentare</string>
+    <string name="patient_home_diary_subtitle">Registra pasti e sintomi della giornata</string>
+    <string name="patient_home_find_specialist_subtitle">Cerca e collegati a un professionista</string>
+    <string name="patient_home_chat_subtitle">Messaggia con il tuo specialista</string>
+    <string name="patient_home_linked_specialist_label">Il tuo specialista</string>
+    <string name="patient_home_no_specialist_title">Nessuno specialista collegato</string>
+    <string name="patient_home_no_specialist_subtitle">Cerca un professionista e invia una richiesta di collegamento</string>
+    <string name="specialists_already_linked_warning">Sei già collegato a %1$s: se un nuovo specialista accetta la tua richiesta, sostituirà il collegamento attuale.</string>
+    <string name="send_link_request_replace_warning">Sei già collegato a %1$s: se questa richiesta viene accettata, sostituirà il collegamento attuale.</string>
+    <string name="specialist_home_subtitle">Gestisci i tuoi pazienti e le loro richieste.</string>
+    <string name="specialist_home_link_requests_subtitle">Accetta o rifiuta le richieste in attesa</string>
+    <string name="specialist_home_my_patients_subtitle">Consulta i diari dei pazienti collegati</string>
+    <string name="specialist_home_chat_subtitle">Messaggia con i tuoi pazienti</string>
+    <string name="specialist_pending_title">Account in verifica</string>
+    <string name="specialist_pending_body">Il tuo profilo è in attesa di approvazione. Finché non viene verificato non sei visibile ai pazienti e non puoi accettare richieste di collegamento.</string>
+</resources>

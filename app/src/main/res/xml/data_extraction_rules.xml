@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+   Regole di backup/trasferimento (Android 12+). Configurazione di default: nessuna
+   esclusione — l'app non salva dati sensibili in locale (la sessione Supabase è
+   già cifrata dal sistema).
+-->
+<data-extraction-rules>
+    <cloud-backup />
+    <device-transfer />
+</data-extraction-rules>
