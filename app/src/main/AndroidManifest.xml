@@ -34,8 +34,8 @@
             </intent-filter>
         </activity>
 
-        <!-- Promemoria diario via allarmi esatti (AlarmManager): lo sparo arriva qui, che
-             mostra la notifica e riarma la settimana successiva. Non esportato. -->
+        <!-- Promemoria diario via allarmi esatti (AlarmManager): allo scatto dell'allarme
+             questo receiver mostra la notifica e ri-arma per la settimana successiva. Non esportato. -->
         <receiver
             android:name=".data.receiver.ReminderAlarmReceiver"
             android:exported="false" />

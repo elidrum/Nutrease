@@ -25,7 +25,7 @@ import kotlin.time.Clock
  * su API 31-32): senza dichiararlo nel manifest il sistema lancia `SecurityException`. Entrambi
  * sono concessi all'installazione, quindi non serve un flusso runtime.
  *
- * Una schedulazione = un allarme one-shot per ogni coppia (promemoria, giorno). Allo sparo, il
+ * Una schedulazione = un allarme one-shot per ogni coppia (promemoria, giorno). Allo scatto, il
  * [ReminderAlarmReceiver] mostra la notifica e ri-arma la settimana successiva. La matematica del
  * prossimo slot vive in [ReminderScheduling] (pura, testabile). L'interfaccia resta
  * [ReminderScheduler], così il dominio non vede AlarmManager.
@@ -52,7 +52,7 @@ class AlarmManagerReminderScheduler(
 
     /**
      * Arma (o ri-arma) il singolo slot (promemoria, giorno) alla prossima occorrenza settimanale.
-     * Usato sia da [schedule] sia dal [ReminderAlarmReceiver] dopo lo sparo (gli allarmi esatti
+     * Usato sia da [schedule] sia dal [ReminderAlarmReceiver] dopo lo scatto (gli allarmi esatti
      * sono one-shot e vanno re-impostati).
      *
      * `setAlarmClock` è sempre esatto e Doze-exempt, ma richiede il permesso exact-alarm dichiarato

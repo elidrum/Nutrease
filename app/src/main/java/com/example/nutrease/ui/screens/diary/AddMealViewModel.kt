@@ -33,7 +33,7 @@ import kotlin.time.Clock
 
 /**
  * Riga alimento "in bozza" nel form: tiene unità e quantità come digitate dall'utente
- * e deriva i grammi al volo con [Food.gramsFor]. Diventa [MealFoodItem] solo al salvataggio.
+ * e calcola i grammi in tempo reale con [Food.gramsFor]. Diventa [MealFoodItem] solo al salvataggio.
  */
 data class PendingMealItem(
     val food: Food,

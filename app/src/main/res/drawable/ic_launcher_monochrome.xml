@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Layer monocromatico per le icone "a tema" (Android 13+): silhouette della "N"
+     di Nutrease. Il colore qui sotto e' irrilevante: il sistema lo sostituisce
+     col tint del wallpaper usando l'alpha come maschera. Tenuto dentro la safe
+     zone centrale (~66dp del viewport 108) per non essere ritagliato. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#1B5E20"
+        android:pathData="M30,34 H42 V74 H30 Z M66,34 H78 V74 H66 Z M30,34 L42,34 L78,74 L66,74 Z" />
+</vector>

@@ -9,7 +9,7 @@ import javax.inject.Inject
 /**
  * Ri-pianifica tutti i promemoria abilitati del paziente corrente. Gli allarmi esatti di
  * AlarmManager si perdono al riavvio del dispositivo (e quando l'app viene terminata prima dello
- * sparo): vanno riarmati. Invocata all'avvio dell'app dopo l'auth (più affidabile di un
+ * scatto): vanno riarmati. Invocata all'avvio dell'app dopo l'auth (più affidabile di un
  * BootReceiver, che girerebbe senza rete/sessione garantite). Idempotente: [ReminderScheduler.schedule]
  * sostituisce gli allarmi già presenti.
  */

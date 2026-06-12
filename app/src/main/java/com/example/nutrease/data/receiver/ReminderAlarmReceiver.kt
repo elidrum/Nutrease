@@ -9,7 +9,7 @@ import com.example.nutrease.domain.model.ReminderConfig
 import kotlinx.datetime.DayOfWeek
 
 /**
- * Riceve lo sparo dell'allarme esatto ([AlarmManagerReminderScheduler]): mostra la notifica del
+ * Riceve lo scatto dell'allarme esatto ([AlarmManagerReminderScheduler]): mostra la notifica del
  * promemoria e **ri-arma** lo stesso slot per la settimana successiva (gli allarmi di
  * `setAlarmClock` sono one-shot).
  *
