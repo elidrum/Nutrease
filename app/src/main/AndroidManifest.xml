@@ -6,6 +6,14 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- Promemoria diario (RF22): allarmi esatti via AlarmManager. Su Android 13+ (API 33+)
+         basta USE_EXACT_ALARM, concesso all'installazione senza prompt; su Android 12 (API
+         31-32) serve SCHEDULE_EXACT_ALARM, auto-concesso ma limitato a quelle versioni. -->
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
+        android:maxSdkVersion="32" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+
     <application
         android:name=".NutreaseApplication"
         android:allowBackup="true"
