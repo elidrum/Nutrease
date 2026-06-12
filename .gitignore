@@ -1,0 +1,14 @@
+*.iml
+.gradle
+/local.properties
+# Config dell'IDE: non versionata (ogni sviluppatore ha la propria)
+/.idea/
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+# Release signing — keystore e credenziali mai versionati
+*.keystore
+*.jks

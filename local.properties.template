@@ -1,0 +1,36 @@
+# ============================================================
+# Nutrease Mobile — local.properties template
+# ============================================================
+# Copia questo file in `local.properties` e compila i valori.
+# `local.properties` è gitignored: NON COMMITTARE con i secret dentro.
+#
+# Istruzioni complete: docs/setup.md §3
+# ============================================================
+
+# ---- Android SDK ----
+# Android Studio lo imposta automaticamente alla prima apertura.
+# macOS:   /Users/<tu>/Library/Android/sdk
+# Windows: C:\\Users\\<tu>\\AppData\\Local\\Android\\Sdk
+# Linux:   /home/<tu>/Android/Sdk
+sdk.dir=
+
+# ---- Supabase ----
+# Project Settings → API su https://app.supabase.com
+# SUPABASE_URL:       "Project URL" (https://xxx.supabase.co)
+# SUPABASE_ANON_KEY:  "anon public" (JWT tipo eyJhbGci...) oppure "publishable" (sb_publishable_...)
+# ATTENZIONE: NON usare la chiave "service_role" / "sb_secret_...": bypassa RLS, è una chiave admin.
+SUPABASE_URL=https://xxxxxxxxxxxxx.supabase.co
+SUPABASE_ANON_KEY=eyJhbGci...
+
+# ---- (Opzionale) Override di environment ----
+# Utile per separare dev/staging/prod nello stesso progetto Supabase.
+# SUPABASE_ENV=dev
+
+# ---- (Opzionale) Release signing ----
+# Serve solo per `./gradlew assembleRelease` (APK firmato). Vedi docs/setup.md §9.
+# NON committare keystore né password. Se assenti, la release resta NON firmata.
+# RELEASE_STORE_FILE è relativo alla root del progetto (es. nutrease-release.keystore).
+# RELEASE_STORE_FILE=nutrease-release.keystore
+# RELEASE_STORE_PASSWORD=
+# RELEASE_KEY_ALIAS=nutrease
+# RELEASE_KEY_PASSWORD=
