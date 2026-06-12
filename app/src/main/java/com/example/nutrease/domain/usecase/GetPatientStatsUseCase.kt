@@ -9,6 +9,7 @@ import com.example.nutrease.domain.model.SymptomFrequency
 import com.example.nutrease.domain.model.UserRole
 import com.example.nutrease.domain.repository.AuthRepository
 import kotlinx.datetime.LocalDate
+import kotlin.coroutines.cancellation.CancellationException
 import javax.inject.Inject
 
 /**
@@ -25,7 +26,7 @@ class GetPatientStatsUseCase @Inject constructor(
     suspend operator fun invoke(
         fascicoloId: Int,
         today: LocalDate
-    ): Result<PatientStats> = runCatching {
+    ): Result<PatientStats> = try {
         val authUser = authRepository.getCurrentUser()
             ?: throw IllegalStateException("Nessun utente autenticato")
         if (authUser.role != UserRole.SPECIALIST) {
@@ -40,13 +41,21 @@ class GetPatientStatsUseCase @Inject constructor(
 
         val ascending = days.sortedBy { it.date }
 
-        PatientStats(
-            bmi = null, // richiede peso/altezza (modulo misurazioni, post-MVP); la UI mostra il placeholder
-            dailySeriesByFilter = buildNutrientSeries(ascending),
-            topSymptoms = computeTopSymptoms(ascending),
-            symptomaticDaysPercent = computeSymptomaticDaysPercent(ascending),
-            totalDays = ascending.size
+        Result.success(
+            PatientStats(
+                bmi = null, // richiede peso/altezza (modulo misurazioni, post-MVP); la UI mostra il placeholder
+                dailySeriesByFilter = buildNutrientSeries(ascending),
+                topSymptoms = computeTopSymptoms(ascending),
+                symptomaticDaysPercent = computeSymptomaticDaysPercent(ascending),
+                totalDays = ascending.size
+            )
         )
+    } catch (e: CancellationException) {
+        // Come in GetPatientDiaryRangeUseCase: la cancellazione non è un errore di
+        // caricamento, va propagata e non incapsulata in Result.failure.
+        throw e
+    } catch (e: Throwable) {
+        Result.failure(e)
     }
 
     private fun buildNutrientSeries(

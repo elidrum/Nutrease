@@ -14,6 +14,7 @@ import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.daysUntil
 import kotlinx.datetime.plus
+import kotlin.coroutines.cancellation.CancellationException
 import javax.inject.Inject
 
 /**
@@ -38,7 +39,7 @@ class GetPatientDiaryRangeUseCase @Inject constructor(
         fascicoloId: Int,
         range: DiaryDateRange,
         today: LocalDate
-    ): Result<List<PatientDiaryDay>> = runCatching {
+    ): Result<List<PatientDiaryDay>> = try {
         val authUser = authRepository.getCurrentUser()
             ?: throw IllegalStateException("Nessun utente autenticato")
         if (authUser.role != UserRole.SPECIALIST) {
@@ -51,7 +52,7 @@ class GetPatientDiaryRangeUseCase @Inject constructor(
             "Il periodo selezionato non può superare $MAX_RANGE_DAYS giorni"
         }
 
-        coroutineScope {
+        val diaryDays = coroutineScope {
             (0 until days)
                 .map { offset -> resolved.start.plus(offset, DateTimeUnit.DAY) }
                 .map { date ->
@@ -65,6 +66,15 @@ class GetPatientDiaryRangeUseCase @Inject constructor(
                 .awaitAll()
                 .sortedByDescending { it.date }
         }
+        Result.success(diaryDays)
+    } catch (e: CancellationException) {
+        // La cancellazione (es. lo specialista cambia periodo mentre il fetch è ancora
+        // in volo) non è un errore: va ri-lanciata, non incapsulata in Result.failure.
+        // Altrimenti il messaggio "StandaloneCoroutine was cancelled" risalirebbe fino
+        // alla UI come se fosse un errore reale del caricamento.
+        throw e
+    } catch (e: Throwable) {
+        Result.failure(e)
     }
 
     companion object {
